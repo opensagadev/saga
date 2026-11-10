@@ -452,7 +452,7 @@ void HeadMovement(GameObject_s *object) {
             CHARACTERDATA *character = object->apiobj.character_data;
             object->joint_modifiers[object->field_0x1089].joint_index = character->game_character->head_joint;
             object->joint_modifiers[object->field_0x1089].flags = static_cast<NUJOINTANIM_FLAGS>(0);
-            f32 blend = object->apiobj.character_data->game_character->field_0x58 * FRAMETIME;
+            f32 blend = character->game_character->field_0x58 * FRAMETIME;
             f32 previous;
             if (blend > 1.0f) {
                 blend = 1.0f;
@@ -465,10 +465,10 @@ void HeadMovement(GameObject_s *object) {
                 first * blend + object->joint_modifiers[object->field_0x1089].rotation.y * previous;
             object->joint_modifiers[object->field_0x1089].rotation.z =
                 second * blend + object->joint_modifiers[object->field_0x1089].rotation.z * previous;
-            i32 limit = static_cast<i32>(object->apiobj.character_data->game_character->field_0x54 * 10430.3779296875f);
+            i32 limit = static_cast<i32>(character->game_character->field_0x54 * 10430.3779296875f);
             object->joint_modifiers[object->field_0x1089].rotation_limit_start[1] = limit;
             object->joint_modifiers[object->field_0x1089].rotation_limit_end[1] = -limit;
-            limit = static_cast<i32>(object->apiobj.character_data->game_character->field_0x50 * 10430.3779296875f);
+            limit = static_cast<i32>(character->game_character->field_0x50 * 10430.3779296875f);
             object->joint_modifiers[object->field_0x1089].rotation_limit_start[2] = limit;
             object->joint_modifiers[object->field_0x1089].rotation_limit_end[2] = -limit;
             if (object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||

@@ -591,23 +591,16 @@ bool MechTouchTaskUseForce::Update() {
     position.z -= player->apiobj.pos_z;
     GIZFORCE_s *force = object->GetGizForce();
     bool within_range = false;
-    if (force != NULL) {
-        const f32 dx = position.x;
-        const f32 dz = position.z;
-        const f32 radius = force->interaction_radius;
-        if (TouchHacks::CanUseGizForce(*player, *force)) {
-            if (object->GetTgtVoidPtr() == player->force_glow_object) {
-                controller->button_was_pressed[3] = 1;
-                return true;
-            }
-            const f32 range = radius * 0.9f;
-            within_range = dx * dx + dz * dz < range * range;
-        } else {
-            return false;
-        }
-    } else if (object->GetTgtVoidPtr() == player->force_glow_object) {
+    if (force != NULL && !TouchHacks::CanUseGizForce(*player, *force)) {
+        return false;
+    }
+    if (object->GetTgtVoidPtr() == player->force_glow_object) {
         controller->button_was_pressed[3] = 1;
         return true;
+    }
+    if (force != NULL) {
+        const f32 range = force->interaction_radius * 0.9f;
+        within_range = position.x * position.x + position.z * position.z < range * range;
     }
     if (!within_range && MechTouchTaskGoTo::Update()) {
         return true;

@@ -2508,6 +2508,54 @@ void edpartMultipleCopyClear() {
     edpart_copyroty = 0;
 }
 
+static inline void EdCursorRotate(NUVEC *vector, i32 rotation_z, i32 rotation_y) {
+    NuVecRotateZ(vector, vector, rotation_z);
+    NuVecRotateY(vector, vector, rotation_y);
+}
+
+static inline void EdCursorDrawAxis(NUVEC *vector, NURND_VERTEX3D *line, i32 rotation_z, i32 rotation_y) {
+    EdCursorRotate(vector, rotation_z, rotation_y);
+    line[0].position.x = edpart_cam_pos.x - vector->x;
+    line[0].position.y = edpart_cam_pos.y - vector->y;
+    line[0].position.z = edpart_cam_pos.z - vector->z;
+    line[0].colour = 0xffffffff;
+    line[1].position.x = edpart_cam_pos.x;
+    line[1].position.y = edpart_cam_pos.y;
+    line[1].position.z = edpart_cam_pos.z;
+    line[1].colour = 0xffffffff;
+    NuRndrLine3d(line, edpart_mtl, NULL);
+    line[0].position.x = edpart_cam_pos.x;
+    line[0].position.y = edpart_cam_pos.y;
+    line[0].position.z = edpart_cam_pos.z;
+    line[0].colour = 0xff00ff00;
+    line[1].position.x = edpart_cam_pos.x + vector->x;
+    line[1].position.y = edpart_cam_pos.y + vector->y;
+    line[1].position.z = edpart_cam_pos.z + vector->z;
+    line[1].colour = 0xff00ff00;
+    NuRndrLine3d(line, edpart_mtl, NULL);
+}
+
+static inline void EdCursorDrawMark(NUVEC *vector, NURND_VERTEX3D *line, i32 rotation_z, i32 rotation_y, f32 sx, f32 sy,
+                                    f32 sz, f32 ex, f32 ey, f32 ez) {
+    vector->x = sx;
+    vector->y = sy;
+    vector->z = sz;
+    EdCursorRotate(vector, rotation_z, rotation_y);
+    line[0].position.x = edpart_cam_pos.x + vector->x;
+    line[0].position.y = edpart_cam_pos.y + vector->y;
+    line[0].position.z = edpart_cam_pos.z + vector->z;
+    line[0].colour = 0xff00ff00;
+    vector->x = ex;
+    vector->y = ey;
+    vector->z = ez;
+    EdCursorRotate(vector, rotation_z, rotation_y);
+    line[1].position.x = edpart_cam_pos.x + vector->x;
+    line[1].position.y = edpart_cam_pos.y + vector->y;
+    line[1].position.z = edpart_cam_pos.z + vector->z;
+    line[1].colour = 0xff00ff00;
+    NuRndrLine3d(line, edpart_mtl, NULL);
+}
+
 void edpartDrawCursor() {
     extern i32 edpart_copy_mode, edpart_copyrotz, edpart_copyroty, edpart_rotz, edpart_roty;
     extern i32 edpart_emitrotz, edpart_emitroty, edpart_emitrotx, edpart_refrotz, edpart_refroty;
@@ -2530,64 +2578,20 @@ void edpartDrawCursor() {
     }
     NUVEC vector;
     NURND_VERTEX3D line[2];
-    auto rotate = [&]() {
-        NuVecRotateZ(&vector, &vector, rotation_z);
-        NuVecRotateY(&vector, &vector, rotation_y);
-    };
-    auto draw_axis = [&]() {
-        rotate();
-        line[0].position.x = edpart_cam_pos.x - vector.x;
-        line[0].position.y = edpart_cam_pos.y - vector.y;
-        line[0].position.z = edpart_cam_pos.z - vector.z;
-        line[0].colour = 0xffffffff;
-        line[1].position.x = edpart_cam_pos.x;
-        line[1].position.y = edpart_cam_pos.y;
-        line[1].position.z = edpart_cam_pos.z;
-        line[1].colour = 0xffffffff;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-        line[0].position.x = edpart_cam_pos.x;
-        line[0].position.y = edpart_cam_pos.y;
-        line[0].position.z = edpart_cam_pos.z;
-        line[0].colour = 0xff00ff00;
-        line[1].position.x = edpart_cam_pos.x + vector.x;
-        line[1].position.y = edpart_cam_pos.y + vector.y;
-        line[1].position.z = edpart_cam_pos.z + vector.z;
-        line[1].colour = 0xff00ff00;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-    };
     vector = {0.5f, 0.0f, 0.0f};
-    draw_axis();
+    EdCursorDrawAxis(&vector, line, rotation_z, rotation_y);
     vector = {0.0f, 0.5f, 0.0f};
-    draw_axis();
+    EdCursorDrawAxis(&vector, line, rotation_z, rotation_y);
     vector = {0.0f, 0.0f, 0.5f};
-    draw_axis();
-    auto draw_mark = [&](f32 sx, f32 sy, f32 sz, f32 ex, f32 ey, f32 ez) {
-        vector.x = sx;
-        vector.y = sy;
-        vector.z = sz;
-        rotate();
-        line[0].position.x = edpart_cam_pos.x + vector.x;
-        line[0].position.y = edpart_cam_pos.y + vector.y;
-        line[0].position.z = edpart_cam_pos.z + vector.z;
-        line[0].colour = 0xff00ff00;
-        vector.x = ex;
-        vector.y = ey;
-        vector.z = ez;
-        rotate();
-        line[1].position.x = edpart_cam_pos.x + vector.x;
-        line[1].position.y = edpart_cam_pos.y + vector.y;
-        line[1].position.z = edpart_cam_pos.z + vector.z;
-        line[1].colour = 0xff00ff00;
-        NuRndrLine3d(line, edpart_mtl, NULL);
-    };
-    draw_mark(0.55f, 0.05f, 0.0f, 0.6f, -0.05f, 0.0f);
-    draw_mark(0.6f, 0.05f, 0.0f, 0.55f, -0.05f, 0.0f);
-    draw_mark(0.0f, 0.65f, -0.025f, 0.0f, 0.6f, 0.0f);
-    draw_mark(0.0f, 0.65f, 0.025f, 0.0f, 0.6f, 0.0f);
-    draw_mark(0.0f, 0.6f, 0.0f, 0.0f, 0.55f, 0.0f);
-    draw_mark(0.0f, 0.05f, 0.55f, 0.0f, 0.05f, 0.6f);
-    draw_mark(0.0f, 0.05f, 0.6f, 0.0f, -0.05f, 0.55f);
-    draw_mark(0.0f, -0.05f, 0.55f, 0.0f, -0.05f, 0.6f);
+    EdCursorDrawAxis(&vector, line, rotation_z, rotation_y);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.55f, 0.05f, 0.0f, 0.6f, -0.05f, 0.0f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.6f, 0.05f, 0.0f, 0.55f, -0.05f, 0.0f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, 0.65f, -0.025f, 0.0f, 0.6f, 0.0f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, 0.65f, 0.025f, 0.0f, 0.6f, 0.0f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, 0.6f, 0.0f, 0.0f, 0.55f, 0.0f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, 0.05f, 0.55f, 0.0f, 0.05f, 0.6f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, 0.05f, 0.6f, 0.0f, -0.05f, 0.55f);
+    EdCursorDrawMark(&vector, line, rotation_z, rotation_y, 0.0f, -0.05f, 0.55f, 0.0f, -0.05f, 0.6f);
 
     if (edpart_copy_mode != 0) {
         edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z, edpart_copy_size, edpart_copy_size,

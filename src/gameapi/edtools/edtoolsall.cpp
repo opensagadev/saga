@@ -2114,7 +2114,7 @@ extern "C" {
             else
                 eduiDrawRect(x << 4, y << 3, item_width << 4, (height * 5) << 3, item->colours[2], material);
             for (i32 row = 0; row < 4; ++row) {
-                auto draw_key = [&](i32 column) {
+                for (i32 column = 0; column < 10; ++column) {
                     if (row == picker->keyboard_row && column == picker->keyboard_column) {
                         eduiDrawFontSet(edui_font);
                         eduiSetFontColour(edui_font, item->colours[1]);
@@ -2125,17 +2125,7 @@ extern "C" {
                     letter[0] = textrow[row][column];
                     eduiFntPrintExLeft(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16,
                                        letter);
-                };
-                draw_key(0);
-                draw_key(1);
-                draw_key(2);
-                draw_key(3);
-                draw_key(4);
-                draw_key(5);
-                draw_key(6);
-                draw_key(7);
-                draw_key(8);
-                draw_key(9);
+                }
             }
             eduiDrawFontSetLikely(edui_font);
             eduiSetFontColour(edui_font, item->colours[1]);
@@ -4452,72 +4442,77 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         *picker_flags = (*picker_flags & ~2u) | (*source_flags & 2u);
     }
 
+    static inline void TextPickDeletePrevious(edui_textpicker_s *picker) {
+        if (picker->cursor == 0)
+            return;
+        if (picker->value[picker->cursor]) {
+            --picker->cursor;
+            for (i32 index = picker->cursor; index < 0xff; ++index)
+                picker->value[index] = picker->value[index + 1];
+        } else {
+            picker->value[--picker->cursor] = '\0';
+        }
+    }
+
+    static inline void TextPickInsertCharacter(edui_textpicker_s *picker, char character) {
+        if (NuStrLen(picker->value) >= picker->max_length)
+            return;
+        // The original includes the cursor slot in the shift before
+        // overwriting it. Read the enclosing object's bytes so cursor zero
+        // accesses the preceding object byte rather than value[-1].
+        const char *picker_bytes = reinterpret_cast<const char *>(picker);
+        for (i32 index = 0xff; index >= picker->cursor; --index)
+            picker->value[index] = picker_bytes[offsetof(edui_textpicker_s, value) + index - 1];
+        picker->value[picker->cursor++] = character;
+    }
+
+    static inline void TextPickNextRow(edui_textpicker_s *picker) {
+        ++picker->keyboard_row;
+        if (picker->keyboard_flags & 2) {
+            if (picker->keyboard_row > 5)
+                picker->keyboard_row = 0;
+        } else if (picker->keyboard_row > 3)
+            picker->keyboard_row = 0;
+    }
+
+    static inline void TextPickPreviousRow(edui_textpicker_s *picker) {
+        if (--picker->keyboard_row < 0)
+            picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
+    }
+
+    static inline void TextPickNextColumn(edui_textpicker_s *picker) {
+        if (picker->keyboard_row >= 4)
+            return;
+        if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
+            picker->keyboard_column = 0;
+    }
+
+    static inline void TextPickPreviousColumn(edui_textpicker_s *picker) {
+        if (picker->keyboard_row >= 4)
+            return;
+        if (--picker->keyboard_column < 0)
+            picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
+    }
+
     static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         auto *picker = static_cast<edui_textpicker_s *>(item);
         u32 modifiers;
         i32 key = NuKeyGet(&modifiers);
         NuStrLen(picker->value);
 
-        auto delete_previous = [&]() {
-            if (picker->cursor == 0)
-                return;
-            if (picker->value[picker->cursor]) {
-                --picker->cursor;
-                for (i32 index = picker->cursor; index < 0xff; ++index)
-                    picker->value[index] = picker->value[index + 1];
-            } else {
-                picker->value[--picker->cursor] = '\0';
-            }
-        };
-        auto insert_character = [&](char character) {
-            if (NuStrLen(picker->value) >= picker->max_length)
-                return;
-            // The original includes the cursor slot in the shift before
-            // overwriting it. Read the enclosing object's bytes so cursor zero
-            // accesses the preceding object byte rather than value[-1].
-            const char *picker_bytes = reinterpret_cast<const char *>(picker);
-            for (i32 index = 0xff; index >= picker->cursor; --index)
-                picker->value[index] = picker_bytes[offsetof(edui_textpicker_s, value) + index - 1];
-            picker->value[picker->cursor++] = character;
-        };
-        auto next_row = [&]() {
-            ++picker->keyboard_row;
-            if (picker->keyboard_flags & 2) {
-                if (picker->keyboard_row > 5)
-                    picker->keyboard_row = 0;
-            } else if (picker->keyboard_row > 3)
-                picker->keyboard_row = 0;
-        };
-        auto previous_row = [&]() {
-            if (--picker->keyboard_row < 0)
-                picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
-        };
-        auto next_column = [&]() {
-            if (picker->keyboard_row >= 4)
-                return;
-            if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
-                picker->keyboard_column = 0;
-        };
-        auto previous_column = [&]() {
-            if (picker->keyboard_row >= 4)
-                return;
-            if (--picker->keyboard_column < 0)
-                picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
-        };
-
         if (key != -1) {
             switch (key) {
                 case 0xc8:
-                    previous_row();
+                    TextPickPreviousRow(picker);
                     break;
                 case 0xd0:
-                    next_row();
+                    TextPickNextRow(picker);
                     break;
                 case 0xcb:
-                    previous_column();
+                    TextPickPreviousColumn(picker);
                     break;
                 case 0xcd:
-                    next_column();
+                    TextPickNextColumn(picker);
                     break;
                 case 0x1c:
                 case 1:
@@ -4526,7 +4521,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                     break;
                 case 0x0e:
                 case 0xd3:
-                    delete_previous();
+                    TextPickDeletePrevious(picker);
                     break;
                 default: {
                     char character = NuKeyToAscii(key, modifiers & 1);
@@ -4547,13 +4542,13 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         }
 
         if (pad->digital_buttons_pressed & 0x4000)
-            next_row();
+            TextPickNextRow(picker);
         if (pad->digital_buttons_pressed & 0x1000)
-            previous_row();
+            TextPickPreviousRow(picker);
         if (pad->digital_buttons_pressed & 0x8000)
-            previous_column();
+            TextPickPreviousColumn(picker);
         if (pad->digital_buttons_pressed & 0x2000)
-            next_column();
+            TextPickNextColumn(picker);
         if ((pad->digital_buttons_pressed & 0x10) && picker->callback)
             picker->callback(menu, item, pad->digital_buttons);
         if ((pad->digital_buttons & 0xc) == 0xc) {
@@ -4578,9 +4573,9 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 picker->cursor = NuStrLen(picker->value);
         }
         if (pad->digital_buttons_pressed & 0x40)
-            insert_character(textrow[picker->keyboard_row][picker->keyboard_column]);
+            TextPickInsertCharacter(picker, textrow[picker->keyboard_row][picker->keyboard_column]);
         if (pad->digital_buttons_pressed & 0x80)
-            delete_previous();
+            TextPickDeletePrevious(picker);
         if (pad->digital_buttons_pressed & 0x20) {
             if (textrow[1] == const_cast<char *>("QWERTYUIOP")) {
                 textrow[0] = const_cast<char *>("1234567890");
@@ -4607,41 +4602,31 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         return active_menu;
     }
 
+    static inline void eduiAddInteract(i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
+                                       i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
+        if (numInteracts < 64 && !eduiInteractLocked) {
+            edui_interact_s *entry = &eduiInteracts[numInteracts];
+            entry->x = static_cast<f32>(x);
+            entry->y = static_cast<f32>(y) * 0.5f;
+            entry->width = static_cast<f32>(width);
+            entry->height = static_cast<f32>(height) * 0.5f;
+            entry->menu = menu;
+            entry->item = item;
+            entry->callback = callback;
+            entry->buttons = buttons;
+            entry->field_20 = field_20;
+            ++numInteracts;
+        }
+    }
+
     void eduiMenuRender(eduimenu_s *menu) {
-        const auto font_set = [](void *font) { eduiDrawFontSet(font); };
-        const auto font_colour = [](void *font, u32 colour) { eduiSetFontColour(font, colour); };
-        const auto rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            eduiDrawRect(x, y, width, height, colour, material);
-        };
-        const auto line = [](i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material) {
-            eduiDrawLine(x0, y0, x1, y1, colour, material);
-        };
-        const auto outline_rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            eduiDrawLineRect(x, y, width, height, colour, material);
-        };
-        const auto interact = [](i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
-                                 i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
-            if (numInteracts < 64 && !eduiInteractLocked) {
-                edui_interact_s *entry = &eduiInteracts[numInteracts];
-                entry->x = static_cast<f32>(x);
-                entry->y = static_cast<f32>(y) * 0.5f;
-                entry->width = static_cast<f32>(width);
-                entry->height = static_cast<f32>(height) * 0.5f;
-                entry->menu = menu;
-                entry->item = item;
-                entry->callback = callback;
-                entry->buttons = buttons;
-                entry->field_20 = field_20;
-                ++numInteracts;
-            }
-        };
         ++NuPrimCSPos;
         i32 x = menu->x;
         i32 y = menu->y;
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
         NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
         NuQFntPushPrintMode(2);
-        font_set(edui_font);
+        eduiDrawFontSet(edui_font);
         NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
 
         const f32 font_height = NuQFntHeight(edui_font);
@@ -4650,10 +4635,10 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         if (menu->title && menu->title[0]) {
             const i32 title_height = static_cast<i32>(font_height * 0.15625f);
             if (!menu->child)
-                interact(x, y, menu->width, title_height, menu, NULL, cbInteractMenuTitle, 0x40, 0);
-            rect(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
-            font_set(edui_font);
-            font_colour(edui_font, 0x807f7f7f);
+                eduiAddInteract(x, y, menu->width, title_height, menu, NULL, cbInteractMenuTitle, 0x40, 0);
+            eduiDrawRect(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, 0x807f7f7f);
             eduiFntPrintClipEx(edui_font, (x + 1) << 4,
                                static_cast<i32>(title_font_height * 0.125f + baseline) + (y << 3), 0x10, x << 4,
                                menu->width << 4, menu->title);
@@ -4668,14 +4653,14 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             if (item != menu->first) {
                 const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
                 if (!menu->child)
-                    interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
-                rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                    eduiAddInteract(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
+                eduiDrawRect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
                 const i32 bottom = ((y + scroll_height) << 3) - 16;
-                line(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
-                line(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 y += scroll_height;
             }
 
@@ -4690,8 +4675,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                     max_item_height = item_height;
 
                 if (!menu->child)
-                    interact(x, y, menu->width, item_height, menu, item, reinterpret_cast<edui_sel_s *>(item)->interact,
-                             0x40, 0);
+                    eduiAddInteract(x, y, menu->width, item_height, menu, item,
+                                    reinterpret_cast<edui_sel_s *>(item)->interact, 0x40, 0);
 
                 item = item->next;
                 if (menu->flags & 2)
@@ -4706,14 +4691,14 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 }
                 const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
                 if (!menu->child)
-                    interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
-                rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                    eduiAddInteract(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
+                eduiDrawRect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 const i32 bottom = ((y + scroll_height - 2) << 3);
                 i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
-                line(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
-                line(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                 break;
             }
 
@@ -4729,11 +4714,12 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         menu->field_28 = y - menu->y;
 
         const u32 outline = eduiGetActiveMenu() == menu ? eduimenu_selected_outline_colour : eduimenu_outline_colour;
-        outline_rect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,
-                     outline, uimtls[ui_outmtl]);
+        eduiDrawLineRect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,
+                         outline, uimtls[ui_outmtl]);
 
         if (menu->child) {
-            interact(menu->x, menu->y, menu->field_24, menu->field_28, menu, NULL, cbInteractMenuCancelChild, 0x40, 1);
+            eduiAddInteract(menu->x, menu->y, menu->field_24, menu->field_28, menu, NULL, cbInteractMenuCancelChild,
+                            0x40, 1);
             eduiMenuRender(menu->child);
         }
 

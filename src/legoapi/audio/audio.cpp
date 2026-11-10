@@ -1564,20 +1564,21 @@ i32 CheckMusicSwapInstant() {
     return 0;
 }
 
+static inline bool PlayerUnderAttack(GameObject_s *player) {
+    if (player == NULL)
+        return false;
+    if (player->ai.opponent != NULL)
+        return true;
+    GameObject_s *opponent = static_cast<GameObject_s *>(player->ai.nearest_opponent);
+    return opponent != NULL && opponent->apiobj.field_0x287 == 0 && player->ai.nearest_opponent_metric < 3.0f;
+}
+
 void ProcessMusicChanges(LEVELDATA_s *level, OPTIONSSAVE_s *opts) {
     (void)opts;
 
     if (GameAudio_ActionMusicFn == NULL) {
-        const auto player_under_attack = [](GameObject_s *player) {
-            if (player == NULL)
-                return false;
-            if (player->ai.opponent != NULL)
-                return true;
-            GameObject_s *opponent = static_cast<GameObject_s *>(player->ai.nearest_opponent);
-            return opponent != NULL && opponent->apiobj.field_0x287 == 0 && player->ai.nearest_opponent_metric < 3.0f;
-        };
-        if (DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 || player_under_attack(Player[0]) ||
-            player_under_attack(Player[1]))
+        if (DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 || PlayerUnderAttack(Player[0]) ||
+            PlayerUnderAttack(Player[1]))
             PlayersUnderAttack = 1;
         else
             PlayersUnderAttack = 0;

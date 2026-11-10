@@ -7282,16 +7282,18 @@ void *EdClass::FindObject(char *object_name) {
     return NULL;
 }
 
+static inline void GetObjectAttribute(EdClass *object_class, void *object, i32 attribute, i32 type, void *data,
+                                      i32 size) {
+    EdMember member;
+    if (object_class->FindMember(&member, object, attribute, 1))
+        member.reference->GetAttributeData(member.object, attribute, type, data, size);
+}
+
 void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry) {
     char object_name[256];
 
     i32 filter_flags;
     i16 group;
-    auto get_attribute = [&](EdClass *object_class, void *object, i32 attribute, i32 type, void *data, i32 size) {
-        EdMember member;
-        if (object_class->FindMember(&member, object, attribute, 1))
-            member.reference->GetAttributeData(member.object, attribute, type, data, size);
-    };
     auto is_filtered = [&](i32 object_group, i32 stream_group) -> bool {
         if (stream.flags & 0x400000) {
             if (filter_flags & 0x400000)
@@ -7362,8 +7364,8 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                  object = object_class->interface->GetNextObject(object)) {
                 group = 0;
                 filter_flags = 0;
-                get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
-                get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
+                GetObjectAttribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
+                GetObjectAttribute(object_class, object, 0x100, EdType_Short, &group, 0);
                 if (is_filtered(group, stream.unknown_10))
                     continue;
                 ++object_count;
@@ -7373,15 +7375,15 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
                  object = object_class->interface->GetNextObject(object)) {
                 group = 0;
                 filter_flags = 0;
-                get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
-                get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
+                GetObjectAttribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
+                GetObjectAttribute(object_class, object, 0x100, EdType_Short, &group, 0);
                 if (is_filtered(group, stream.unknown_10))
                     continue;
                 i32 object_flags = 0;
-                get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
+                GetObjectAttribute(object_class, object, 1, EdType_Int, &object_flags, 0);
                 stream.SerialiseBuffer(&object_flags, sizeof(object_flags), 1);
                 if ((object_flags & 0x02000000) || (object_class->flags & 0x04000000)) {
-                    get_attribute(object_class, object, 4, EdType_String, object_name, sizeof(object_name));
+                    GetObjectAttribute(object_class, object, 4, EdType_String, object_name, sizeof(object_name));
                     stream.SerialiseString(object_name, sizeof(object_name));
                 }
                 object_class->SerialiseObject(stream, object);

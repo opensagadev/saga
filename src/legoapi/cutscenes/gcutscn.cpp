@@ -509,6 +509,15 @@ static __attribute__((noinline)) void instNuGCutSceneClipTest(instNUGCUTSCENE_s 
     }
 }
 
+static inline void SilenceLocatorVoice(u8 *owner, u16 index) {
+    if (index != 0) {
+        u8 *table = *reinterpret_cast<u8 **>(owner + 0xc);
+        u8 *voice = *reinterpret_cast<u8 **>(table - 4 + index * 4);
+        *reinterpret_cast<i32 *>(voice + 0x80) = 0;
+        *reinterpret_cast<i32 *>(voice + 0x84) = 0;
+    }
+}
+
 static void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance, NUGCUTLOCATORSYS_s *system) {
     for (u32 i = 0; i < system->locator_count; ++i) {
         instNUGCUTLOCATOR_s *inst_locator = &instance->locators[i];
@@ -519,17 +528,9 @@ static void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance, NUGCUTLOCA
             u8 *sfx = reinterpret_cast<u8 *>(static_cast<usize>(static_cast<u32>(inst_locator->effect_handle)));
             if (*reinterpret_cast<i16 *>(sfx + 8) != 0 && *reinterpret_cast<void **>(sfx) != NULL) {
                 u8 *owner = *reinterpret_cast<u8 **>(sfx);
-                auto silence = [owner](u16 index) {
-                    if (index != 0) {
-                        u8 *table = *reinterpret_cast<u8 **>(owner + 0xc);
-                        u8 *voice = *reinterpret_cast<u8 **>(table - 4 + index * 4);
-                        *reinterpret_cast<i32 *>(voice + 0x80) = 0;
-                        *reinterpret_cast<i32 *>(voice + 0x84) = 0;
-                    }
-                };
-                silence(*reinterpret_cast<u16 *>(sfx + 0xe));
-                silence(*reinterpret_cast<u16 *>(sfx + 0x10));
-                silence(*reinterpret_cast<u16 *>(sfx + 0xa));
+                SilenceLocatorVoice(owner, *reinterpret_cast<u16 *>(sfx + 0xe));
+                SilenceLocatorVoice(owner, *reinterpret_cast<u16 *>(sfx + 0x10));
+                SilenceLocatorVoice(owner, *reinterpret_cast<u16 *>(sfx + 0xa));
             }
         } else if ((type->flags & 1) != 0) {
             if ((locator->flags & 0x20) != 0 && inst_locator->effect_handle >= 0) {

@@ -3596,28 +3596,49 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
         return;
     }
 
-    const auto add_item = [&](u32 slot, EdUiItemCallback callback, const char *name) {
-        eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(slot, colours, 0, 0, callback, const_cast<char *>(name)));
-    };
-    add_item(1, edanimcbMCTBCardPresent, "Card Present Test");
-    add_item(1, edanimcbMCTBCardType, "Card Type Test");
-    add_item(1, edanimcbMCTBCardCheckFormat, "Card Format Test");
-    add_item(1, edanimcbMCTBCardFreeSpace, "Card Free Space");
-    add_item(1, edanimcbMCTBCardSlotsUsed, "Card Slots Used");
-    add_item(0, edanimcbMCTBCardSaveSlot, "Card Save Slot 0");
-    add_item(0, edanimcbMCTBCardLoadSlot, "Card Load Slot 0");
-    add_item(0, edanimcbMCTBCardDeleteSlot, "Card Delete Slot 0");
-    add_item(1, edanimcbMCTBCardSaveSlot, "Card Save Slot 1");
-    add_item(1, edanimcbMCTBCardLoadSlot, "Card Load Slot 1");
-    add_item(1, edanimcbMCTBCardDeleteSlot, "Card Delete Slot 1");
-    add_item(1, edanimcbMCTBCardFormat, "Format Card");
-    add_item(1, edanimcbMCTBCardUnFormat, "Unformat Card");
-    add_item(1, edanimcbMCTBCardWriteKeyCard, "Write KeyCard");
-    add_item(1, edanimcbMCTBCardCheckKeyCard, "Check KeyCard");
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardPresent,
+                                                        const_cast<char *>("Card Present Test")));
+    eduiMenuAddItem(edanim_mctb_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardType, const_cast<char *>("Card Type Test")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardCheckFormat,
+                                                        const_cast<char *>("Card Format Test")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardFreeSpace,
+                                                        const_cast<char *>("Card Free Space")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardSlotsUsed,
+                                                        const_cast<char *>("Card Slots Used")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(0, colours, 0, 0, edanimcbMCTBCardSaveSlot,
+                                                        const_cast<char *>("Card Save Slot 0")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(0, colours, 0, 0, edanimcbMCTBCardLoadSlot,
+                                                        const_cast<char *>("Card Load Slot 0")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(0, colours, 0, 0, edanimcbMCTBCardDeleteSlot,
+                                                        const_cast<char *>("Card Delete Slot 0")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardSaveSlot,
+                                                        const_cast<char *>("Card Save Slot 1")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardLoadSlot,
+                                                        const_cast<char *>("Card Load Slot 1")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardDeleteSlot,
+                                                        const_cast<char *>("Card Delete Slot 1")));
+    eduiMenuAddItem(edanim_mctb_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardFormat, const_cast<char *>("Format Card")));
+    eduiMenuAddItem(edanim_mctb_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardUnFormat, const_cast<char *>("Unformat Card")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardWriteKeyCard,
+                                                        const_cast<char *>("Write KeyCard")));
+    eduiMenuAddItem(edanim_mctb_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBCardCheckKeyCard,
+                                                        const_cast<char *>("Check KeyCard")));
 
     eduiMenuAttach(parent, edanim_mctb_menu);
     edanim_mctb_menu->x = parent->x + 10;
     edanim_mctb_menu->y = parent->y + 40;
+}
+
+static inline void edanimAddSwitchType(u32 *colours, u32 type, const char *name) {
+    const bool selected = AnimParams[edanim_nearest_param_id].field_00c == type;
+    eduiMenuAddItem(edanim_switchtype_menu,
+                    eduiItemCheckCreate(type, colours, selected, 1, edanimcbSetSwitchType, const_cast<char *>(name)));
+    if (edui_last_item->highlighted & 1) {
+        edanim_switchtype_menu->selected = edui_last_item;
+    }
 }
 
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -3628,27 +3649,19 @@ static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, edu
         return;
     }
 
-    const auto add_type = [&](u32 type, const char *name) {
-        const bool selected = AnimParams[edanim_nearest_param_id].field_00c == type;
-        eduiMenuAddItem(edanim_switchtype_menu, eduiItemCheckCreate(type, colours, selected, 1, edanimcbSetSwitchType,
-                                                                    const_cast<char *>(name)));
-        if (edui_last_item->highlighted & 1) {
-            edanim_switchtype_menu->selected = edui_last_item;
-        }
-    };
-    add_type(0, "None");
-    add_type(1, "Switch");
-    add_type(2, "Switch One Cycle");
-    add_type(3, "Switch Continuous");
-    add_type(4, "Proximity");
-    add_type(5, "Proximity One Cycle");
-    add_type(6, "Proximity Continuous");
-    add_type(7, "Terrain");
-    add_type(8, "Terrain One Cycle");
-    add_type(9, "Terrain Continuous");
-    add_type(10, "Override NoAnim");
-    add_type(11, "Override Play");
-    add_type(12, "Override PlayCont");
+    edanimAddSwitchType(colours, 0, "None");
+    edanimAddSwitchType(colours, 1, "Switch");
+    edanimAddSwitchType(colours, 2, "Switch One Cycle");
+    edanimAddSwitchType(colours, 3, "Switch Continuous");
+    edanimAddSwitchType(colours, 4, "Proximity");
+    edanimAddSwitchType(colours, 5, "Proximity One Cycle");
+    edanimAddSwitchType(colours, 6, "Proximity Continuous");
+    edanimAddSwitchType(colours, 7, "Terrain");
+    edanimAddSwitchType(colours, 8, "Terrain One Cycle");
+    edanimAddSwitchType(colours, 9, "Terrain Continuous");
+    edanimAddSwitchType(colours, 10, "Override NoAnim");
+    edanimAddSwitchType(colours, 11, "Override Play");
+    edanimAddSwitchType(colours, 12, "Override PlayCont");
 
     eduiMenuAttach(parent, edanim_switchtype_menu);
     edanim_switchtype_menu->x = parent->x + 10;
@@ -7501,17 +7514,18 @@ extern "C" {
         Music.seek_offset = 0.0f;
     }
 
+    static inline void MusicPlayStream(i32 stream, i32 track, f32 seek_offset) {
+        NuSound3StopStereoStream(stream);
+        NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL, 0,
+                            NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
+                            NUSOUNDPLAYTOK_END);
+    }
+
     void MusicPreSeek(i32 track) {
         if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || track >= SFX_MUSIC_COUNT) {
             return;
         }
 
-        const auto play_stream = [](i32 stream, i32 track, f32 seek_offset) {
-            NuSound3StopStereoStream(stream);
-            NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
-                                0, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
-                                NUSOUNDPLAYTOK_END);
-        };
         const MusicPlaybackState state = Music.state;
         if ((state & ~MUSIC_PLAYBACK_ACTIVE) == MUSIC_PLAYBACK_STOPPED &&
             (track != Music.requested_track || Music.pause_requested)) {
@@ -7525,7 +7539,7 @@ extern "C" {
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 const i32 stream = 1 - primary_stream;
-                play_stream(stream, track, seek_offset);
+                MusicPlayStream(stream, track, seek_offset);
                 Music.secondary_stream = static_cast<i16>(stream);
                 Music.transition_frames = 0;
                 Music.seek_offset = 0.0f;
@@ -7550,7 +7564,7 @@ extern "C" {
                 Music.pause_requested = false;
                 const f32 seek_offset = Music.seek_offset;
                 if (NOSOUND == 0 && NOMUSIC == 0) {
-                    play_stream(primary_stream, track, seek_offset);
+                    MusicPlayStream(primary_stream, track, seek_offset);
                 }
                 Music.secondary_stream = static_cast<i16>(primary_stream);
                 Music.transition_frames = 0;

@@ -3330,7 +3330,7 @@ void AnimatePlayer(GameObject_s *object) {
 
     const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
     f32 movement_speed;
-    if (object->apiobj.character_model->model_data_b[1] != NULL) {
+    if (model->model_data_b[1] != NULL) {
         movement_speed = pad->animation_input_magnitude;
         if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
             movement_speed = object->apiobj.character_data->game_character->walk_speed;

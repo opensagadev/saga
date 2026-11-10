@@ -539,6 +539,21 @@ static u32 ShaderCountLeadingZeros(u32 value) {
     return value ? g_clzTable[((value + 1) * 0x07dcd629u) >> 27] : 32;
 }
 
+static inline void UnpackColour(u32 packed, f32 *colour) {
+    colour[0] = static_cast<f32>(packed & 0xff) / 255.0f;
+    colour[1] = static_cast<f32>((packed >> 8) & 0xff) / 255.0f;
+    colour[2] = static_cast<f32>((static_cast<i32>(packed) >> 16) & 0xff) / 255.0f;
+    colour[3] = static_cast<f32>(static_cast<i32>(packed >> 24)) / 255.0f;
+}
+
+static inline f32 MaterialFloat(const u8 *material, usize offset) {
+    return *reinterpret_cast<const f32 *>(material + offset);
+}
+
+static inline u32 MaterialU32(const u8 *material, usize offset) {
+    return *reinterpret_cast<const u32 *>(material + offset);
+}
+
 // IPA-SRA passes only the two mask words the setter reads.
 static __attribute__((noinline, noclone)) void
 NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, u32 semantics0, u32 semantics1, numtl_s *mtl)
@@ -547,16 +562,7 @@ NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, u32 sema
 static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, u32 semantics0, u32 semantics1,
                                                         numtl_s *mtl) {
     NUSHADEROBJECT *shader = reinterpret_cast<NUSHADEROBJECT *>(glsl);
-    auto unpackColour = [](u32 packed, f32 *colour) {
-        colour[0] = static_cast<f32>(packed & 0xff) / 255.0f;
-        colour[1] = static_cast<f32>((packed >> 8) & 0xff) / 255.0f;
-        colour[2] = static_cast<f32>((static_cast<i32>(packed) >> 16) & 0xff) / 255.0f;
-        colour[3] = static_cast<f32>(static_cast<i32>(packed >> 24)) / 255.0f;
-    };
-
     const u8 *material = reinterpret_cast<const u8 *>(mtl);
-    auto materialFloat = [material](usize offset) { return *reinterpret_cast<const f32 *>(material + offset); };
-    auto materialU32 = [material](usize offset) { return *reinterpret_cast<const u32 *>(material + offset); };
 
     // Each semantic has its own upload storage, as in the original setter.
     // The numeric suffix identifies its shader semantic.
@@ -599,13 +605,13 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
         const f32 *four_values;
         switch (semantic) {
             case 21: {
-                unpackColour(materialU32(0x11c), values21);
+                UnpackColour(MaterialU32(material, 0x11c), values21);
                 four_values = values21;
                 goto upload_four;
             }
             case 22: {
-                unpackColour(materialU32(0x120), values22);
-                values22[3] = materialFloat(0x1b4);
+                UnpackColour(MaterialU32(material, 0x120), values22);
+                values22[3] = MaterialFloat(material, 0x1b4);
                 four_values = values22;
                 goto upload_four;
             }
@@ -615,50 +621,50 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 break;
             }
             case 24: {
-                values24[0] = materialFloat(0x134);
+                values24[0] = MaterialFloat(material, 0x134);
                 values24[1] = 1.0f;
-                values24[2] = 0.035f * materialFloat(0x138);
-                values24[3] = materialFloat(0x14c);
+                values24[2] = 0.035f * MaterialFloat(material, 0x138);
+                values24[3] = MaterialFloat(material, 0x14c);
                 four_values = values24;
                 goto upload_four;
             }
             case 25: {
                 values25[2] = 0.0f;
                 values25[3] = 0.0f;
-                values25[0] = materialFloat(0xf0);
-                values25[1] = materialFloat(0x284) / materialFloat(0x274);
+                values25[0] = MaterialFloat(material, 0xf0);
+                values25[1] = MaterialFloat(material, 0x284) / MaterialFloat(material, 0x274);
                 four_values = values25;
                 goto upload_four;
             }
             case 26: {
-                values26[0] = materialFloat(0x130);
-                values26[1] = materialFloat(0x12c);
-                values26[2] = materialFloat(0x144);
-                values26[3] = materialFloat(0x148);
+                values26[0] = MaterialFloat(material, 0x130);
+                values26[1] = MaterialFloat(material, 0x12c);
+                values26[2] = MaterialFloat(material, 0x144);
+                values26[3] = MaterialFloat(material, 0x148);
                 four_values = values26;
                 goto upload_four;
             }
             case 27: {
                 values27[3] = 0.0f;
-                values27[0] = materialFloat(0x140);
-                values27[1] = materialFloat(0x13c);
-                values27[2] = materialFloat(0x248);
+                values27[0] = MaterialFloat(material, 0x140);
+                values27[1] = MaterialFloat(material, 0x13c);
+                values27[2] = MaterialFloat(material, 0x248);
                 four_values = values27;
                 goto upload_four;
             }
             case 28: {
-                values28[0] = materialFloat(0x114);
+                values28[0] = MaterialFloat(material, 0x114);
                 g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, 1, values28);
                 break;
             }
             case 29: {
-                values29[0] = materialFloat(0x118);
+                values29[0] = MaterialFloat(material, 0x118);
                 g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, 1, values29);
                 break;
             }
             case 30: {
-                values30[0] = materialFloat(0x1b8);
-                values30[1] = materialFloat(0x1bc);
+                values30[0] = MaterialFloat(material, 0x1b8);
+                values30[1] = MaterialFloat(material, 0x1bc);
                 values30[2] = 0.0f;
                 values30[3] = 0.0f;
                 four_values = values30;
@@ -668,51 +674,51 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 NuShaderObjectBaseUpdateWaterTable(shader, mtl);
                 break;
             case 32: {
-                unpackColour(materialU32(0xc8), values32);
+                UnpackColour(MaterialU32(material, 0xc8), values32);
                 four_values = values32;
                 goto upload_four;
             }
             case 33: {
-                unpackColour(materialU32(0xcc), values33);
+                UnpackColour(MaterialU32(material, 0xcc), values33);
                 four_values = values33;
                 goto upload_four;
             }
             case 34: {
-                unpackColour(materialU32(0xd0), values34);
+                UnpackColour(MaterialU32(material, 0xd0), values34);
                 four_values = values34;
                 goto upload_four;
             }
             case 35: {
-                unpackColour(materialU32(0xd4), values35);
+                UnpackColour(MaterialU32(material, 0xd4), values35);
                 four_values = values35;
                 goto upload_four;
             }
             case 36: {
-                values36[0] = materialFloat(0xd8);
-                values36[1] = materialFloat(0xdc);
-                values36[2] = materialFloat(0xe0);
-                values36[3] = materialFloat(0xe4);
+                values36[0] = MaterialFloat(material, 0xd8);
+                values36[1] = MaterialFloat(material, 0xdc);
+                values36[2] = MaterialFloat(material, 0xe0);
+                values36[3] = MaterialFloat(material, 0xe4);
                 four_values = values36;
                 goto upload_four;
             }
             case 37: {
-                unpackColour(materialU32(0x128), values37);
+                UnpackColour(MaterialU32(material, 0x128), values37);
                 glUniform3fv(parameter.location, 1, values37);
                 break;
             }
             case 38: {
-                unpackColour(materialU32(0xf4), values38);
+                UnpackColour(MaterialU32(material, 0xf4), values38);
                 glUniform3fv(parameter.location, 1, values38);
                 break;
             }
             case 39: {
-                unpackColour(materialU32(0x124), values39);
-                values39[3] = materialFloat(0x158);
+                UnpackColour(MaterialU32(material, 0x124), values39);
+                values39[3] = MaterialFloat(material, 0x158);
                 four_values = values39;
                 goto upload_four;
             }
             case 40: {
-                values40[0] = (materialFloat(0x150) - 1.0f) * 0.1f;
+                values40[0] = (MaterialFloat(material, 0x150) - 1.0f) * 0.1f;
                 g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, 1, values40);
                 break;
             }
@@ -732,26 +738,26 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 values45[0] = 0.05f;
                 values45[2] = 0.2f;
                 values45[3] = 0.8f;
-                values45[1] = 0.32f * materialFloat(0x60);
+                values45[1] = 0.32f * MaterialFloat(material, 0x60);
                 four_values = values45;
                 goto upload_four;
             }
             case 46: {
-                values46[0] = materialFloat(0x60);
-                values46[1] = materialFloat(0x64);
-                values46[2] = materialFloat(0x68);
+                values46[0] = MaterialFloat(material, 0x60);
+                values46[1] = MaterialFloat(material, 0x64);
+                values46[2] = MaterialFloat(material, 0x68);
                 values46[3] = (values46[2] * values46[1]) * 0.2f;
                 four_values = values46;
                 goto upload_four;
             }
             case 47: {
-                values47[0] = materialFloat(0x154);
+                values47[0] = MaterialFloat(material, 0x154);
                 g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, 1, values47);
                 break;
             }
             case 48: {
-                values48[0] = materialFloat(0x260);
-                values48[1] = materialFloat(0x264);
+                values48[0] = MaterialFloat(material, 0x260);
+                values48[1] = MaterialFloat(material, 0x264);
                 values48[2] = 0.0f;
                 values48[3] = 0.0f;
                 four_values = values48;
@@ -759,24 +765,24 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
             }
             case 49: {
                 for (i32 colour = 0; colour < 4; ++colour) {
-                    unpackColour(materialU32(0x250 + colour * 4), values49 + colour * 4);
+                    UnpackColour(MaterialU32(material, 0x250 + colour * 4), values49 + colour * 4);
                 }
                 glUniform4fv(parameter.location, 4, values49);
                 break;
             }
             case 50: {
-                values50[0] = 1.0f / materialFloat(0x290);
-                values50[1] = materialFloat(0x288);
-                values50[2] = materialFloat(0x28c);
-                values50[3] = materialFloat(0x294);
+                values50[0] = 1.0f / MaterialFloat(material, 0x290);
+                values50[1] = MaterialFloat(material, 0x288);
+                values50[2] = MaterialFloat(material, 0x28c);
+                values50[3] = MaterialFloat(material, 0x294);
                 four_values = values50;
                 goto upload_four;
             }
             case 51: {
-                values51[0] = 0.1f * materialFloat(0x274);
-                values51[1] = materialFloat(0x27c);
-                values51[2] = materialFloat(0x280);
-                values51[3] = materialFloat(0x278);
+                values51[0] = 0.1f * MaterialFloat(material, 0x274);
+                values51[1] = MaterialFloat(material, 0x27c);
+                values51[2] = MaterialFloat(material, 0x280);
+                values51[3] = MaterialFloat(material, 0x278);
                 four_values = values51;
                 goto upload_four;
             }
