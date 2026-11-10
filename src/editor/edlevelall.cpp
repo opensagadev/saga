@@ -137,14 +137,6 @@
 
 static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
-#define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
-    do {                                                                                                               \
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);                                              \
-        if (scene != NULL && scene->active)                                                                            \
-            eduiMenuAddItem(menu, eduiItemToggleCreate((scene_index) << 6, &EdLevelAttr, scene->editable, 1,           \
-                                                       ClassEditor::cbEdFilterLED, scene->name));                      \
-    } while (0)
-
 // Reads an attribute of an object through its reference, falling back to the class member lookup.
 template <typename Object>
 static inline i32 get_class_object_attribute(Object &object, i32 attribute, i32 type, void *data, i32 size) {
@@ -3524,16 +3516,12 @@ void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *parent, eduiitem_s *item,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    for (i32 index = 0; index < 10; ++index) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
+        if (scene != NULL && scene->active)
+            eduiMenuAddItem(menu, eduiItemToggleCreate(index << 6, &EdLevelAttr, scene->editable, 1,
+                                                       ClassEditor::cbEdFilterLED, scene->name));
+    }
     eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
     for (i32 index = 0; index < theRegistry.class_count; ++index) {
         EdClass *ed_class = &theRegistry.classes[index];
@@ -3558,16 +3546,12 @@ void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
         return;
     eduiMenuAddItem(menu, eduiItemCheckCreate(0, &EdLevelAttr, 0, 0, cbEdClassSetPinned, const_cast<char *>("Pinned")));
     menu->flags &= ~4;
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    for (i32 index = 0; index < 10; ++index) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
+        if (scene != NULL && scene->active)
+            eduiMenuAddItem(menu, eduiItemToggleCreate(index << 6, &EdLevelAttr, scene->editable, 1,
+                                                       ClassEditor::cbEdFilterLED, scene->name));
+    }
     eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
     eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassSetView, const_cast<char *>("All")));
     eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdClassSetView, const_cast<char *>("None")));
@@ -3612,16 +3596,12 @@ void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
-    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    for (i32 index = 0; index < 10; ++index) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
+        if (scene != NULL && scene->active)
+            eduiMenuAddItem(menu, eduiItemToggleCreate(index << 6, &EdLevelAttr, scene->editable, 1,
+                                                       ClassEditor::cbEdFilterLED, scene->name));
+    }
     eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
     eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelSave, const_cast<char *>("Save")));
     eduiMenuFitWidth(menu, 5);
@@ -3632,50 +3612,26 @@ void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
 void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *menu, eduiitem_s *, u32) {
     // The original callback walks the first explicit argument as an item list.
     eduiitem_s *item = reinterpret_cast<eduiitem_s *>(menu);
-#define EDLEVEL_DESELECT_SCENE(index)                                                                                  \
-    do {                                                                                                               \
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
-            item = item->previous;                                                                                     \
-            scene->editable = 0;                                                                                       \
-            item->highlighted = 0;                                                                                     \
-        }                                                                                                              \
-    } while (0)
-    EDLEVEL_DESELECT_SCENE(0);
-    EDLEVEL_DESELECT_SCENE(1);
-    EDLEVEL_DESELECT_SCENE(2);
-    EDLEVEL_DESELECT_SCENE(3);
-    EDLEVEL_DESELECT_SCENE(4);
-    EDLEVEL_DESELECT_SCENE(5);
-    EDLEVEL_DESELECT_SCENE(6);
-    EDLEVEL_DESELECT_SCENE(7);
-    EDLEVEL_DESELECT_SCENE(8);
-    EDLEVEL_DESELECT_SCENE(9);
-#undef EDLEVEL_DESELECT_SCENE
+    for (i32 index = 0; index < 10; ++index) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
+        if (scene != NULL && scene->active) {
+            item = item->previous;
+            scene->editable = 0;
+            item->highlighted = 0;
+        }
+    }
 }
 
 void ClassEditor::cbEdLevelSelectAll(eduimenu_s *menu, eduiitem_s *, u32) {
     eduiitem_s *item = reinterpret_cast<eduiitem_s *>(menu);
-#define EDLEVEL_SELECT_SCENE(index)                                                                                    \
-    do {                                                                                                               \
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
-        if (scene != NULL && scene->active) {                                                                          \
-            item = item->previous;                                                                                     \
-            scene->editable = 1;                                                                                       \
-            item->highlighted = 1;                                                                                     \
-        }                                                                                                              \
-    } while (0)
-    EDLEVEL_SELECT_SCENE(0);
-    EDLEVEL_SELECT_SCENE(1);
-    EDLEVEL_SELECT_SCENE(2);
-    EDLEVEL_SELECT_SCENE(3);
-    EDLEVEL_SELECT_SCENE(4);
-    EDLEVEL_SELECT_SCENE(5);
-    EDLEVEL_SELECT_SCENE(6);
-    EDLEVEL_SELECT_SCENE(7);
-    EDLEVEL_SELECT_SCENE(8);
-    EDLEVEL_SELECT_SCENE(9);
-#undef EDLEVEL_SELECT_SCENE
+    for (i32 index = 0; index < 10; ++index) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
+        if (scene != NULL && scene->active) {
+            item = item->previous;
+            scene->editable = 1;
+            item->highlighted = 1;
+        }
+    }
 }
 
 i32 LevelEditor::IsActiveScene(nugscn_s *scene) {
@@ -8389,26 +8345,10 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
     memset(reserved_0xef8 + 0x80, 0, 0x80);
     field_0x2c = -1;
     editable_scene_count = 0;
-    if (scenes[0].editable)
-        ++editable_scene_count;
-    if (scenes[1].editable)
-        ++editable_scene_count;
-    if (scenes[2].editable)
-        ++editable_scene_count;
-    if (scenes[3].editable)
-        ++editable_scene_count;
-    if (scenes[4].editable)
-        ++editable_scene_count;
-    if (scenes[5].editable)
-        ++editable_scene_count;
-    if (scenes[6].editable)
-        ++editable_scene_count;
-    if (scenes[7].editable)
-        ++editable_scene_count;
-    if (scenes[8].editable)
-        ++editable_scene_count;
-    if (scenes[9].editable)
-        ++editable_scene_count;
+    for (i32 index = 0; index < 10; ++index) {
+        if (scenes[index].editable)
+            ++editable_scene_count;
+    }
     if (edLevelActiveMenu == NULL && field_0x38 != 0 && input.GetPress(4) != 0.0f) {
         eduiSetCameraEnabled(0);
         eduiSetDefaultActiveMenu(eduiGetActiveMenu());

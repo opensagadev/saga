@@ -931,28 +931,10 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
             break;
     }
     if (!LevFlag[4]) {
-        {
-            if (!LevFlag[1] && NuSpecialGetVisibilityFn(&LevHSpecial[1 + 2])) {
-                PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[1 + 2]));
-                LevFlag[1] = 1;
-            }
-        }
-        {
-            if (!LevFlag[2] && NuSpecialGetVisibilityFn(&LevHSpecial[2 + 2])) {
-                PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[2 + 2]));
-                LevFlag[2] = 1;
-            }
-        }
-        {
-            if (!LevFlag[3] && NuSpecialGetVisibilityFn(&LevHSpecial[3 + 2])) {
-                PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[3 + 2]));
-                LevFlag[3] = 1;
-            }
-        }
-        {
-            if (!LevFlag[4] && NuSpecialGetVisibilityFn(&LevHSpecial[4 + 2])) {
-                PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[4 + 2]));
-                LevFlag[4] = 1;
+        for (i32 i = 1; i < 5; ++i) {
+            if (!LevFlag[i] && NuSpecialGetVisibilityFn(&LevHSpecial[i + 2])) {
+                PlaySfx("env_block_light_on", NuSpecialGetDrawPos(&LevHSpecial[i + 2]));
+                LevFlag[i] = 1;
             }
         }
     }

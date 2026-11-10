@@ -1726,15 +1726,19 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
     nuanimdata2_s *animation = locator->animation;
     nuanimcurve2_s *curves = animation->curves;
     u8 *curve_types = animation->curve_types;
-    auto evaluate = [&](u32 curve) {
-        const i8 type = static_cast<i8>(curve_types[curve]);
-        return type == 0 ? curves[curve].data.constant
-                         : NuAnimCurve2CalcValEx(&curves[curve], time, static_cast<u32>(type));
-    };
     if ((*animation->node_flags & 1) != 0) {
-        const f32 rotation_x = evaluate(3);
-        const f32 rotation_y = evaluate(4);
-        const f32 rotation_z = evaluate(5);
+        const f32 rotation_x =
+            static_cast<i8>(curve_types[3]) == 0
+                ? curves[3].data.constant
+                : NuAnimCurve2CalcValEx(&curves[3], time, static_cast<u32>(static_cast<i8>(curve_types[3])));
+        const f32 rotation_y =
+            static_cast<i8>(curve_types[4]) == 0
+                ? curves[4].data.constant
+                : NuAnimCurve2CalcValEx(&curves[4], time, static_cast<u32>(static_cast<i8>(curve_types[4])));
+        const f32 rotation_z =
+            static_cast<i8>(curve_types[5]) == 0
+                ? curves[5].data.constant
+                : NuAnimCurve2CalcValEx(&curves[5], time, static_cast<u32>(static_cast<i8>(curve_types[5])));
         NUANGVEC angles = {
             static_cast<NUANG>(rotation_x * 10430.378f),
             static_cast<NUANG>(rotation_y * 10430.378f),
@@ -1744,7 +1748,16 @@ extern "C" f32 *NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMT
     } else {
         NuMtxSetIdentity(mtx);
     }
-    NUVEC translation = {evaluate(0), evaluate(1), evaluate(2)};
+    NUVEC translation;
+    translation.x = static_cast<i8>(curve_types[0]) == 0
+                        ? curves[0].data.constant
+                        : NuAnimCurve2CalcValEx(&curves[0], time, static_cast<u32>(static_cast<i8>(curve_types[0])));
+    translation.y = static_cast<i8>(curve_types[1]) == 0
+                        ? curves[1].data.constant
+                        : NuAnimCurve2CalcValEx(&curves[1], time, static_cast<u32>(static_cast<i8>(curve_types[1])));
+    translation.z = static_cast<i8>(curve_types[2]) == 0
+                        ? curves[2].data.constant
+                        : NuAnimCurve2CalcValEx(&curves[2], time, static_cast<u32>(static_cast<i8>(curve_types[2])));
     NuMtxTranslate(mtx, &translation);
     mtx->m02 = -mtx->m02;
     mtx->m12 = -mtx->m12;

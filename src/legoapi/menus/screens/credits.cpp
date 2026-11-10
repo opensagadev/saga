@@ -107,20 +107,13 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                     }
                 } else {
                     const char *style_word = parser->word_buf;
-                    i32 style_index;
-                    if (NuStrICmp(CreditType[0].name, style_word) == 0)
-                        style_index = 0;
-                    else if (NuStrICmp(CreditType[1].name, style_word) == 0)
-                        style_index = 1;
-                    else if (NuStrICmp(CreditType[2].name, style_word) == 0)
-                        style_index = 2;
-                    else if (NuStrICmp(CreditType[3].name, style_word) == 0)
-                        style_index = 3;
-                    else if (NuStrICmp(CreditType[4].name, style_word) == 0)
-                        style_index = 4;
-                    else
-                        style_index = -1;
-                    CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
+                    CREDIT_TYPE_s *type = NULL;
+                    for (i32 style_index = 0; style_index < 5; ++style_index) {
+                        if (NuStrICmp(CreditType[style_index].name, style_word) == 0) {
+                            type = &CreditType[style_index];
+                            break;
+                        }
+                    }
                     if (type != NULL) {
                         char *text;
                         if (NuFParGetWord(parser) == 0) {

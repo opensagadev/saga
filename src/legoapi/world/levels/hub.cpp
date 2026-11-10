@@ -4568,11 +4568,10 @@ void Hub_Update(WORLDINFO_s *world) {
                 !(hub_area != -1 && hub_area_time > 0.0f &&
                   (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
                 minikit_candidate != -1) {
-                const auto player_ready = [](GameObject_s *object) {
-                    return object != NULL && object->apiobj.player_controlled &&
-                           object->pad_gamepad->input_magnitude == 0.0f;
-                };
-                if (player_ready(Player[0]) || player_ready(Player[1])) {
+                if ((Player[0] != NULL && Player[0]->apiobj.player_controlled &&
+                     Player[0]->pad_gamepad->input_magnitude == 0.0f) ||
+                    (Player[1] != NULL && Player[1]->apiobj.player_controlled &&
+                     Player[1]->pad_gamepad->input_magnitude == 0.0f)) {
                     selected_minikit = hub_minikitviewer_area;
                 }
             }

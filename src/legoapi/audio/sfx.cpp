@@ -743,30 +743,11 @@ void SetLevelSfxBits(WORLDINFO *world) {
     if (world->cutscene_sys != NULL) {
         for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
             CUTINFO *cut = world->cutscene_sys->cuts[i];
-            // The original visits the six cutscene cues as separate checks.
-            sound_id = cut->sfx[0].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[1].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[2].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[3].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[4].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[5].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
+            for (i32 j = 0; j < 6; ++j) {
+                sound_id = cut->sfx[j].id;
+                if (sound_id != -1) {
+                    sfx_ids[sfx_count++] = sound_id;
+                }
             }
         }
     }

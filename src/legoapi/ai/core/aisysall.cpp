@@ -14964,25 +14964,6 @@ extern "C" {
 }
 
 void pathEditor_Enter(void) {
-    auto find_connection = [](EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) -> i32 {
-        if (node->connections[0].node == other)
-            return 0;
-        if (node->connections[1].node == other)
-            return 1;
-        if (node->connections[2].node == other)
-            return 2;
-        if (node->connections[3].node == other)
-            return 3;
-        if (node->connections[4].node == other)
-            return 4;
-        if (node->connections[5].node == other)
-            return 5;
-        if (node->connections[6].node == other)
-            return 6;
-        if (node->connections[7].node == other)
-            return 7;
-        return 8;
-    };
     aieditor->paths.head = nullptr;
     aieditor->paths.tail = nullptr;
     for (i32 index = 0; index < 32; ++index) {
@@ -15085,7 +15066,11 @@ void pathEditor_Enter(void) {
                         i32 other_index = connection->node_indices[direction ^ 1];
                         EDAIPATHNODE_s *other = &aieditor->node_storage[node_storage_start + other_index];
                         if (node != nullptr && other != nullptr) {
-                            i32 connection_slot = find_connection(node, other);
+                            i32 connection_slot;
+                            for (connection_slot = 0; connection_slot < 8; ++connection_slot) {
+                                if (node->connections[connection_slot].node == other)
+                                    break;
+                            }
                             if (connection_slot == 8) {
                                 i32 free_node_slot;
                                 i32 free_other_slot;
@@ -15107,7 +15092,10 @@ void pathEditor_Enter(void) {
                                 reciprocal->flags = 0;
                             }
                         refind:
-                            connection_slot = find_connection(node, other);
+                            for (connection_slot = 0; connection_slot < 8; ++connection_slot) {
+                                if (node->connections[connection_slot].node == other)
+                                    break;
+                            }
                             if (connection_slot == 8)
                                 continue;
                             node->connections[connection_slot].flags = connection->original_traversal_flags[direction];
