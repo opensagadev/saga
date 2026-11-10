@@ -165,9 +165,9 @@ struct PART_s;
 // Retail only has the constant-propagated clone of
 // DrawHitPoints(GameObject_s *, float, float, float, float, i32, float, i32); every caller passes 0.0f and 0
 // for the two trailing (unused) arguments, so the clone drops them.
-static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoints(GameObject_s *object, float x, float y, float scale,
-                                                             float alpha, i32 alignment)
-    __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
+static __attribute__((noinline, noclone)) void
+DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha,
+              i32 alignment) __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
 
 // NuFileExists @nufile (nucore_plain.cpp).
 
@@ -354,11 +354,10 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
         f32 scale = type->score == 0 ? normal_pickup : scaled_pickup;
         f32 radius_x = type->shadow_extent_x * scale;
         f32 radius_y = scale * (coin_magnet ? type->shadow_extent_z : type->shadow_radius_z);
-        if (__builtin_expect(object->apiobj.collision_min.x > pickup->position.x + radius_x ||
-                                 pickup->position.x - radius_x > object->apiobj.collision_max.x ||
-                                 !(object->apiobj.collision_min.z <= pickup->position.z + radius_x) ||
-                                 pickup->position.z - radius_x > object->apiobj.collision_max.z,
-                             1)) {
+        if (object->apiobj.collision_min.x > pickup->position.x + radius_x ||
+            pickup->position.x - radius_x > object->apiobj.collision_max.x ||
+            !(object->apiobj.collision_min.z <= pickup->position.z + radius_x) ||
+            pickup->position.z - radius_x > object->apiobj.collision_max.z) {
             continue;
         }
 
@@ -369,9 +368,8 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
             if (!(dx * dx + dz * dz >= radius * radius)) {
                 return pickup;
             }
-        } else if (__builtin_expect(object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
-                                        !(pickup->position.y - radius_y > object->apiobj.collision_max.y),
-                                    1)) {
+        } else if (object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
+                   !(pickup->position.y - radius_y > object->apiobj.collision_max.y)) {
             if (object->field_0xcc0 == NULL) {
                 if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y, &object->apiobj.collision_position,
                                               object->apiobj.collision_radius, object->apiobj.field_0x1e0)) {
@@ -406,7 +404,7 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
     } else {
         pickup->state_enabled = 1;
         SuperCounter_ActivateGizmoPickup(gizmo, pickup);
-        if (__builtin_expect(pickup->state_enabled != 0, 1)) {
+        if (pickup->state_enabled != 0) {
             pickup->state_activated = 1;
             GIZMO_PICKUP_TYPE *type;
             if (!pickup->state_alternate_type || GizmoPickupSys->alternate_type == -1) {
@@ -554,7 +552,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
     f32 shadow_distance_squared;
     if (g_lowEndLevelBehaviour != 0) {
         shadow_distance_squared = 0.0f;
-        if (__builtin_expect(CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far, 0)) {
+        if (CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far) {
             maximum_distance = static_cast<f32>(world->current_level->blob_shadow_fade_far);
         }
     } else {
@@ -641,7 +639,7 @@ static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 
                 NuMtxPreScaleU(&matrix, AreaPickupScale);
             }
 
-            if (__builtin_expect((pickup.config_flags & GIZMOPICKUP_CONFIG_DISABLE_SHADOW_MAP) != 0, 1)) {
+            if ((pickup.config_flags & GIZMOPICKUP_CONFIG_DISABLE_SHADOW_MAP) != 0) {
                 ResetShadowMapRendering();
             }
             const i32 drawn = NuSpecialDrawAt(&model.special, &matrix);
@@ -807,9 +805,9 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
         if (version < 6 && pickup_sys->draw_distance < 10.0f) {
             pickup_sys->draw_distance = 10.0f;
         }
-        if (world->level_sub_id >= 0 && __builtin_expect(world->level_sub_id < AREACOUNT, 1) &&
-            __builtin_expect((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0, 1) &&
-            __builtin_expect(pickup_sys->draw_distance < 100.0f, 1)) {
+        if (world->level_sub_id >= 0 && (world->level_sub_id < AREACOUNT) &&
+            ((ADataList[world->level_sub_id].flags & AREAFLAG_VEHICLE_AREA) != 0) &&
+            (pickup_sys->draw_distance < 100.0f)) {
             pickup_sys->draw_distance = 100.0f;
         }
     }
@@ -998,14 +996,14 @@ GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i3
     } else {
         pickup =
             GizmoPickups_CollideList(object, world->gizmo_pickup_sys->pickups, world->gizmo_pickup_sys->pickup_count);
-        if (__builtin_expect(pickup == NULL, 1)) {
+        if (pickup == NULL) {
             return NULL;
         }
         pickup->state_flags |= GIZMOPICKUP_STATE_COLLECTED;
     }
 
     i32 type_index = pickup->type_index;
-    if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1, 1)) {
+    if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
         type_index = GizmoPickupSys->alternate_type;
     }
     if (GizmoPickupSys->types[type_index].collection_sfx_name != NULL) {
@@ -1173,7 +1171,7 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
             decrement = (decrement / 10) * 10;
             if (decrement < 10) {
                 decrement = 10;
-            } else if (__builtin_expect(packet->coins < decrement, 1)) {
+            } else if (packet->coins < decrement) {
                 packet->coins = 0;
                 return;
             }
@@ -1274,7 +1272,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
 
         if (NuSpecialExistsFn(&item.special) != 0) {
             item.inst_anim = NuSpecialGetInstAnim(&item.special);
-            if (__builtin_expect(item.inst_anim != NULL, 0)) {
+            if (item.inst_anim != NULL) {
                 nuinstanim_s *animation = static_cast<nuinstanim_s *>(item.inst_anim);
                 item.anim_data = item.special.scene->instance_animation_data[animation->anim_ix];
                 item.end_frame = NuAnimEndFrameOld(item.anim_data);
@@ -1373,7 +1371,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
         if (item->pickup_gizmo != NULL) {
             GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
             GIZMO_PICKUP_TYPE *type;
-            if (__builtin_expect((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0, 1) &&
+            if (((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0) &&
                 GizmoPickupSys->alternate_type != -1) {
                 type = &GizmoPickupSys->types[GizmoPickupSys->alternate_type];
             } else {

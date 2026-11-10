@@ -97,12 +97,12 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         cursor += take;
 
         this->decoder->locked_buffer->Unlock();
-        if (__builtin_expect(remaining == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop), 0)) {
+        if (remaining == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop)) {
             result = copied;
             break;
         }
 
-        if (__builtin_expect(context.size3 != 0 && context.size3 < context.read_size, 0)) {
+        if (context.size3 != 0 && context.size3 < context.read_size) {
             context.size3 = 0;
             result = copied;
             break;
@@ -112,7 +112,7 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         // encoded buffer. The original drops that second lock here.
         this->decoder->locked_buffer->Unlock();
 
-        if (__builtin_expect(this->decoder->ring_read_pos == this->decoder->ring_write_pos, 0)) {
+        if (this->decoder->ring_read_pos == this->decoder->ring_write_pos) {
             this->decoder->locked_buffer->Lock();
             this->position = 0;
             result = copied;

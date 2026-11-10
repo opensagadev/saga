@@ -134,7 +134,7 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
         const float sample_x = x + static_cast<float>(i) * x_step;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
             sample_y = graph_bottom + static_cast<float>((samples + sample)->values[0]) * byte_scale;
-        } else if (__builtin_expect(info == static_cast<NetSmallStats::eInfo>(1), 1)) {
+        } else if (info == static_cast<NetSmallStats::eInfo>(1)) {
             sample_y = graph_bottom + static_cast<float>((samples + sample)->values[2]) * packet_scale;
         }
         NuRndrPrimSetColour(0x80008000);
@@ -152,7 +152,7 @@ void NetStats::Draw(float x, float y, float width, float height, volatile NetSma
         const float sample_x = x + static_cast<float>(i) * x_step;
         if (info == static_cast<NetSmallStats::eInfo>(0)) {
             sample_y = graph_bottom + static_cast<float>((samples + sample)->values[1]) * byte_scale;
-        } else if (__builtin_expect(info == static_cast<NetSmallStats::eInfo>(1), 1)) {
+        } else if (info == static_cast<NetSmallStats::eInfo>(1)) {
             sample_y = graph_bottom + static_cast<float>((samples + sample)->values[3]) * packet_scale;
         }
         NuRndrPrimSetColour(0x80008080);

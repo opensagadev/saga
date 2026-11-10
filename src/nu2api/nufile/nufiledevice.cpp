@@ -109,7 +109,7 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
             relative_path[0] == '/' || relative_path[0] == '\\') {
             NuStrCat(relative, relative_path);
         } else {
-            if (__builtin_expect(length > 0 && current_dir[0] != '\\' && current_dir[0] != '/', 1))
+            if (length > 0 && current_dir[0] != '\\' && current_dir[0] != '/')
                 NuStrCat(relative, separator);
             NuStrCat(relative, current_dir);
             NuStrCat(relative, relative_path);
@@ -149,7 +149,7 @@ NuFileDevice *NuFileDevice::GetDeviceByType(NuFileDeviceType type) {
         return sm_DefaultDevice;
     for (i32 i = 0; i < sm_NumDevices; ++i) {
         NuFileDevice *device = sm_Devices[i];
-        if (__builtin_expect(device && device->device_type == type, 0))
+        if (device && device->device_type == type)
             return device;
     }
     return NULL;

@@ -212,9 +212,8 @@ static inline void Techno_DrawHand(WORLDINFO *world, TECHNO *techno, NUMTX *matr
 
 static void Technos_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (__builtin_expect(TechnoSys.active_effect_id == -1 || world->lev_objs[TechnoSys.active_effect_id].active == 0 ||
-                             world->technos == NULL,
-                         0)) {
+    if (TechnoSys.active_effect_id == -1 || world->lev_objs[TechnoSys.active_effect_id].active == 0 ||
+        world->technos == NULL) {
         return;
     }
 
@@ -412,7 +411,7 @@ void *Technos_FindTgt(TECHNO_s *techno) {
             break;
         case 3:
             techno->controlled_object = GizmoFindByName(WORLD->gizmo_sys, -1, techno->target_name);
-            if (__builtin_expect(techno->controlled_object == NULL, 0)) {
+            if (techno->controlled_object == NULL) {
                 techno->target_mode = 0;
             }
             break;

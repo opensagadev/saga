@@ -639,7 +639,7 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
             if (index >= first && index <= last)
                 *entry->text_id = entry->value;
         } else {
-            if (__builtin_expect(index >= first && index <= last, 1)) {
+            if (index >= first && index <= last) {
                 entry->value = index;
                 *entry->text_id = index;
                 Text_StringBits[index / 32] |= 1U << (index & 0x1f);
@@ -654,23 +654,24 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
 }
 
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
-    char separator;
+    char separator = ',';
+    i32 count;
     if (Text_Language == 2) {
         separator = ' ';
-    } else if (Text_Language == 1 || Text_Language == 18 || Text_Language == 0) {
-        separator = ',';
-    } else {
+    } else if (Text_Language != 1 && Text_Language != 18 && Text_Language != 0) {
         separator = '.';
     }
 
     if (length < 0) {
-        length = NuStrLen(number);
+        count = NuStrLen(number);
+    } else {
+        count = length;
     }
 
     i32 output = 0;
-    for (i32 digit = 0; digit < length; ++digit) {
+    for (i32 digit = 0; digit < count; ++digit) {
+        const i32 remaining = count - digit - 1;
         text[output++] = number[digit];
-        const i32 remaining = length - digit - 1;
         if (remaining != 0 && remaining % 3 == 0) {
             text[output++] = separator;
         }
@@ -764,7 +765,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
+                if (Text_ExpandButtonString(token, expanded) != 0) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;
@@ -789,24 +790,26 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
 }
 
 i32 Text_StripComments(char *text, char *dest, i32 param) {
+    i32 count = 0;
     char *end = text + NuStrLen(text);
-    char *out = dest;
+
     while (text <= end) {
         char c = *text;
-        if (c == '#' || c == ';' || (c == '/' && (c = *++text) == '/')) {
-            c = *++text;
-            while (c != '\r' && c != '\0' && c != '\n') {
-                c = *++text;
+        if (c == ';' || c == '#' || (c == '/' && *++text == '/')) {
+            ++text;
+            while ((c = *text) != '\r' && c != '\n' && c != '\0') {
+                ++text;
             }
         }
-        if (param != 0 && (c == ',' || c == '=')) {
+        c = *text++;
+        if (param != 0 && (c == '=' || c == ',')) {
             c = ' ';
         }
-        *out++ = c;
-        text++;
+        *dest++ = c;
+        ++count;
     }
-    *out = '\0';
-    return (i32)(out - dest);
+    *dest = '\0';
+    return count;
 }
 
 void IntroText_SetTextID(i32 id) {
@@ -882,7 +885,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             body_text_id = mission->text_id;
             paragraph_count = 3;
         } else if (Arcade != 0) {
-            if (__builtin_expect(area != NULL, 1) && area->name_id != -1) {
+            if ((area != NULL) && area->name_id != -1) {
                 area_name = TTab[area->name_id];
             }
             body_text_id = Arcade_TextCrawlID;
@@ -894,7 +897,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             if (EDataList[episode_index].text_id != -1) {
                 episode_text = TTab[EDataList[episode_index].text_id];
             }
-            if (__builtin_expect(area_index != -1, 1)) {
+            if (area_index != -1) {
                 if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
                     i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
                                                                                  : s_crawlPtr->character_bonus_text;
@@ -902,7 +905,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                         chapter_text = TTab[*bonus_text];
                     }
                 } else {
-                    if (__builtin_expect(s_crawlPtr->heading_text != NULL, 1)) {
+                    if (s_crawlPtr->heading_text != NULL) {
                         sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
                         chapter_text = chapter_buffer;
                     }
@@ -966,7 +969,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
 
-    if (__builtin_expect(episode_text != NULL, 1)) {
+    if (episode_text != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(episode_text, encoded);
         NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
@@ -974,7 +977,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
 
-    if (__builtin_expect(chapter_text != NULL, 1)) {
+    if (chapter_text != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale);
         Text3DStringEncode(chapter_text, encoded);
         NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
@@ -982,7 +985,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
         y += NuQFntHeight(QFont3DZ) * 1.5f;
     }
 
-    if (__builtin_expect(area_name != NULL, 1)) {
+    if (area_name != NULL) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
         Text3DStringEncode(area_name, encoded);
         NuQFntMove(QFont3DZ, -NuQFntPrintLenW(QFont3DZ, encoded) * 0.5f, y, 0.0f);
@@ -992,12 +995,12 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
 
     if (body_text_id != -1) {
         NuQFntSetScale(QFont3DZ, x_scale, y_scale);
-        if (__builtin_expect(paragraph_count == 0, 1)) {
+        if (paragraph_count == 0) {
             paragraph_count = area == NULL ? s_crawlPtr->paragraph_count : area->text_id_value;
         }
         for (i32 i = 0; i < paragraph_count; ++i) {
             char *paragraph = TTab[body_text_id + i];
-            if (__builtin_expect(paragraph == NULL || *paragraph == '\0', 0)) {
+            if (paragraph == NULL || *paragraph == '\0') {
                 break;
             }
             Text3DStringEncode(paragraph, encoded);

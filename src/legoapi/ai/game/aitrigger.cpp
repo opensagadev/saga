@@ -173,7 +173,7 @@ i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
 }
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
-    if (__builtin_expect(system == NULL || player == NULL, 0))
+    if (system == NULL || player == NULL)
         return;
     // The original accumulates route membership across all sets in this pass.
     u64 character_mask = 0;
@@ -207,15 +207,15 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 }
             } else if (gizmo->type_id == obstacle_gizmotype_id) {
                 GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
-                if (__builtin_expect(obstacle->triggering_object == player ||
-                    (player2 != NULL && obstacle->triggering_object == player2), 0)) {
+                if (obstacle->triggering_object == player ||
+                    (player2 != NULL && obstacle->triggering_object == player2)) {
                     set->field_0x20e |= 1u << index;
                 } else if ((set->field_0x20e >> index) & 1) {
-                    if (__builtin_expect(obstacle->anim_set != NULL, 0) &&
+                    if ((obstacle->anim_set != NULL) &&
                         (obstacle->anim_set->state == 3 || obstacle->anim_set->state == 0 ||
                          obstacle->anim_set->state == 4))
                         set->field_0x20e &= ~(1u << index);
-                } else if (__builtin_expect((obstacle->progress_flags & 3) != 3, 1)) {
+                } else if ((obstacle->progress_flags & 3) != 3) {
                     release = true;
                 }
             } else if (gizmo->type_id == spinner_gizmotype_id) {
@@ -232,10 +232,9 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 }
             } else if (gizmo->type_id == force_gizmotype_id) {
                 GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-                if (__builtin_expect(
-                        GizForce_GameObjUsingForce(player, force) || GizForce_GameObjUsingForce(player2, force), 1)) {
+                if (GizForce_GameObjUsingForce(player, force) || GizForce_GameObjUsingForce(player2, force)) {
                     set->field_0x20e |= 1u << index;
-                } else if (__builtin_expect((set->field_0x20e >> index) & 1 != 0, 1)) {
+                } else if ((set->field_0x20e >> index) & 1 != 0) {
                     set->field_0x20e &= ~(1u << index);
                 } else if (GizForce_Complete(force)) {
                     release = true;
@@ -263,7 +262,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
         }
         i32 player_count = player2 != NULL ? 2 : 1;
         if ((set->field_0x20e != 0 || (set->flags & 2)) && !complete) {
-            if (__builtin_expect(has_assignments && set->field_0x20e == 0, 0)) {
+            if (has_assignments && set->field_0x20e == 0) {
                 auto set_trigger_count = set->trigger_count;
                 for (i32 index = 0; index < set_trigger_count; ++index) {
                     i32 assigned = set->trigger_indices[index];
@@ -291,14 +290,13 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     } else if (gizmo->type_id == spinner_gizmotype_id) {
                         if (static_cast<GIZSPINNER_s *>(gizmo_object)->room_index != -1)
                             continue;
-                    } else if (__builtin_expect(gizmo->type_id == force_gizmotype_id, 0)) {
+                    } else if (gizmo->type_id == force_gizmotype_id) {
                         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo_object);
                         if (!(force->progress_flags & 1) || force->using_object != NULL ||
-                            __builtin_expect(force->field_0x3c_bits != 0, 0))
+                            (force->field_0x3c_bits != 0))
                             continue;
                     } else if (gizmo->type_id == grapple_gizmotype_id) {
-                        if (__builtin_expect(
-                                Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo_object), NULL, NULL) != NULL, 1))
+                        if (Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo_object), NULL, NULL) != NULL)
                             continue;
                     } else {
                         continue;

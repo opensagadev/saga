@@ -317,7 +317,7 @@ void *SetLevelHack(i32 size) {
 }
 
 i32 objInNetWaitContext(GameObject_s *object, i32 context) {
-    if (__builtin_expect(LEGOCONTEXT_NETWAIT != -1 && object != NULL && LEGOCONTEXT_NETWAIT == object->character_context, 1)) {
+    if (LEGOCONTEXT_NETWAIT != -1 && object != NULL && LEGOCONTEXT_NETWAIT == object->character_context) {
         return object->context_animation == context;
     }
     return false;

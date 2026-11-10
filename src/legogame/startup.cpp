@@ -212,7 +212,7 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Font path depends on language.  `Text_Language == 0` is Japanese in the
     // original; everything else uses the Latin font.
-    if (__builtin_expect(Text_Language != 0, 1)) {
+    if (Text_Language != 0) {
         Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
     } else {
         Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
@@ -410,20 +410,19 @@ void LoadPerm(void) {
     NuMtxSetScale(&scale, scale_vec);
     scale.m32 = 1.0f;
 
-    if (__builtin_expect(PAL == 0, 0)) {
+    if (PAL == 0) {
         LoadPerm_LanguageSelect = 3;
     }
 
     i32 device_language = 0;
-    if (__builtin_expect(NuStrICmp(g_deviceManufacturer, (char *)"Amazon") == 0 ||
-                             (device_language = NuIOS_GetDeviceLanguage(), LANGUAGECOUNT < 1),
-                         0)) {
+    if (NuStrICmp(g_deviceManufacturer, (char *)"Amazon") == 0 ||
+        (device_language = NuIOS_GetDeviceLanguage(), LANGUAGECOUNT < 1)) {
         LoadPerm_LanguageSelect = 0;
     } else {
         i32 language_index = 0;
         while (Text_LanguageList[language_index].language != device_language) {
             ++language_index;
-            if (__builtin_expect(language_index == LANGUAGECOUNT, 0)) {
+            if (language_index == LANGUAGECOUNT) {
                 break;
             }
         }
@@ -432,7 +431,7 @@ void LoadPerm(void) {
         } else {
             NuLanguageSet(device_language);
             Text_Language = static_cast<u32>(device_language);
-            if (__builtin_expect(language_index >= LANGUAGECOUNT, 0)) {
+            if (language_index >= LANGUAGECOUNT) {
                 LoadPerm_LanguageSelect = 0;
             }
         }
@@ -455,8 +454,8 @@ void LoadPerm(void) {
         UpdateTimer(&GlobalTimer);
         menu_flash = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
 
-        if (__builtin_expect(language_timer < 0.5f && Text_IsFontLoaded() != nullptr, 0)) {
-            if (__builtin_expect(LoadPerm_LanguageSelect == 0, 0)) {
+        if (language_timer < 0.5f && Text_IsFontLoaded() != nullptr) {
+            if (LoadPerm_LanguageSelect == 0) {
                 NewMenu(7, 0, -1);
                 LoadPerm_LanguageSelect = 1;
                 FadeSys.fade = -1.0f;
@@ -481,7 +480,7 @@ void LoadPerm(void) {
         }
 
         if (legal_timer < 5.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && loadlegal_done) {
-            if (__builtin_expect(legal_timer != 0.0f, 0) || legal_mtl != nullptr) {
+            if ((legal_timer != 0.0f) || legal_mtl != nullptr) {
                 if (PermDataLoaded != 0 &&
                     ((GamePad[0].buttons_down_08 &
                       (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
@@ -497,9 +496,9 @@ void LoadPerm(void) {
                 }
             } else {
                 const i32 texture_id = legal_tid;
-                if (__builtin_expect(texture_id != 0, 0)) {
+                if (texture_id != 0) {
                     NUMTL *mtl = NuMtlCreate(1);
-                    if (__builtin_expect(mtl != nullptr, 0)) {
+                    if (mtl != nullptr) {
                         mtl->diffuse_color = {1.0f, 1.0f, 1.0f};
                         mtl->opacity = 1.0f;
                         mtl->attribs.cull_mode = 2;
@@ -519,10 +518,8 @@ void LoadPerm(void) {
             }
         }
 
-        if (__builtin_expect(intro_timer < 3.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f &&
-                                 legal_timer >= 5.8f && Text_IsFontLoaded() != nullptr && LoadPerm_StringsLoaded != 0 &&
-                                 IntroText_TextID != -1,
-                             0)) {
+        if (intro_timer < 3.8f && LoadPerm_LanguageSelect == 3 && ready_timer >= 1.0f && legal_timer >= 5.8f &&
+            Text_IsFontLoaded() != nullptr && LoadPerm_StringsLoaded != 0 && IntroText_TextID != -1) {
             if (PermDataLoaded != 0 && ((GamePad[0].buttons_down_08 & (GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL |
                                                                        GAMEPAD_ACTION | GAMEPAD_TAG)) != 0 ||
                                         MechInputTouchMenuController::AnyTouchesThisFrame > 0)) {
@@ -547,7 +544,7 @@ void LoadPerm(void) {
 
         NuRndrBeginScene(-1);
         NuRndrGradClear(0xf00, 0x80000000, 0x80000000, 1.0f);
-        if (__builtin_expect(tail_timer == 0.2f, 1)) {
+        if (tail_timer == 0.2f) {
             DrawMenu(0);
 
             if (legal_timer > 0.0f && legal_timer < 5.8f && legal_mtl != nullptr) {
@@ -564,7 +561,7 @@ void LoadPerm(void) {
                     alpha = legal_timer / 0.3f;
                 }
 
-                if (__builtin_expect(alpha > 0.0f, 1)) {
+                if (alpha > 0.0f) {
                     if (legal_timer < 0.0f) {
                         if (legal_timer >= -0.3f) {
                             alpha *= 1.0f - (legal_timer + 0.3f) / 0.3f;
@@ -615,7 +612,7 @@ void LoadPerm(void) {
                         };
 
                         LegalVertex *vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0)) {
+                        if (g_NuPrim_NeedsOverbrightening) {
                             vert->colour = colour;
                         } else {
                             vert->colour = (colour & 0xff000000u) | 0x404040u;
@@ -630,12 +627,12 @@ void LoadPerm(void) {
                         NuPrim2DAddXYZ(0.5f - half_w, 0.5f - half_h, 0.0f);
 
                         vert = reinterpret_cast<LegalVertex *>(g_NuPrim_StreamBufferPtr->addr);
-                        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0)) {
+                        if (g_NuPrim_NeedsOverbrightening) {
                             vert->colour = colour;
                         } else {
                             vert->colour = (colour & 0xff000000u) | 0x404040u;
                         }
-                        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 0)) {
+                        if (!g_NuPrim_NeedsHalfUVs) {
                             vert->full.u = 1.0f;
                             vert->full.v = 1.0f;
                         } else {
@@ -650,11 +647,11 @@ void LoadPerm(void) {
                 }
             }
 
-            if (__builtin_expect(intro_timer > 0.0f && intro_timer < 3.8f, 0)) {
+            if (intro_timer > 0.0f && intro_timer < 3.8f) {
                 f32 alpha;
-                if (__builtin_expect(!(intro_timer >= 0.3f), 0)) {
+                if (!(intro_timer >= 0.3f)) {
                     alpha = intro_timer / 0.3f;
-                } else if (__builtin_expect(intro_timer < 3.3f, 0)) {
+                } else if (intro_timer < 3.3f) {
                     alpha = 1.0f;
                 } else if (!(intro_timer < 3.6f)) {
                     alpha = 0.0f;
@@ -673,7 +670,7 @@ void LoadPerm(void) {
         edGraDisableTerrainSwap();
         if (FRAMETIME < DEFAULTFRAMETIME) {
             FRAMETIME = DEFAULTFRAMETIME;
-        } else if (__builtin_expect(FRAMETIME > DEFAULTFRAMETIME * 3.0f, 1)) {
+        } else if (FRAMETIME > DEFAULTFRAMETIME * 3.0f) {
             FRAMETIME = DEFAULTFRAMETIME * 3.0f;
         }
     }

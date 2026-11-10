@@ -133,7 +133,7 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
         }
 
         EDGIZSHADOW_PRESET preset;
-        if (__builtin_expect(version <= 7 && world->area != NULL, 0)) {
+        if (version <= 7 && world->area != NULL) {
             preset = (world->area->flags & 1) != 0 ? EDGIZSHADOW_PRESET_2 : EDGIZSHADOW_PRESET_1;
         } else {
             preset = shadow->preset;

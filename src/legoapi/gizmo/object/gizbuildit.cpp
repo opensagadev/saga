@@ -87,8 +87,8 @@ namespace {
 
         for (i32 i = 0; i < 8; i++) {
             GameObject_s *player = Player[i];
-            if (player != NULL && __builtin_expect(static_cast<i8>(player->apiobj.field_0x1f8) < 0, 1) &&
-                __builtin_expect(player->build_context == LEGOCONTEXT_BUILDIT, 1) && player->field_0x788 == buildit) {
+            if (player != NULL && (static_cast<i8>(player->apiobj.field_0x1f8) < 0) &&
+                (player->build_context == LEGOCONTEXT_BUILDIT) && player->field_0x788 == buildit) {
                 return player;
             }
         }
@@ -286,7 +286,7 @@ static void GizBuildIts_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void
                     AddGizmo(gizmo_sys, type_id, NULL, &buildit_sys->buildits[i]);
                 }
                 ++i;
-            } while (__builtin_expect(buildit_sys->count > i, 1));
+            } while (buildit_sys->count > i);
         }
     }
 }
@@ -754,7 +754,7 @@ void GizBuildIt_SetToStart(GIZBUILDIT_s *buildit, i32 emit_debris, i32 keep_buil
     const i32 first_piece_to_reset = restored_built_count;
     buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_VISIBLE;
 
-    if (__builtin_expect(emit_debris != 0, 1)) {
+    if (emit_debris != 0) {
         for (i32 index = 0; index < buildit->anim_object_count; ++index) {
             GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
             if (index < buildit->built_object_count) {
@@ -921,7 +921,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                    \
                      (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                  \
                     builder->field_0xe21 ^= 0x40;                                                                      \
-                    if (__builtin_expect(builder->build_button_taps < 10, 0)) {                                        \
+                    if (builder->build_button_taps < 10) {                                                             \
                         ++builder->build_button_taps;                                                                  \
                     }                                                                                                  \
                 } else {                                                                                               \
@@ -946,7 +946,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             if (automatic_build) {
                 if (GizBuildit_AutoBuildPosFn != NULL) {
                     u16 facing;
-                    if (__builtin_expect(GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0, 1)) {
+                    if (GizBuildit_AutoBuildPosFn(world, &buildit.start_position, &centre, &facing) != 0) {
                         f32 radius;
                         u16 angle;
                         u16 angle_step;
@@ -1233,7 +1233,7 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
                 buildit->blowup_type = EdFileReadShort();
             } else {
                 const i32 blowup_name_length = static_cast<i8>(EdFileReadChar());
-                if (__builtin_expect(blowup_name_length != 0, 0)) {
+                if (blowup_name_length != 0) {
                     EdFileRead(blowup_name, blowup_name_length);
                     buildit->blowup_type = static_cast<i16>(GizmoBlowupGetNameTableId(blowup_name));
                     if (buildit->blowup_type != -1) {
@@ -1261,7 +1261,7 @@ static i32 GizBuildIts_Load(void *world_ptr, void *data) {
                     buildit->state_flags |= GIZBUILDIT_STATE_AUTO_BUILD_STATIC_OBJECTS;
                 }
             }
-            if (__builtin_expect(version == 3, 0)) {
+            if (version == 3) {
                 if (EdFileReadChar() != 0) {
                     buildit->state_flags |= 0x80;
                 }
@@ -1524,7 +1524,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             return;
         GizBuildIt_SetHeadTarget(buildit, player);
         buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
-        if ((buildit->state_flags & 0x80) != 0 && __builtin_expect(ShadowMode == 0, 0)) {
+        if ((buildit->state_flags & 0x80) != 0 && (ShadowMode == 0)) {
             player->build_context = -1;
             buildit->builders_active = 1;
             static_cast<GIZBUILDIT_s *>(player->field_0x788)->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
@@ -1539,7 +1539,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
             player->context_animation_timer = 0.2f;
         } else {
             player->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(player->context_animation_timer <= 0.0f, 0)) {
+            if (player->context_animation_timer <= 0.0f) {
                 player->build_context = -1;
                 return;
             }
@@ -1556,23 +1556,21 @@ void BuildIt_MoveCode(GameObject_s *player) {
         return;
     if (player->apiobj.field_0x27d == 0)
         return;
-    if (__builtin_expect(ObjLandReady(player) == 0, 0) && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0)
+    if ((ObjLandReady(player) == 0) && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0)
         return;
-    if (__builtin_expect(player->touch_task != NULL &&
-                             player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value,
-                         0))
+    if (player->touch_task != NULL && player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value)
         return;
     GIZBUILDIT_s *buildit = nextBuildit.Get() != NULL ? nextBuildit->GetGizBuildit() : NULL;
     if (buildit == NULL)
         buildit = GizBuildIt_FindNearest(WORLD, player, BUILDIT_FIND_AVAILABLE, ShadowMode);
-    if (__builtin_expect(objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0, 1)) {
+    if (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0) {
         player->context_animation_timer -= FRAMETIME;
         if (player->context_animation_timer <= 0.0f) {
             player->build_context = -1;
             player->big_jump_data = NULL;
         }
     }
-    if (__builtin_expect(buildit == NULL || !player->apiobj.player_controlled, 0))
+    if (buildit == NULL || !player->apiobj.player_controlled)
         return;
     if (player->apiobj.field_0x27d != 0 && (buildit->state_flags & 4) != 0) {
         GizBuildItPushAwayFromStart(player, buildit);
@@ -1595,7 +1593,7 @@ void BuildIt_MoveCode(GameObject_s *player) {
         GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
         Hint_SetComplete(LEGOHINT_BUILD);
     }
-    if (player->apiobj.player_controlled && __builtin_expect(player->apiobj.field_0x27d != 0, 0)) {
+    if (player->apiobj.player_controlled && (player->apiobj.field_0x27d != 0)) {
         GizBuildItPushAwayFromEnd(player);
     }
 }

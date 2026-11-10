@@ -572,7 +572,7 @@ void ScaleGameObject(GameObject_s *object) {
     object->apiobj.scaled_height = (character->field16_0x38 - character->field15_0x34) * object->field_0x1004;
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) void GetTopBot(GameObject_s *object) {
+void GetTopBot(GameObject_s *object) {
     CHARACTERDATA *character = object->apiobj.character_data;
     const f32 bottom = character->field15_0x34;
     const f32 top = character->field16_0x38;
@@ -899,9 +899,8 @@ void UpdateLastSafePosition(GameObject_s *object) {
                    shadow_platform == LevSafePlatID[1])) &&
                 (LastSafePosExtraFn == NULL || !LastSafePosExtraFn(object)))
                 break;
-            if (__builtin_expect(!(api.lower_position.y > api.field_0x218 - 0.1f) || unsafe ||
-                                     (VehicleArea != 0 && TouchHacks::CheckForAboutToRunIntoKillTerrain(*object, 1.0f)),
-                                 0))
+            if (!(api.lower_position.y > api.field_0x218 - 0.1f) || unsafe ||
+                (VehicleArea != 0 && TouchHacks::CheckForAboutToRunIntoKillTerrain(*object, 1.0f)))
                 break;
             object->field_0xf02 |= 0x40;
             api.last_safe_position = api.position;
@@ -912,10 +911,8 @@ void UpdateLastSafePosition(GameObject_s *object) {
                 api.respawn_position = api.last_safe_position;
                 api.respawn_enabled = 1;
             }
-            if (__builtin_expect(static_cast<u8>(api.field_0x27c) < 2 && object->field_0xda8 <= 0.0f &&
-                                     GameCam->blend_time >= GameCam->blend_duration &&
-                                     object->sock_position.location.sock != -1,
-                                 1)) {
+            if (static_cast<u8>(api.field_0x27c) < 2 && object->field_0xda8 <= 0.0f &&
+                GameCam->blend_time >= GameCam->blend_duration && object->sock_position.location.sock != -1) {
                 ClearLastSafeTakeoverSource(object);
                 object->last_safe_camera_position = api.last_safe_position;
             }
@@ -923,8 +920,8 @@ void UpdateLastSafePosition(GameObject_s *object) {
         } while (false);
         {
             i8 edge_layer;
-            if (__builtin_expect((api.flags_low & 0x80) != 0, 1) && (edge_layer = api.field_0x27f) != -1 &&
-                __builtin_expect((TerLayer[edge_layer].flags & 1) != 0, 1) && !NoLayerKill(object)) {
+            if (((api.flags_low & 0x80) != 0) && (edge_layer = api.field_0x27f) != -1 &&
+                ((TerLayer[edge_layer].flags & 1) != 0) && !NoLayerKill(object)) {
                 if (object->fall_recovery_timer <= 0.0f)
                     object->fall_hover_height = api.position.y;
                 object->fall_recovery_timer += FRAMETIME;

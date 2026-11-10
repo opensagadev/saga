@@ -482,7 +482,7 @@ void NuInputDevice::ProcessTouchData() {
     }
     u32 added = 0;
     for (u32 i = 0; i < previous_count; ++i) {
-        if (__builtin_expect(unknown_touch_data.touch_events[i].unknown_01 != 0, 0))
+        if (unknown_touch_data.touch_events[i].unknown_01 != 0)
             continue;
         i32 current = 0xff;
         for (u32 j = 0; j < count; ++j) {
@@ -657,7 +657,7 @@ void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
     caps = 0x400;
 }
 
-__attribute__((optimize("O2"))) void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
+void NuInputDevice::Update(f32 delta_time, bool emulate_touch) {
     u32 i;
 
     f32 raw_motion_values[20];

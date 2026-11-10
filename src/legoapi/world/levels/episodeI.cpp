@@ -248,7 +248,7 @@ static __used__ void PodRaceSnipersUpdate(void) {
     i32 bolttype = (WORLD->current_level == PODSPRINTA_LDATA) ? 0x29 : 0x28;
     BOLTTYPE_s *type = BoltType_FindByID(bolttype, WORLD);
     i32 n = PodRace_nsnipers;
-    if (__builtin_expect(n <= 0 || max_nsnipers <= 0, 0))
+    if (n <= 0 || max_nsnipers <= 0)
         return;
     SNIPER_s *s = PodRace_snipers;
     for (i32 i = 0; i < n && i < max_nsnipers; i++, s++) {
@@ -281,7 +281,7 @@ static __used__ void PodRaceSnipersUpdate(void) {
                     }
                     if (player_ix == 0)
                         target = player;
-                    if (__builtin_expect(target == NULL || type == NULL, 0))
+                    if (target == NULL || type == NULL)
                         continue;
                     CalculateInterceptVector(&s->prev, &target->apiobj.collision_position, &target->apiobj.velocity,
                                              type->field_10, &aim, NULL);
@@ -318,7 +318,7 @@ static __used__ void PodRaceSnipersReset(void) {
         char buf[16];
         sprintf(buf, "Sniper%d", Lap);
         NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, buf);
-        if (__builtin_expect(spline != NULL && spline->length > 0 && PodRace_nsnipers <= 9, 1)) {
+        if (spline != NULL && spline->length > 0 && PodRace_nsnipers <= 9) {
             i32 npts = 0;
             float half_time = PodRace_sniper_fire_time * 0.5f;
             do {
@@ -330,7 +330,7 @@ static __used__ void PodRaceSnipersReset(void) {
                 dst->fire_timer = NuRandFloat() * PodRace_sniper_fire_time + half_time;
                 PodRace_snipers[PodRace_nsnipers++].state = 0.0f;
                 npts += 2;
-            } while (__builtin_expect(npts < spline->length && PodRace_nsnipers <= 9, 1));
+            } while (npts < spline->length && PodRace_nsnipers <= 9);
         }
     }
 }
@@ -368,7 +368,7 @@ static void *CreatePodRaceMine(nuvec_s *pos) {
     entry->pos = mine_pos;
     entry->active = 1;
     entry->grow_alpha = 0.0f;
-    if (__builtin_expect(mine_max_tile != 0, 1))
+    if (mine_max_tile != 0)
         entry->rotx = (u16)((u32)NuRandInt() % (u32)mine_max_tile);
     i32 bit = (i32)(1u << slot);
     entry->roty = (u16)NuRandInt();
@@ -568,7 +568,7 @@ static __used__ void UpdatePodRaceMines(void) {
             NUVEC *pos = &client_mines.positions[idx];
             if (mines->mine_debris != -1)
                 AddGameDebris(WORLD->debris_sys, mines->mine_debris, pos);
-            if (__builtin_expect(mines->mine_part != -1, 1))
+            if (mines->mine_part != -1)
                 AddFiniteShotPART(mines->mine_part, pos, 1);
             GameCam_HitJudder();
             GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
@@ -787,7 +787,7 @@ void PodRace_IncreaseLap() {
 }
 
 void PodRaceUpdate(WORLDINFO_s *world, float dt) {
-    if (__builtin_expect(netclient != 0, 0)) {
+    if (netclient != 0) {
         PodRace->lap_countdown = podrace_netpacket->start_countdown;
         PodRace->lap_display = podrace_netpacket->remaining_time;
         PodRace->prev_lap_display = podrace_netpacket->available_time;
@@ -815,9 +815,9 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         PodRace->mushroom_timer += dt;
         if (PodRace->prev_lap_display > 0.0f) {
             PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
-            if (__builtin_expect(PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f, 1)) {
+            if (PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f) {
                 PodRace->lap_display = 0.0f;
-                if (__builtin_expect(Player[0] != NULL, 1) && Player[0]->apiobj.player_controlled)
+                if ((Player[0] != NULL) && Player[0]->apiobj.player_controlled)
                     LoseCoins(Player[0], 1);
                 if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
                     LoseCoins(Player[1], 1);
@@ -850,7 +850,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             if (pod->start < 1.0f) {
                 float dot =
                     direction.x * pod->matrix.m20 + direction.y * pod->matrix.m21 + direction.z * pod->matrix.m22;
-                while (length_sq < 1.0f || __builtin_expect(dot < 0.0f, 0)) {
+                while (length_sq < 1.0f || (dot < 0.0f)) {
                     pod->start += PODRACE_SPLINEINC;
                     if (!(pod->start <= 1.0f)) {
                         pod->start = 1.0f;
@@ -865,7 +865,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 }
             }
             float length = NuFsqrt(length_sq);
-            if (__builtin_expect(pod->start >= 1.0f, 0) || length != 0.0f) {
+            if ((pod->start >= 1.0f) || length != 0.0f) {
                 if (pod->start < 1.0f) {
                     float ratio = PodRace->mushroom_timer / PodRace->prev_lap_display;
                     if (ratio > 1.0f)
@@ -895,9 +895,8 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
                 pod->previous_displacement = direction;
             }
             object = pod->object;
-            if (__builtin_expect(world->current_level == PODRACEA_LDATA && object != NULL &&
-                                     pod->model_id == id_SEBULBASPOD && NuSpecialExistsFn(&minesys.mine_special) != 0,
-                                 0)) {
+            if (world->current_level == PODRACEA_LDATA && object != NULL && pod->model_id == id_SEBULBASPOD &&
+                NuSpecialExistsFn(&minesys.mine_special) != 0) {
                 object->special_move_timer -= FRAMETIME;
                 if (object->special_move_timer < 0.0f && player != NULL) {
                     NUVEC origin;
@@ -956,7 +955,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         }
         pod->matrix.m33 = 1.0f;
         object = pod->object;
-        if (__builtin_expect(object != NULL, 0)) {
+        if (object != NULL) {
             object->vehicle_orientation = pod->matrix;
             object->apiobj.position = *NUMTX_GET_ROW_VEC(&object->vehicle_orientation, 3);
             object->saved_position = object->apiobj.position;
@@ -1009,7 +1008,7 @@ void PodRacePanel(WORLDINFO_s *world) {
 }
 
 void UpdatePodRaceLapDisplay(float arg) {
-    if (__builtin_expect(FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0, 1)) {
+    if (FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0) {
         float target = 0.0f;
         if (Paused != 0)
             target = 1.0f;
@@ -1030,7 +1029,7 @@ void UpdatePodRaceLapDisplay(float arg) {
             if (podhurryalpha > 1.0f)
                 podhurryalpha = 1.0f;
         }
-        if (__builtin_expect(podhurry_i > 0 && oldhurry != podhurry_i, 0))
+        if (podhurry_i > 0 && oldhurry != podhurry_i)
             TickTockSfx();
     } else {
         podhurryalpha = 0.0f;
@@ -1058,7 +1057,7 @@ i32 PodRace_InStartCountdown(WORLDINFO_s *world) {
 void PodRaceAUpdate(WORLDINFO_s *world) {
     UpdatePacemakerDisplay(world);
     PodRaceUpdate(world, FRAMETIME);
-    if (__builtin_expect(netclient == 0, 0)) {
+    if (netclient == 0) {
         if (Lap <= 3 && MiniCutCam == 0) {
             MINESYS_s *mines = &minesys;
             float t = mines->update_timer + FRAMETIME;
@@ -1443,7 +1442,7 @@ i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, ch
             if (do_mine != 0) {
                 if (CreatePodRaceMine(&object->apiobj.lower_position) != NULL)
                     process->action_timer = 0.0f;
-            } else if (__builtin_expect(NuSpecialExistsFn(&special) != 0, 0)) {
+            } else if (NuSpecialExistsFn(&special) != 0) {
                 NUVEC throw_velocity;
                 NUVEC target_delta;
                 NUVEC origin;
@@ -1891,10 +1890,10 @@ void PodSprintA_Update(WORLDINFO_s *world) {
         goto speed_section;
     }
     // netclient == 0: react to cutscene / free-play flag.
-    if (__builtin_expect(!!(CutScene_PlayingOrRequested(NULL)), 0))
+    if (CutScene_PlayingOrRequested(NULL))
         return;
     if ((ps->flags & 0xc) != 0) {
-        if (__builtin_expect(!(ps->flags & 0x10), 0)) {
+        if (!(ps->flags & 0x10)) {
             ps->flags |= 0x10;
             ResetLevel(world, NULL, 1);
         }
@@ -1905,7 +1904,7 @@ speed_section:
         float v = ps->speed;
         if (FadeSys.fade == 0.0f)
             ps->speed -= FRAMETIME;
-        if (__builtin_expect(Player[0] != NULL, 1)) {
+        if (Player[0] != NULL) {
             if (ps->speed > 0.0f) {
                 Player[0]->field_0xdc8 = 0.0f;
                 Player[0]->apiobj.velocity.z = 0.0f;
@@ -2013,7 +2012,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
                 n = 3;
             sprintf(buf, "%i", n);
             float m = NuFmod(v, 1.0f);
-            if (__builtin_expect(!(m < 0.7f), 1))
+            if (!(m < 0.7f))
                 m = (m - 0.7f) / 0.3f + 1.0f;
             else
                 m = 1.0f;
@@ -2033,7 +2032,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
 }
 
 void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
-    if (__builtin_expect(spline == NULL, 0))
+    if (spline == NULL)
         return;
     PODSPRINT_s *ps = &podsprint;
     i32 idx = -1;
@@ -2047,7 +2046,7 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
         idx = 3;
     else if (spline == ps->ai[4].spline)
         idx = 4;
-    else if (__builtin_expect(spline == ps->ai[5].spline, 0))
+    else if (spline == ps->ai[5].spline)
         idx = 5;
     else
         return;
@@ -2105,11 +2104,11 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                     distance = second_distance - first_distance;
                     if (distance > sock_length * 0.5f)
                         distance -= sock_length;
-                    else if (__builtin_expect(distance < sock_length * -0.5f, 1))
+                    else if (distance < sock_length * -0.5f)
                         distance += sock_length;
 
                     GameObject_s *lead_player;
-                    if (__builtin_expect(0.0f > goal, 0))
+                    if (0.0f > goal)
                         lead_player = distance <= 0.0f ? player2 : player;
                     else
                         lead_player = distance <= 0.0f ? player : player2;
@@ -2128,7 +2127,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
                 else if (distance < sock_length * -0.5f)
                     distance += sock_length;
                 distance -= goal;
-                if (__builtin_expect(distance > 0.0f, 1)) {
+                if (distance > 0.0f) {
                     float ratio = distance / (sebulba_fallback_dist - goal);
                     float base = 0.0f;
                     if (ratio > 1.0f)
@@ -2144,7 +2143,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         catchup: {
             float ratio = distance / sebulba_catchup_dist;
             float base = 0.0f;
-            if (__builtin_expect(!(ratio <= 1.0f), 1))
+            if (!(ratio <= 1.0f))
                 ratio = 1.0f;
             else
                 base = 1.0f - ratio;
@@ -2154,7 +2153,7 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         } else {
             float base_speed = object->apiobj.character_data->game_character->run_speed;
             float target = base_speed;
-            if (__builtin_expect(ps->max_speed_msg != NULL && ps->min_speed_msg != NULL && ps->speed_step_msg != NULL, 0)) {
+            if (ps->max_speed_msg != NULL && ps->min_speed_msg != NULL && ps->speed_step_msg != NULL) {
                 float reduced_maximum =
                     ps->max_speed_msg->value - (float)*(i16 *)&ps->pad_0x8c[0] * ps->speed_step_msg->value;
                 target = ps->min_speed_msg->value > reduced_maximum ? ps->min_speed_msg->value : reduced_maximum;
@@ -2164,9 +2163,9 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
     }
 done:
     if (object->movement_spline_finished != 0 && (ps->flags & 4) == 0) {
-        if (__builtin_expect(Player[0] != NULL && (i8)Player[0]->apiobj.field_0x1f8 < 0, 0))
+        if (Player[0] != NULL && (i8)Player[0]->apiobj.field_0x1f8 < 0)
             LoseCoins(Player[0], 1);
-        if (__builtin_expect(Player[1] != NULL && (i8)Player[1]->apiobj.field_0x1f8 < 0, 0))
+        if (Player[1] != NULL && (i8)Player[1]->apiobj.field_0x1f8 < 0)
             LoseCoins(Player[1], 1);
         ps->flags |= 4;
         ResetLevel(WORLD, "Ep1_Podsprint_OutOfTime", 1);

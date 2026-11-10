@@ -227,7 +227,7 @@ void HeadMovement(GameObject_s *object) {
                     angle = NuAtan2(-direction.x, -direction.z);
                     second = angle + object->joint_modifiers[object->field_0x1089].rotation.z;
                     limit = character->game_character->field_0x50;
-                    if (__builtin_expect(second >= limit, 0))
+                    if (second >= limit)
                         second = limit;
                     else if (second <= -limit)
                         second = -limit;
@@ -272,7 +272,7 @@ void HeadMovement(GameObject_s *object) {
             }
             if (object->head_target != NULL) {
                 object->head_target_timer -= FRAMETIME;
-                if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
+                if (object->head_target_timer < 0.0f) {
                     object->head_target_timer = 0.0f;
                     object->head_target_delay = 0.0f;
                     object->head_target = NULL;
@@ -293,7 +293,7 @@ void HeadMovement(GameObject_s *object) {
         if (object->apiobj.anim_packet.blending) {
             animation = object->apiobj.anim_packet.blend_animation_b;
             if (animation >= 0 && animation < apicharsys->model_id_capacity &&
-                __builtin_expect(object->apiobj.character_model->model_data_b[animation] != NULL, 1)) {
+                (object->apiobj.character_model->model_data_b[animation] != NULL)) {
                 if (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation])->flags &
                     0x40) {
                     allowed = 0;
@@ -363,11 +363,10 @@ void HeadMovement(GameObject_s *object) {
         limit = static_cast<i32>(character->game_character->field_0x54 * 10430.3779296875f);
         object->joint_modifiers[object->field_0x1089].rotation_limit_start[1] = limit;
         object->joint_modifiers[object->field_0x1089].rotation_limit_end[1] = -limit;
-        if (__builtin_expect(object->joint_modifiers[object->field_0x1089].rotation.x > 0.0017453293548896909f ||
-                                 object->joint_modifiers[object->field_0x1089].rotation.x < -0.0017453293548896909f ||
-                                 object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||
-                                 object->joint_modifiers[object->field_0x1089].rotation.y < -0.0017453293548896909f,
-                             0)) {
+        if (object->joint_modifiers[object->field_0x1089].rotation.x > 0.0017453293548896909f ||
+            object->joint_modifiers[object->field_0x1089].rotation.x < -0.0017453293548896909f ||
+            object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||
+            object->joint_modifiers[object->field_0x1089].rotation.y < -0.0017453293548896909f) {
             object->joint_modifiers[object->field_0x1089].flags = NUJOINTANIM_ROTATION;
             if (allowed) {
                 if (object->joint_modifiers[object->field_0x1089].rotation.x != 0.0f)
@@ -380,7 +379,7 @@ void HeadMovement(GameObject_s *object) {
         }
         if (object->head_target != NULL) {
             object->head_target_timer -= FRAMETIME;
-            if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
+            if (object->head_target_timer < 0.0f) {
                 object->head_target_timer = 0.0f;
                 object->head_target_delay = 0.0f;
                 object->head_target = NULL;
@@ -393,7 +392,7 @@ void HeadMovement(GameObject_s *object) {
             object->field_0xefe &= ~1;
             i32 allowed;
             i16 animation;
-            if (__builtin_expect(!object->apiobj.anim_packet.blending, 1)) {
+            if (!object->apiobj.anim_packet.blending) {
                 animation = object->apiobj.anim_packet.animation_index;
                 allowed = 1;
                 if (animation < 0)
@@ -453,7 +452,7 @@ void HeadMovement(GameObject_s *object) {
             CHARACTERDATA *character = object->apiobj.character_data;
             object->joint_modifiers[object->field_0x1089].joint_index = character->game_character->head_joint;
             object->joint_modifiers[object->field_0x1089].flags = static_cast<NUJOINTANIM_FLAGS>(0);
-            f32 blend = object->apiobj.character_data->game_character->field_0x58 * FRAMETIME;
+            f32 blend = character->game_character->field_0x58 * FRAMETIME;
             f32 previous;
             if (blend > 1.0f) {
                 blend = 1.0f;
@@ -466,10 +465,10 @@ void HeadMovement(GameObject_s *object) {
                 first * blend + object->joint_modifiers[object->field_0x1089].rotation.y * previous;
             object->joint_modifiers[object->field_0x1089].rotation.z =
                 second * blend + object->joint_modifiers[object->field_0x1089].rotation.z * previous;
-            i32 limit = static_cast<i32>(object->apiobj.character_data->game_character->field_0x54 * 10430.3779296875f);
+            i32 limit = static_cast<i32>(character->game_character->field_0x54 * 10430.3779296875f);
             object->joint_modifiers[object->field_0x1089].rotation_limit_start[1] = limit;
             object->joint_modifiers[object->field_0x1089].rotation_limit_end[1] = -limit;
-            limit = static_cast<i32>(object->apiobj.character_data->game_character->field_0x50 * 10430.3779296875f);
+            limit = static_cast<i32>(character->game_character->field_0x50 * 10430.3779296875f);
             object->joint_modifiers[object->field_0x1089].rotation_limit_start[2] = limit;
             object->joint_modifiers[object->field_0x1089].rotation_limit_end[2] = -limit;
             if (object->joint_modifiers[object->field_0x1089].rotation.y > 0.0017453293548896909f ||
@@ -488,7 +487,7 @@ void HeadMovement(GameObject_s *object) {
             }
             if (object->head_target != NULL) {
                 object->head_target_timer -= FRAMETIME;
-                if (__builtin_expect(object->head_target_timer < 0.0f, 1)) {
+                if (object->head_target_timer < 0.0f) {
                     object->head_target_timer = 0.0f;
                     object->head_target_delay = 0.0f;
                     object->head_target = NULL;
@@ -728,7 +727,7 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
 
             sprintf(path, "chars\\%s\\%s.gsc", CDataList[model_id].dir, CDataList[model_id].file);
             entry.scene = NuGScnRead(buf, buf_end, path);
-            if (__builtin_expect(entry.scene != NULL, 1)) {
+            if (entry.scene != NULL) {
                 NuSpecialFind(entry.scene, &entry.special_scene, CDataList[model_id].file, 1);
             }
         }
@@ -737,7 +736,7 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     nuhspecial_s *special;
-    if (__builtin_expect(CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL, 1)) {
+    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
         special = &CharScene_Area[character_id].special_scene;
     } else if (world->minikit.character_scenes[character_id].scene != NULL) {
         special = &world->minikit.character_scenes[character_id].special_scene;
@@ -825,7 +824,7 @@ void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32, variptr_u *buf, variptr
         NuStrCat(path, LevelObject_FindNameFromIndex(object_index));
         NuStrCat(path, ".gsc");
         IconScene[character_id] = NuGScnRead(buf, *buf_end, path);
-        if (__builtin_expect(IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL, 1)) {
+        if (IconScene[character_id] != NULL && IconScene[character_id]->display_list != NULL) {
             IconScene[character_id]->display_list->flags |= NU_DISPLAYSCENE_FLAG_NEEDS_BUILD;
         }
     }
@@ -885,7 +884,7 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
             if (icon_object_id != -1) {
                 if (drawcharicon_find != 0) {
                     NUGSCN *icon_scene = character_id == -1 ? NULL : IconScene_FindById(character_id);
-                    if (__builtin_expect(icon_scene != NULL, 0)) {
+                    if (icon_scene != NULL) {
                         NuSpecialFind(icon_scene, &special, ObjTabList[icon_object_id].name, 1);
                     } else {
                         NuSpecialFind(things_scene, &special, ObjTabList[icon_object_id].name, 1);

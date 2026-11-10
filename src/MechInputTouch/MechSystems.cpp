@@ -630,32 +630,13 @@ void MechSystems::ProcessEvenWhenPaused(ThingProcessData *data) {
     if (initialized == 0) {
         Init();
     }
-    if (radar_pulses[0] != NULL) {
-        radar_pulses[0]->Process(FRAMETIME);
-        if (radar_pulses[0]->IsFinished()) {
-            delete radar_pulses[0];
-            radar_pulses[0] = NULL;
-        }
-    }
-    if (radar_pulses[1] != NULL) {
-        radar_pulses[1]->Process(FRAMETIME);
-        if (radar_pulses[1]->IsFinished()) {
-            delete radar_pulses[1];
-            radar_pulses[1] = NULL;
-        }
-    }
-    if (radar_pulses[2] != NULL) {
-        radar_pulses[2]->Process(FRAMETIME);
-        if (radar_pulses[2]->IsFinished()) {
-            delete radar_pulses[2];
-            radar_pulses[2] = NULL;
-        }
-    }
-    if (radar_pulses[3] != NULL) {
-        radar_pulses[3]->Process(FRAMETIME);
-        if (radar_pulses[3]->IsFinished()) {
-            delete radar_pulses[3];
-            radar_pulses[3] = NULL;
+    for (i32 i = 0; i < 4; ++i) {
+        if (radar_pulses[i] != NULL) {
+            radar_pulses[i]->Process(FRAMETIME);
+            if (radar_pulses[i]->IsFinished()) {
+                delete radar_pulses[i];
+                radar_pulses[i] = NULL;
+            }
         }
     }
     input_touch_system.ProcessEvenWhenPaused(data);
@@ -711,7 +692,7 @@ void MechSystems::Process(ThingProcessData *) {
 
 MechSystems *MechSystems::Get() {
     static MechSystems *instance = NULL;
-    if (__builtin_expect(instance == NULL, 1)) {
+    if (instance == NULL) {
         instance = new MechSystems();
     }
     return instance;
@@ -755,7 +736,7 @@ void SwipeDecalRenderer::Render() {
     NuPrim2DBegin(1, 7, MechSystems::Get()->swipe_material);
     u32 colour = (static_cast<u32>(static_cast<i32>(alpha.value * 128.0f)) << 24) | 0x000080;
     if (style != static_cast<Style>(1)) {
-        if (__builtin_expect(style == static_cast<Style>(2), 0))
+        if (style == static_cast<Style>(2))
             colour = (static_cast<u32>(static_cast<i32>(alpha.value * 255.0f)) << 24) | 0x0000ff;
         else
             colour |= 0x808000;
@@ -772,11 +753,11 @@ void SwipeDecalRenderer::Render() {
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[2].x, static_cast<f32>(PS2_VREZ_H) * vertices[2].y, 0.0f);
     {
         PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
-        if (__builtin_expect(g_NuPrim_NeedsOverbrightening, 0))
+        if (g_NuPrim_NeedsOverbrightening)
             vertex->color = colour;
         else
             vertex->color = ((static_cast<i32>(colour) >> 1) & 0x007f7f7f) | (colour & 0xff000000);
-        if (__builtin_expect(!g_NuPrim_NeedsHalfUVs, 1)) {
+        if (!g_NuPrim_NeedsHalfUVs) {
             vertex->float_uv[0] = 1.0f;
             vertex->float_uv[1] = uv_height;
         } else {

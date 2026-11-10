@@ -410,31 +410,21 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
             break;
         }
     }
-    if (__builtin_expect(new_area == HUB_AREA_COUNT || new_area == hub_ai.area, 0)) {
+    if (new_area == HUB_AREA_COUNT || new_area == hub_ai.area) {
         return;
     }
 
     hub_ai.area = static_cast<i16>(new_area);
     AIPATH *area_path = hub_ai.paths[new_area];
     if (area_path != NULL && AISysSetLevelPath(world->ai_sys, area_path->name) != 0) {
-#define SET_HUB_PLAYER_PATH(index)                                                                                     \
-    do {                                                                                                               \
-        GameObject_s *path_player = Player[index];                                                                     \
-        if (path_player != NULL && (path_player->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {                   \
-            AISysCharacterSetPath(&path_player->ai, world->ai_sys->path_sys->active_path);                             \
-            AISysGetCharacterPathPos(world->ai_sys, &path_player->apiobj, &path_player->ai, 0xff,                      \
-                                     static_cast<i8>(path_player->apiobj.field_0x27d));                                \
-        }                                                                                                              \
-    } while (0)
-        SET_HUB_PLAYER_PATH(0);
-        SET_HUB_PLAYER_PATH(1);
-        SET_HUB_PLAYER_PATH(2);
-        SET_HUB_PLAYER_PATH(3);
-        SET_HUB_PLAYER_PATH(4);
-        SET_HUB_PLAYER_PATH(5);
-        SET_HUB_PLAYER_PATH(6);
-        SET_HUB_PLAYER_PATH(7);
-#undef SET_HUB_PLAYER_PATH
+        for (i32 index = 0; index < 8; ++index) {
+            GameObject_s *path_player = Player[index];
+            if (path_player != NULL && (path_player->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {
+                AISysCharacterSetPath(&path_player->ai, world->ai_sys->path_sys->active_path);
+                AISysGetCharacterPathPos(world->ai_sys, &path_player->apiobj, &path_player->ai, 0xff,
+                                         static_cast<i8>(path_player->apiobj.field_0x27d));
+            }
+        }
     }
 
     i16 available_characters[HUB_CHARACTER_CAPACITY];

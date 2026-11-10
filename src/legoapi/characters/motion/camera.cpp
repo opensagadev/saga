@@ -407,9 +407,8 @@ mode_selected:
                     (BonusWinner != -1 && BonusWinner != i))
                     continue;
                 vehicle_player[i] = object->apiobj.character_data->model_flags & 0x2000;
-                if (__builtin_expect(!(SPEEDERCHASEA_LDATA != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA &&
-                                       object->id == id_SPEEDERBIKE && disable_narrow_socks),
-                                     1) &&
+                if ((!(SPEEDERCHASEA_LDATA != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA &&
+                       object->id == id_SPEEDERBIKE && disable_narrow_socks)) &&
                     vehicle_player[i]) {
                     vehicle_count++;
                     if (object->id == id_LANDSPEEDER) {
@@ -426,7 +425,7 @@ mode_selected:
                         }
                     }
                 }
-                if (PODRACE_ADATA != NULL && __builtin_expect(WORLD->area == PODRACE_ADATA, 0)) {
+                if (PODRACE_ADATA != NULL && (WORLD->area == PODRACE_ADATA)) {
                     player_focus[player_count] = Player[i]->apiobj.collision_position;
                     NUVEC &pod_offset = mode_scratch;
                     pod_offset.y = 0.0f;
@@ -603,7 +602,7 @@ mode_selected:
                 if (WORLD->current_level == BONUS_GUNSHIPB_LDATA && camera->sock_position.location.sock != -1) {
                     position.x += target.x * 0.0625f;
                     position.z += target.z * 0.0625f;
-                } else if (__builtin_expect(WORLD->current_level == EMPERORFIGHTA_LDATA, 1) && player != NULL &&
+                } else if ((WORLD->current_level == EMPERORFIGHTA_LDATA) && player != NULL &&
                            player->sock_position.location.sock == 11 && WORLD->current_level != NULL)
                     position.y += EMPERORFIGHTA_CAMDYHACK;
             rail_vehicle_focus:
@@ -654,7 +653,7 @@ mode_selected:
                                 is_player = true;
                             if (Player[6] != NULL && Player[6] == walker)
                                 is_player = true;
-                            if (__builtin_expect(Player[7] != NULL && Player[7] == walker, 1))
+                            if (Player[7] != NULL && Player[7] == walker)
                                 is_player = true;
                             landspeeder_lookahead = is_player ? 4.0f : 2.0f;
                             f32 distance = NuFsqrt(walker_distance_sq);
@@ -694,7 +693,7 @@ mode_selected:
                     NuVecSub(&offset, &rail_position, &average_position);
                     f32 magnitude = NuVecMagSqr(&offset);
                     f32 blend = 0.0f;
-                    if (__builtin_expect(player2 == NULL, 1)) {
+                    if (player2 == NULL) {
                         blend = magnitude / 125.0f;
                         if (blend > 0.75f)
                             blend = 0.6f;
@@ -966,7 +965,7 @@ mode_selected:
                 offset.x = lateral.x * projection + offset.x;
                 offset.z = projection * lateral.z + offset.z;
                 ++shared_count;
-                if (__builtin_expect(shared_count == 2, 0)) {
+                if (shared_count == 2) {
                     offset.x *= 0.5f;
                     offset.z *= 0.5f;
                 }
@@ -1207,14 +1206,14 @@ mode_selected:
         for (i32 i = 0; i < 2; i++) {
             GameObject_s *object = Player[i];
             if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
-                if (__builtin_expect(WORLD->current_level == DEATHSTARBATTLED_LDATA &&
-                    ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx), 0)) {
+                if (WORLD->current_level == DEATHSTARBATTLED_LDATA &&
+                    ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) {
                     camera_shake = 0.6f;
                     break;
                 }
                 object = Player[i];
-                if (__builtin_expect(object->camera_shake_strength > 0.0f && WORLD->area != NULL &&
-                    (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA), 0)) {
+                if (object->camera_shake_strength > 0.0f && WORLD->area != NULL &&
+                    (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
                     camera_shake = object->camera_shake_strength * 2.0f;
                     break;
                 }
@@ -1261,7 +1260,7 @@ mode_selected:
                         changed = true;
                     }
                 }
-                if (__builtin_expect(!changed && object->field_0xef0 < 0.3f, 0)) {
+                if (!changed && object->field_0xef0 < 0.3f) {
                     object->field_0xef0 += FRAMETIME;
                     if (!(object->field_0xef0 < 0.3f)) {
                         object->field_0xef0 = 0.3f;

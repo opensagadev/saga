@@ -70,7 +70,7 @@ static void D_cam_lookatplayers(NUFPAR *) {
 }
 
 static void D_spline(NUFPAR *parser) {
-    if (__builtin_expect(NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63, 1)) {
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63) {
         return;
     }
 
@@ -84,7 +84,7 @@ static void D_spline(NUFPAR *parser) {
 
     for (i32 i = 0; i < D_worldinfo->door_count; i++) {
         DOOR_s *other = &D_worldinfo->doors[i];
-        if (__builtin_expect(other->spline == D_door->spline, 0)) {
+        if (other->spline == D_door->spline) {
             D_door->spline = NULL;
             D_door->name[0] = '\0';
             return;
@@ -394,7 +394,7 @@ i32 StartDoorPositions(void) {
         return 0;
     }
     DOOR_s *a = WORLD->doors;
-    if (__builtin_expect(a != NULL && WORLD->door_count > 0, 1)) {
+    if (a != NULL && WORLD->door_count > 0) {
         i32 i = 0;
         do {
             if (a->spline != NULL && NuStrICmp(a->name, Door_ExitName) == 0) {
@@ -464,7 +464,7 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     if (!(door->cutscene == NULL || CutScene_HasPlayed(static_cast<CUTINFO *>(door->cutscene)))) {
         CUTINFO *cutscene = static_cast<CUTINFO *>(door->cutscene);
         if (cutscene != NULL) {
-            if (__builtin_expect(door_cutscenesnap != 0, 1)) {
+            if (door_cutscenesnap != 0) {
                 NewCutScene(cutscene, WorldInfo_CurrentlyActive()->cutscene_sys, NULL, 0);
             } else {
                 newmode_cutinfo = cutscene;
@@ -497,7 +497,7 @@ void Door_GoThrough(WORLDINFO_s *world, DOOR_s *door, i32 player_triggered) {
     Door_NextSock = static_cast<i8>(door->next_sock);
     Door_SetCutCam(door);
     ResetBits |= RESETBIT_DOOR_TRANSITION;
-    if (__builtin_expect(NewLData != NULL && NewLData != world->current_level, 1)) {
+    if (NewLData != NULL && NewLData != world->current_level) {
         if (world->area == HUB_ADATA) {
             Hub_ActivateDoorMenu(&NewLData);
         } else if (NewLData->area_index == world->level_sub_id) {
@@ -517,8 +517,7 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
         !(LEGOCONTEXT_DOOMED != -1 && LEGOCONTEXT_DOOMED == static_cast<i8>(object->field_0x7a5)) && NewLData == NULL) {
 
         DOOR_s *doors = WORLD->doors;
-        if (__builtin_expect(doors == NULL || (object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0,
-                             0)) {
+        if (doors == NULL || (object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) != 0) {
             return;
         }
 
@@ -601,7 +600,7 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
     f32 best_distance = 1000000.0f;
     DOOR_s *best = NULL;
     for (i32 i = 0; i < world->door_count; ++i, ++door) {
-        if ((door->flags & 4) != 0 || __builtin_expect(door->level == -1, 0))
+        if ((door->flags & 4) != 0 || (door->level == -1))
             continue;
         if ((level == -1 || door->level != level) && (area == -1 || LDataList[door->level].area_index != area))
             continue;

@@ -743,30 +743,11 @@ void SetLevelSfxBits(WORLDINFO *world) {
     if (world->cutscene_sys != NULL) {
         for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
             CUTINFO *cut = world->cutscene_sys->cuts[i];
-            // The original visits the six cutscene cues as separate checks.
-            sound_id = cut->sfx[0].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[1].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[2].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[3].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[4].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
-            }
-            sound_id = cut->sfx[5].id;
-            if (sound_id != -1) {
-                sfx_ids[sfx_count++] = sound_id;
+            for (i32 j = 0; j < 6; ++j) {
+                sound_id = cut->sfx[j].id;
+                if (sound_id != -1) {
+                    sfx_ids[sfx_count++] = sound_id;
+                }
             }
         }
     }
@@ -1018,10 +999,10 @@ void SetLevelSfxBits(WORLDINFO *world) {
         } else if (level == DEATHSTARBATTLEB_LDATA) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
-        } else if (__builtin_expect(level == DEATHSTARBATTLEC_LDATA, 0)) {
+        } else if (level == DEATHSTARBATTLEC_LDATA) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
-        } else if (__builtin_expect(level == DEATHSTARBATTLED_LDATA, 0)) {
+        } else if (level == DEATHSTARBATTLED_LDATA) {
             ADD_SFX("FField");
             ADD_SFX("FFieldOff");
         } else if (level == HOTHESCAPEA_LDATA) {
@@ -1033,10 +1014,10 @@ void SetLevelSfxBits(WORLDINFO *world) {
             ADD_SFX("exp_asteroid");
         } else if (level == CLOUDCITYTRAPA_LDATA) {
             ADD_SFX("Env_Steam_Lp");
-        } else if (__builtin_expect(level == CLOUDCITYESCAPEA_LDATA, 0)) {
+        } else if (level == CLOUDCITYESCAPEA_LDATA) {
             ADD_SFX("env_steam_lp");
             ADD_SFX("Env_ctrl_desk_on");
-        } else if (__builtin_expect(level == CLOUDCITYESCAPEC_LDATA, 0)) {
+        } else if (level == CLOUDCITYESCAPEC_LDATA) {
             ADD_SFX("env_steam_lp");
         } else if (level == DEATHSTAR2BATTLEB_LDATA) {
             ADD_SFX("FField");

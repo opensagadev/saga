@@ -378,8 +378,8 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
 
     if (!(isDebris)) {
         u32 alphaSel = mtl->attribs.alpha_test; // (bytes[0x42]>>4)&7
-        if (__builtin_expect(alphaSel > 1, 0)) {
-            if (__builtin_expect(alphaSel != 5, 0)) {
+        if (alphaSel > 1) {
+            if (alphaSel != 5) {
                 g_alphaTestEnabled = 1; // GREATER
                 g_alphaFunc = 6;
                 g_alphaRef = 0;
@@ -400,7 +400,7 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
 
     u32 alphaRef = mtl->attribs.alpha_ref;
     u32 blend = mtl->attribs.alpha_mode & 0xf; // bytes[0x40] & 0xf
-    NuSetBlendState(blend, [alphaRef]() { return alphaRef; });
+    NuSetBlendState(blend, alphaRef);
 
     NuIOS_SetCullMode(mtl->attribs.cull_mode);
 }

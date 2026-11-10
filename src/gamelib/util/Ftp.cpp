@@ -78,7 +78,7 @@ void NetFtpManager::Reset() {
         network->FtpComplete(file, static_cast<i32>(0xa0200001));
         file->Term();
         if (file->transfer != NULL && file->message_data != NULL) {
-            if (__builtin_expect(file->message_data->reference_count > 1, 1)) {
+            if (file->message_data->reference_count > 1) {
                 --file->message_data->reference_count;
             } else {
                 file->message_data->reference_count = 0;
@@ -104,7 +104,7 @@ NetFtpManager::~NetFtpManager() {
     for (FtpFile *file = files; file != files + 32; ++file) {
         if (file->transfer != NULL) {
             if (file->message_data != NULL) {
-                if (__builtin_expect(file->message_data->reference_count > 1, 1)) {
+                if (file->message_data->reference_count > 1) {
                     --file->message_data->reference_count;
                 } else {
                     file->message_data->reference_count = 0;
@@ -181,7 +181,7 @@ void FtpFile::Update() {
     {
         NetMessage fresh;
         NetMessage::MessageData *old = reinterpret_cast<NetMessage::MessageData *>(message_data);
-        if (__builtin_expect(old->references > 1, 1)) {
+        if (old->references > 1) {
             --old->references;
         } else {
             old->references = 0;

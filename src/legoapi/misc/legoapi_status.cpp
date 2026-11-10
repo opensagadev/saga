@@ -301,8 +301,8 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
         if (StatusPacket.player_active[i] != 0) {
             if (StatusRumbleTargetsPlayer(player, i)) {
                 RUMBLEPACKET *rumble = &StatusPacket.rumble[i];
-                if (amount > 0.0f && (__builtin_expect(rumble->time <= 0.0f, 0) ||
-                                      __builtin_expect(amount > rumble->time / rumble->duration * rumble->amount, 0))) {
+                if (amount > 0.0f &&
+                    ((rumble->time <= 0.0f) || (amount > rumble->time / rumble->duration * rumble->amount))) {
                     rumble->amount = amount;
                     rumble->duration = amount;
                     rumble->time = amount;
@@ -319,7 +319,7 @@ void NewStatusRumbleBuzz(i32 player, float amount, float buzz, i32 priority) {
 }
 
 void NextStatusStage(STATUSPACKET_s *packet) {
-    if (__builtin_expect(packet->stage != NULL, 1)) {
+    if (packet->stage != NULL) {
         if (packet->stage->field_0x14 == -1 && packet->field_0x68 > packet->stage->field_0x18) {
             packet->field_0xb0 |= 2;
             return;
@@ -387,11 +387,11 @@ i32 newCharactersCollected(STATUSPACKET_s *) {
             ++previous;
         }
         if (previous == count) {
-            if (__builtin_expect(Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0, 0)) {
+            if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) != 0) {
                 continue;
             }
             const i32 index = InCollectList_Index(id, MasterCollection.list, MasterCollection.count_y);
-            if (__builtin_expect(index != -1 && MasterCollection.list[index].can_buy == 0, 0)) {
+            if (index != -1 && MasterCollection.list[index].can_buy == 0) {
                 StatusCollectList.ids[count++] = player;
                 if (MasterCollection.list[index].field5_0x9 != 0) {
                     AddToCompletionPoints(POINTS_PER_CHARACTER);
@@ -465,7 +465,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.mission_state = 0;
     else
         p.mission_state = Mission_CurrentState(NULL);
-    if (__builtin_expect(from_save_and_exit != 0, 1)) {
+    if (from_save_and_exit != 0) {
         from_save_and_exit = 0;
         level_already_loaded = -1;
     }
@@ -485,7 +485,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.bonus_mode = 0;
     p.super_bonus_mode = 0;
     i32 episode = -1;
-    if (__builtin_expect(area == -1, 0)) {
+    if (area == -1) {
         p.area = NULL;
         p.episode = NULL;
         p.chapter = -1;
@@ -493,7 +493,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.area = ADataList + area;
         p.episode_id = p.area->episode_index;
         episode = p.episode_id;
-        if (__builtin_expect(episode != -1, 1)) {
+        if (episode != -1) {
             p.episode = EDataList + static_cast<i8>(p.area->episode_index);
         }
         p.chapter = p.area->area_index;
@@ -534,7 +534,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                             gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
                     }
                     p.time_reward_score = *p.score;
-                    if (__builtin_expect(p.new_best_time != 0.0f, 1)) {
+                    if (p.new_best_time != 0.0f) {
                         u64 reward = static_cast<i64>(static_cast<i32>(p.previous_best_time - p.new_best_time) * 100);
                         if (reward < 100)
                             reward = 100;
@@ -581,14 +581,14 @@ void InitStatusScreen(WORLDINFO_s *world) {
             }
             if ((p.mode_flags & 2) == 0) {
                 AddStatusStage(&p, 20, 0);
-                if (__builtin_expect(p.elapsed_time < p.previous_best_time, 0))
+                if (p.elapsed_time < p.previous_best_time)
                     AddStatusStage(&p, 3, 0);
             } else {
                 if (Game.area_save[p.area_id].area_complete == 0) {
                     Game.area_save[p.area_id].area_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
                     p.newly_completed = 1;
-                    if (__builtin_expect(GOLDBRICKFORSUPERBONUS != 0, 0))
+                    if (GOLDBRICKFORSUPERBONUS != 0)
                         gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
                 }
                 AddStatusStage(&p, 22, gold);
@@ -599,7 +599,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 AddStatusStage(&p, 19, 0);
             AddStatusStage(&p, 9, 0);
             AddStatusStage(&p, 10, 0);
-            if (__builtin_expect(netclient == 0, 1))
+            if (netclient == 0)
                 AddStatusStage(&p, 11, 0);
             AddStatusStage(&p, 12, 0);
             p.current_gold_brick = -1;
@@ -651,10 +651,10 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 i32 gold = 0;
                 if (Game.area_save[p.area_id].field_0x5[2] == 0) {
                     AddToCompletionPoints(POINTS_PER_CHALLENGE);
-                    if (__builtin_expect(GOLDBRICKFORCHALLENGE != 0, 1))
+                    if (GOLDBRICKFORCHALLENGE != 0)
                         gold = AddGoldBrickMessage(&p, tCHALLENGECOMPLETE);
                     Game.area_save[p.area_id].field_0x5[2] = 1;
-                    if (__builtin_expect(p.episode_id != -1 && p.chapter != -1, 1)) {
+                    if (p.episode_id != -1 && p.chapter != -1) {
                         sprintf(event, "challenge_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
                         NuIOS_RecordFlurryEvent(event);
                     }
@@ -703,7 +703,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.newly_completed = 0;
         if ((p.field_0xb0 & 4) == 0) {
             f32 numerator = p.collected_score * 100.0f;
-            if (__builtin_expect(numerator != 0.0f && p.true_hero_target != 0.0f, 1)) {
+            if (numerator != 0.0f && p.true_hero_target != 0.0f) {
                 f32 percent = numerator / p.true_hero_target;
                 p.true_hero_percent = MIN(percent, 99.0f);
             } else {
@@ -841,7 +841,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
         if ((p.mode_flags & 8) == 0)
             AddStatusStage(&p, 9, 0);
         AddStatusStage(&p, 10, 0);
-        if (__builtin_expect(netclient == 0, 1))
+        if (netclient == 0)
             AddStatusStage(&p, 11, 0);
         AddStatusStage(&p, 12, 0);
         p.current_gold_brick = -1;
@@ -894,7 +894,7 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
     NUVEC built_size = {built_scale, built_scale, built_scale};
     NUVEC new_size = {new_scale, new_scale, new_scale};
     NUVEC offset = v000;
-    if (__builtin_expect(pieces[currentminikit].direction <= 5, 0)) {
+    if (pieces[currentminikit].direction <= 5) {
         switch (pieces[currentminikit].direction) {
             case 0:
                 offset.x += 0.035f * NuTrigTable[(static_cast<i32>(slide * 32768.0f) >> 1) & 0x7fff];
@@ -917,7 +917,7 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
         }
     }
 
-    if (__builtin_expect(packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0, 1)) {
+    if (packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0) {
         i32 i = 0;
         do {
             HUBMINIKITPIECE_s &piece = pieces[i];
@@ -1077,9 +1077,8 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     } else if (packet->mission_state != 0) {
         labels[0] = tRESTART;
         labels[1] = tMAP;
-    } else if (__builtin_expect((packet->field_0xb0 & 0x40) != 0 ||
-                                    (packet->area_id != -1 && ADataList[packet->area_id].episode_index == 0xff),
-                                0)) {
+    } else if ((packet->field_0xb0 & 0x40) != 0 ||
+               (packet->area_id != -1 && ADataList[packet->area_id].episode_index == 0xff)) {
         labels[0] = tMAP;
     } else {
         const i32 chapter = packet->field_0xb0 & 8;
@@ -1112,13 +1111,13 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
     }
     for (i32 i = 0; i < count; ++i) {
         i32 red, green, blue;
-        if (selected != 0 && status_prompt == i && __builtin_expect(TestForController(), 1)) {
+        if (selected != 0 && status_prompt == i && (TestForController())) {
             if (!(menu_pulsate <= 0.0f)) {
                 const f32 inverse = 1.0f - menu_pulsate;
                 red = static_cast<u32>(MENUFLASH0R) * menu_pulsate + static_cast<u32>(MENUFLASH1R) * inverse;
                 green = static_cast<u32>(MENUFLASH0G) * menu_pulsate + static_cast<u32>(MENUFLASH1G) * inverse;
                 blue = static_cast<u32>(MENUFLASH0B) * menu_pulsate + static_cast<u32>(MENUFLASH1B) * inverse;
-            } else if (__builtin_expect(menu_flash == 0, 0)) {
+            } else if (menu_flash == 0) {
                 red = MENUFLASH1R;
                 blue = MENUFLASH1B;
                 green = MENUFLASH1G;
@@ -1127,7 +1126,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
                 blue = MENUFLASH0B;
                 green = MENUFLASH0G;
             }
-        } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
+        } else if (menu_pulse > 0.0f) {
             const f32 inverse = 1.0f - menu_pulse;
             red = static_cast<u32>(MENUFLASH0R) * menu_pulse + static_cast<u32>(MENUNORMALR) * inverse;
             green = static_cast<u32>(MENUFLASH0G) * menu_pulse + static_cast<u32>(MENUNORMALG) * inverse;
@@ -1154,7 +1153,7 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
     const f32 y = -0.5f * position;
     char *title;
     i32 red, green;
-    if (__builtin_expect(packet->new_best_time != 0.0f, 0)) {
+    if (packet->new_best_time != 0.0f) {
         title = TTab[tNEWBESTTIME];
         red = 0;
         green = 255;
@@ -1182,7 +1181,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
     memset(KitPart, 0, sizeof(KitPart));
 
     if (GAMEDEMO != 0) {
-        if (GAMEDEMO != 1 || __builtin_expect(FadeSys.fade != 0.0f, 1))
+        if (GAMEDEMO != 1 || (FadeSys.fade != 0.0f))
             return;
         char *freeplay_text = TTab[tFREEPLAY];
         char *exit_text = TTab[tEXIT];
@@ -1387,12 +1386,12 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 return;
             }
             for (i32 player = 0; player < 2; ++player) {
-                if (__builtin_expect(StatusPacket.player_active[player] == 0, 1)) {
+                if (StatusPacket.player_active[player] == 0) {
                     continue;
                 }
                 if ((GamePad[player].buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
-                    if (__builtin_expect(gamedemo_option == 0, 1)) {
+                    if (gamedemo_option == 0) {
                         GAMEDEMO = 2;
                         NewLData = HUB_LDATA;
                         new_level_from_menu = 1;
@@ -1420,7 +1419,7 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                 return;
             }
         } else if (GAMEDEMO == 2) {
-            if (__builtin_expect(GameTimer.time_elapsed >= 8.0f, 0)) {
+            if (GameTimer.time_elapsed >= 8.0f) {
                 EndOfDemo(0);
             }
         }
@@ -1439,10 +1438,10 @@ void UpdateStatusScreen(WORLDINFO_s *) {
                    (StatusPacket.player_active[1] != 0 && (GamePad[1].buttons_pressed & button) != 0);
         }
         if (skip) {
-            if (__builtin_expect(StatusPacket.stage == NULL, 0)) {
+            if (StatusPacket.stage == NULL) {
                 return;
             }
-            if (__builtin_expect(StatusPacket.stage->skip_callback != NULL, 1)) {
+            if (StatusPacket.stage->skip_callback != NULL) {
                 StatusPacket.stage->skip_callback(StatusPacket.stage, &StatusPacket);
             }
         }

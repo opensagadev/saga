@@ -228,7 +228,7 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
             usize user = ALIGN(begin + m_headerSize, alignment);
             usize header_address = user - m_headerSize;
             u32 prefix_size = header_address - begin;
-            if (__builtin_expect(prefix_size != 0 && prefix_size < minimum_fragment_size, 1)) {
+            if (prefix_size != 0 && prefix_size < minimum_fragment_size) {
                 user = ALIGN(begin + m_headerSize + minimum_fragment_size, alignment);
                 header_address = user - m_headerSize;
                 prefix_size = header_address - begin;
@@ -291,7 +291,7 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
             suffix_size = 0;
         }
     }
-    if (__builtin_expect(suffix_size != 0, 0)) {
+    if (suffix_size != 0) {
         FreeHeader *suffix = (FreeHeader *)(allocated_begin + allocated_size);
         suffix->block_header.value = suffix_size / 4;
         *END_TAG(suffix, suffix_size) = suffix->block_header.value;
@@ -431,7 +431,7 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
         end_tag = END_TAG(header, BLOCK_SIZE(header->value));
 
         tag_value = *end_tag >> 0x1b;
-        if (__builtin_expect(tag_value != 0x1f, 1)) {
+        if (tag_value != 0x1f) {
             manager_idx = tag_value - 1;
         } else {
             manager_idx = end_tag[-1];
@@ -508,7 +508,7 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
 }
 
 void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 flags, const char *name, u16 category) {
-    if (__builtin_expect(ptr == NULL, 0)) {
+    if (ptr == NULL) {
         return _BlockAlloc(size, alignment, flags, name, category);
     }
 
@@ -637,9 +637,9 @@ void NuMemoryManager::ReleaseUnreferencedPages() {
         Header *header = page->first_header;
         Page *prev = page->prev;
         Page *next = page->next;
-        if (__builtin_expect((header->value & ALLOC_MASK) == 0 &&
+        if ((header->value & ALLOC_MASK) == 0 &&
             reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value) == reinterpret_cast<u8 *>(page->end) &&
-            !page->is_external, 1)) {
+            !page->is_external) {
             FreeHeader *free_header = reinterpret_cast<FreeHeader *>(header);
             BinUnlink(free_header);
             if (!(event_handler->ReleasePage(this, page->original_ptr, page->size))) {
@@ -824,7 +824,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             len = strlen(stranded_dump_path);
             for (usize i = 0; i < len; i++) {
                 char c = stranded_dump_path[i];
-                if (c == '/' || __builtin_expect(c == '\\', 0) || c == ':' || __builtin_expect(c == ' ', 1)) {
+                if (c == '/' || (c == '\\') || c == ':' || (c == ' ')) {
                     stranded_dump_path[i] = '_';
                 }
             }
@@ -1099,7 +1099,7 @@ u32 NuMemoryManager::CalculateLargestFragmentSize() {
     u32 largest_frag_size;
     FreeHeader *largest_frag;
 
-    if (__builtin_expect((m_flags & MEM_MANAGER_IN_ERROR_STATE) != 0, 1)) {
+    if ((m_flags & MEM_MANAGER_IN_ERROR_STATE) != 0) {
         return 0;
     }
 
@@ -1213,7 +1213,7 @@ void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_c
                     stranded_bytes += BLOCK_SIZE(header->value);
                     ctx_id = debug->flags.ctx_id;
                 }
-                if (__builtin_expect(ctx_id == stranded_ctx.id, 0)) {
+                if (ctx_id == stranded_ctx.id) {
                     ++total_stranded;
                     if (largest == NULL || BLOCK_SIZE(largest->value) < BLOCK_SIZE(header->value))
                         largest = header;
@@ -1346,7 +1346,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         if (count > 1 && (flags & 2) == 0) {
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,
                      flag_a ? 'X' : '-', flag_s ? 'X' : '-', flag_c ? 'X' : '-', category_text, debug_name);
-        } else if (__builtin_expect((debug->flags.alloc_flags & 4) != 0, 1)) {
+        } else if ((debug->flags.alloc_flags & 4) != 0) {
             char value[257];
             u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
             u32 size = BLOCK_SIZE(header->value);
@@ -1391,7 +1391,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     }
     error_handler->Dump(this, dump_id, line);
     if ((m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0 && (flags & 0x20) != 0 &&
-        __builtin_expect(reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0, 1)) {
+        (reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0)) {
         strcpy(line, "|            |            |               |     |           |   <NO BACKTRACE>\r\n");
         error_handler->Dump(this, dump_id, line);
     }
@@ -1480,7 +1480,7 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
         Header *end = reinterpret_cast<Header *>(page->end);
         auto page_first_header = page->first_header;
         for (Header *header = page_first_header; header != end;) {
-            if (__builtin_expect(header != &reference->block_header && (header->value & ALLOC_MASK) != 0, 0)) {
+            if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
                 u32 block_size = BLOCK_SIZE(header->value);
                 u16 candidate_category = candidate->category;
@@ -1840,7 +1840,7 @@ void NuMemoryManager::ValidateBlock(void *ptr) {
 }
 
 void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *header, char const *caller) {
-    if (__builtin_expect((m_flags & MEM_MANAGER_DEBUG) == 0, 0))
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
         return;
     DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
     if ((debug->flags.alloc_flags & 0x20) == 0)
@@ -1851,13 +1851,13 @@ void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *head
     u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
     u32 *end_tag = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(header) + block_size - 4);
     u32 tag = *end_tag >> 27;
-    if (__builtin_expect(tag == 31, 0))
+    if (tag == 31)
         tag = *(end_tag - 1);
     else
         --tag;
     u32 count = tag > 29 ? payload_size - 6 : payload_size - 5;
     count >>= 2;
-    if (__builtin_expect(count == 0, 0))
+    if (count == 0)
         return;
 
     u32 i = 0;

@@ -55,6 +55,9 @@ bazel aquery --config=target \
   force an instruction pattern. Explain the necessity near its use.
 - Do not add `regparm`, `fastcall`, `thiscall`, or similar calling-convention
   attributes as matching shortcuts. Record unresolved ABI discrepancies.
+- Do not use `__builtin_expect`, `optimize`/`hot`/`cold` attributes, or
+  `#pragma GCC optimize`; code layout must come from source structure.
+  `//scripts/checks:check_compiler_hints` rejects them.
 
 ## Working boundaries
 

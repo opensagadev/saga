@@ -79,7 +79,7 @@ void MenuDrawMissions(MENU_s *menu) {
     const f32 alpha = MenuAlpha;
     SmartTextEx(TTab[MissionSys->missions[hub_mission].name_id], 0.0f, -0.525f, 1.0f, 0.625f, 0.625f, 0.625f, 0, 255,
                 191, 0, 1.7f, 1, 0, 0, static_cast<i32>(255.0f * MissionsAlpha * alpha));
-    if (__builtin_expect(Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f, 1)) {
+    if (Game.mission_save.completed[hub_mission] != 0 && alpha * MissionsAlpha > 0.0f) {
         const f32 opacity = alpha * MissionsAlpha;
         Hub_DrawImportantBrick(211, -0.15f, HUB_EPISODETITLEY + 0.1f, opacity, -1, -1);
         char time[64], text[64];
@@ -102,7 +102,7 @@ void MenuDrawMissions(MENU_s *menu) {
                              Game.mission_save.completed[i] >= 1 ? 168 : 167, opacity,
                              (i == hub_mission && menu_flash ? 0.7f : 1.0f) * opacity, 1, NULL);
         }
-        if (__builtin_expect(opacity == 0.0f, 0))
+        if (opacity == 0.0f)
             size = 0.0f;
         const f32 height = size / GetAspectRatio();
         menu->item_x[i] = MissionIconX[i];
@@ -115,7 +115,7 @@ void MenuDrawMissions(MENU_s *menu) {
     f32 opacity = MenuPacket.active_player[0] ? 1.0f : DROPINALPHA;
     DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 166, opacity, opacity, 1, NULL);
     i32 select[2], cancel[2], status[2];
-    if (__builtin_expect(!(MenuPacket.active_player[0] && MenuPacket.active_player[1]), 1)) {
+    if (!(MenuPacket.active_player[0] && MenuPacket.active_player[1])) {
         select[0] = select[1] = tSELECT;
         cancel[0] = cancel[1] = tEXIT;
         status[0] = status[1] = tSELECTING;
@@ -182,26 +182,26 @@ void MenuUpdateMissions(MENU_s *menu) {
         if (MenuPacket.active_player[0]) {
             const u32 pressed = GamePad[0].buttons_pressed;
             if (pressed & GAMEPAD_MENUSELECT) {
-                if (__builtin_expect(!MenuPacket.active_player[1], 0)) {
+                if (!MenuPacket.active_player[1]) {
                     start = 1;
                     goto collected_input;
                 }
                 if (!MenuPacket.reserved_1[0]) {
                     MenuPacket.reserved_1[0] = 1;
-                    if (__builtin_expect(MenuPacket.reserved_1[1] != 0, 1)) {
+                    if (MenuPacket.reserved_1[1] != 0) {
                         start = 1;
                         goto collected_input;
                     }
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 }
             } else if (pressed & GAMEPAD_MENUCANCEL) {
-                if (__builtin_expect(!MenuPacket.active_player[1] || !MenuPacket.reserved_1[0], 0)) {
+                if (!MenuPacket.active_player[1] || !MenuPacket.reserved_1[0]) {
                     cancel = 1;
                     goto collected_input;
                 }
                 MenuPacket.reserved_1[0] = 0;
                 GameAudio_PlaySfx(0x31, NULL, 0, 0);
-            } else if (__builtin_expect(MenuPacket.reserved_1[0] == 0 && MenuPacket.reserved_1[1] == 0, 1)) {
+            } else if (MenuPacket.reserved_1[0] == 0 && MenuPacket.reserved_1[1] == 0) {
                 const u32 directions = GamePad[0].unknown_10;
                 if ((directions & GAMEPAD_DLEFT) || (pressed & (GAMEPAD_DLEFT | GAMEPAD_TOGGLELEFT)))
                     left = 1;
@@ -209,14 +209,14 @@ void MenuUpdateMissions(MENU_s *menu) {
                     right = 1;
             }
         }
-        if (__builtin_expect(MenuPacket.active_player[1] != 0, 1)) {
+        if (MenuPacket.active_player[1] != 0) {
             const u32 pressed = GamePad[1].buttons_pressed;
             if (pressed & GAMEPAD_MENUSELECT) {
                 if (!MenuPacket.active_player[0]) {
                     start = 1;
                     goto collected_input;
                 }
-                if (__builtin_expect(!MenuPacket.reserved_1[1], 0)) {
+                if (!MenuPacket.reserved_1[1]) {
                     MenuPacket.reserved_1[1] = 1;
                     if (MenuPacket.reserved_1[0]) {
                         start = 1;
@@ -225,7 +225,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                     GameAudio_PlaySfx(0x30, NULL, 0, 0);
                 }
             } else if (pressed & GAMEPAD_MENUCANCEL) {
-                if (!MenuPacket.active_player[0] || __builtin_expect(!MenuPacket.reserved_1[1], 0)) {
+                if (!MenuPacket.active_player[0] || (!MenuPacket.reserved_1[1])) {
                     cancel = 1;
                     goto collected_input;
                 }
@@ -235,8 +235,7 @@ void MenuUpdateMissions(MENU_s *menu) {
                 const u32 directions = GamePad[1].unknown_10;
                 if ((directions & GAMEPAD_DLEFT) || (pressed & (GAMEPAD_DLEFT | GAMEPAD_TOGGLELEFT)))
                     left = 1;
-                else if (__builtin_expect((directions & GAMEPAD_DRIGHT) != 0, 0) ||
-                         (pressed & (GAMEPAD_DRIGHT | GAMEPAD_TOGGLERIGHT)))
+                else if (((directions & GAMEPAD_DRIGHT) != 0) || (pressed & (GAMEPAD_DRIGHT | GAMEPAD_TOGGLERIGHT)))
                     right = 1;
             }
         }
@@ -245,7 +244,7 @@ void MenuUpdateMissions(MENU_s *menu) {
 collected_input:
     if (menu->input_activity) {
         if (menu->confirm_pressed) {
-            if (__builtin_expect(hub_mission == menu->selected_column, 1))
+            if (hub_mission == menu->selected_column)
                 start = 1;
             else
                 hub_mission = menu->selected_column;
@@ -268,7 +267,7 @@ collected_input:
         GameAudio_PlaySfx(0x30, NULL, 0, 0);
         NextArea_FreePlay = FreePlay = 0;
         NewLData = &LDataList[MissionSys->mission->level];
-    } else if (__builtin_expect(cancel != 0, 0)) {
+    } else if (cancel != 0) {
         GameAudio_PlaySfx(0x31, NULL, 0, 0);
         EndMissionsMenu();
     } else if (left) {
@@ -290,7 +289,7 @@ collected_input:
         const u8 *mission_count = &MissionSys->count;
         for (i32 i = 0; i < *mission_count; ++i) {
             f32 x = 0.0f;
-            if (__builtin_expect(i < hub_mission, 0))
+            if (i < hub_mission)
                 x = -0.035f - (hub_mission - i) * 0.12f;
             else if (i != hub_mission)
                 x = 0.035f + (i - hub_mission) * 0.12f;

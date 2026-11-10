@@ -83,7 +83,7 @@ WORLDINFO *WorldInfo_CurrentlyLoading(void) {
 void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
     VARIPTR *bufferEnd = (VARIPTR *)&WorldInfo[1].unknown_0108;
 
-    if (__builtin_expect(area1 == area2 || area1 == -1, 0)) {
+    if (area1 == area2 || area1 == -1) {
         if (area1 != -1 && (ADataList[area1].flags & AREAFLAG_SINGLE_BUFFER) != 0) {
             return;
         }
@@ -165,9 +165,7 @@ void WorldInfo_Init(WORLDINFO *world) {
     Reflections_On = NuDeviceSpecs::ms_instance->specs > 1;
     g_lowEndLevelBehaviour = g_isLowEndDevice;
     if (!g_isLowEndDevice) {
-        if (__builtin_expect(world->current_level != NULL &&
-                                 NuStrIStr(world->current_level->name, "JabbasPalace_Intro1") != NULL,
-                             0)) {
+        if (world->current_level != NULL && NuStrIStr(world->current_level->name, "JabbasPalace_Intro1") != NULL) {
             DebrisSetThinningLevel(6.0f);
             DebrisSetForcedThinning(1);
         } else if (NuDeviceSpecs::ms_instance->specs <= 2 &&
@@ -187,12 +185,12 @@ void WorldInfo_Init(WORLDINFO *world) {
             DebrisSetThinningLevel(1.0f);
             DebrisSetForcedThinning(0);
         }
-        if (__builtin_expect(NuDeviceSpecs::ms_instance->specs <= 2, 0) && world->current_level != NULL &&
+        if ((NuDeviceSpecs::ms_instance->specs <= 2) && world->current_level != NULL &&
             NuStrIStr(world->current_level->name, "Negotiations_") != NULL) {
             Reflections_On = 0;
         }
     } else {
-        if (__builtin_expect(world->current_level != NULL, 0)) {
+        if (world->current_level != NULL) {
             DebrisSetThinningLevel(world->current_level->data_display.particle_thin);
             DebrisSetForcedThinning(world->current_level->data_display.particle_thin > 1.0f);
             character_farclip = world->current_level->unknown_11c;
@@ -349,7 +347,7 @@ void WorldInfo_Activate(void) {
     WorldInfo_Init(LWORLD);
 
     used_fog_color = 0;
-    if (__builtin_expect(NuIOS_IsLowEndDevice() && WORLD != NULL, 0)) {
+    if (NuIOS_IsLowEndDevice() && WORLD != NULL) {
         LEVELDATA *current_level = WORLD->current_level;
 
         if (current_level && current_level->data_display.far_clip < 20000.0f) {
@@ -439,7 +437,7 @@ void WorldInfo_Dump(WORLDINFO *world) {
 i32 WorldInfo_Reset(WORLDINFO *world, i32 level_idx) {
     if (world->loaded != 0) {
         SetLevelExBlowupFlags(0);
-        if (__builtin_expect(world->level_idx == level_idx && (u8)LDataList[level_idx].area_index != 0xff && new_level_from_menu == 0, 0)) {
+        if (world->level_idx == level_idx && (u8)LDataList[level_idx].area_index != 0xff && new_level_from_menu == 0) {
             return 0;
         }
         WorldInfo_Dump(world);

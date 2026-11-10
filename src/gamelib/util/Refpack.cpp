@@ -593,7 +593,7 @@ abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong 
     if (maximum != 0 && *second == *first) {
         do {
             ++length;
-        } while (__builtin_expect(length != maximum && first[length] == second[length], 1));
+        } while (length != maximum && first[length] == second[length]);
     }
     return length;
 }
@@ -656,7 +656,7 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
                         } else {
                             size = 3;
                         }
-                        if (__builtin_expect(length + 4 - size > match_length + 4 - command_size, 1)) {
+                        if (length + 4 - size > match_length + 4 - command_size) {
                             match_length = length;
                             match_offset = offset;
                             command_size = size;
@@ -722,7 +722,7 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
         literal_count -= count;
     }
     *output++ = literal_count - 4;
-    if (__builtin_expect(literal_count != 0, 1)) {
+    if (literal_count != 0) {
         memmove(output, literal_start, literal_count);
         output += literal_count;
     }

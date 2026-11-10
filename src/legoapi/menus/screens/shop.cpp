@@ -317,7 +317,7 @@ static void Shop_GetInput(SHOPINPUT *input) {
             input->up_pressed = 1;
         if (edge & down)
             input->down_pressed = 1;
-        if (__builtin_expect(input->up_pressed && input->down_pressed, 1))
+        if (input->up_pressed && input->down_pressed)
             input->up_pressed = input->down_pressed = 0;
     }
 }
@@ -371,7 +371,7 @@ i32 ItemMenu(MENU_s *menu) {
             if (picked == 0) {
                 picked = 1;
                 candidate = entry_picked;
-            } else if (__builtin_expect(picked == 5, 1)) {
+            } else if (picked == 5) {
                 picked = SHOPGOLDBRICKS != 0 ? 4 : 3;
                 candidate = entry_picked;
             } else
@@ -450,7 +450,7 @@ i32 ItemMenu(MENU_s *menu) {
     if (SubMenu != 0 && slidetimer <= 0.0f) {
         picked = lastitem;
         SubMenu = 0;
-        if (__builtin_expect(TopShelf[lastitem].type == 3, 0)) {
+        if (TopShelf[lastitem].type == 3) {
             lastitem = -1;
             easesubin = 1;
             inoutscale = 0.0f;
@@ -535,7 +535,7 @@ i32 CodeMenu(MENU_s *) {
     if (timer >= 0.0f)
         timer -= FRAMETIME;
     itemchanged = 0;
-    if (__builtin_expect(!!(easesubin), 1)) {
+    if (easesubin) {
         f32 factor = 1.0f - ShopSinePhase(1.0f - 8.0f * slidetimer);
         if (easesubin == 1)
             inoutscale = 0.0f + ShopClamp01(factor);
@@ -549,13 +549,13 @@ i32 CodeMenu(MENU_s *) {
             left = 1;
         else if (input.right_held)
             right = 1;
-        else if (__builtin_expect(!!(input.down_held), 0)) {
-            if (__builtin_expect(timer <= 0.0f, 0))
+        else if (input.down_held) {
+            if (timer <= 0.0f)
                 down = 1;
-            else if (__builtin_expect(!!(input.down_pressed), 1))
+            else if (input.down_pressed)
                 down = 1;
         } else if (input.up_held) {
-            if (__builtin_expect(timer <= 0.0f, 0))
+            if (timer <= 0.0f)
                 up = 1;
             else if (input.up_pressed)
                 up = 1;
@@ -584,7 +584,7 @@ i32 CodeMenu(MENU_s *) {
         if (left) {
             lastitem = col;
             --col;
-            if (__builtin_expect(col < 0, 0))
+            if (col < 0)
                 col = 0;
             codevalid = 0;
             if (!usercode[col])
@@ -607,7 +607,7 @@ i32 CodeMenu(MENU_s *) {
         if (right) {
             lastitem = col;
             ++col;
-            if (__builtin_expect(col > 5, 1))
+            if (col > 5)
                 col = 5;
             codevalid = 0;
             if (!usercode[col])
@@ -644,7 +644,7 @@ i32 CodeMenu(MENU_s *) {
             u32 crc = CRC_ProcessStringIgnoreCase(code);
             i32 i;
             for (i = 0; i < 144; ++i)
-                if (__builtin_expect(codelist[i] && codelist[i] == crc, 0))
+                if (codelist[i] && codelist[i] == crc)
                     break;
             if (i == 144) {
                 PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);
@@ -713,7 +713,7 @@ i32 CodeMenu(MENU_s *) {
                 codemenuscale[col] = codeshelfscale[col] + (codebigscale[col] - codeshelfscale[col]) * factor;
                 factor = ShopClamp01(factor);
                 subpush[1] = SubNormCharPush + (SubBigCharPush - SubNormCharPush) * factor;
-            } else if (__builtin_expect(easesubin == -1, 0)) {
+            } else if (easesubin == -1) {
                 factor = ShopClamp01(factor);
                 codemenuscale[col] = codebigscale[col] + (codeshelfscale[col] - codebigscale[col]) * factor;
                 factor = ShopClamp01(factor);
@@ -767,9 +767,9 @@ void DrawSubItemMenu2D() {
         i32 buyable = 0;
         i32 show_name = 0;
         if (items[ids[3]].type == 1) {
-            if (__builtin_expect(items[ids[3]].unlocked == 1, 1))
+            if (items[ids[3]].unlocked == 1)
                 show_name = 1;
-            else if (__builtin_expect(!!(CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id))), 0))
+            else if (CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id)))
                 buyable = show_name = 1;
             else {
                 f32 scale = 0.7f * ShopLockedScale;
@@ -1064,34 +1064,19 @@ void InitAlphaList() {
         NuSpecialFind(WORLD->current_gscn, &atoz0to9icon[i], name, 1);
     }
 
-#define FIND_SHOP_DIGIT(index_, digit_)                                                                                \
-    memset(name, 0, sizeof(name));                                                                                     \
-    sprintf(name, "shop_%c", digit_);                                                                                  \
-    NuSpecialFind(WORLD->current_gscn, &atoz0to9icon[index_], name, 1)
-
-    FIND_SHOP_DIGIT(26, '0');
-    FIND_SHOP_DIGIT(27, '1');
-    FIND_SHOP_DIGIT(28, '2');
-    FIND_SHOP_DIGIT(29, '3');
-    FIND_SHOP_DIGIT(30, '4');
-    FIND_SHOP_DIGIT(31, '5');
-    FIND_SHOP_DIGIT(32, '6');
-    FIND_SHOP_DIGIT(33, '7');
-    FIND_SHOP_DIGIT(34, '8');
-    FIND_SHOP_DIGIT(35, '9');
-
-#undef FIND_SHOP_DIGIT
+    for (i32 i = 0; i < 10; ++i) {
+        memset(name, 0, sizeof(name));
+        sprintf(name, "shop_%c", i + '0');
+        NuSpecialFind(WORLD->current_gscn, &atoz0to9icon[i + 26], name, 1);
+    }
 }
 
 void UpdateCharacterIDs() {
-    const u16 count = ShopCollection.count_y;
-    if (count) {
-        COLLECTID *collect = ShopCollection.list;
-        shopitem_s *item = CharItems;
-        for (i32 i = 0; i < count; ++i, ++item, ++collect) {
-            item->price = collect->field3_0x4;
-            item->item_id = collect->id;
-        }
+    for (i32 i = 0; i < ShopCollection.count_y; ++i) {
+        COLLECTID *collect = &ShopCollection.list[i];
+        i32 price = collect->field3_0x4;
+        CharItems[i].item_id = collect->id;
+        CharItems[i].price = price;
     }
 }
 
@@ -1347,7 +1332,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
     switch (item->type) {
         case 0: {
             id = static_cast<u16>(item->item_id);
-            if (__builtin_expect(item->unlocked == 1 || item->price == 0, 1))
+            if (item->unlocked == 1 || item->price == 0)
                 return 1;
             if (!CheckCash(items, index))
                 break;
@@ -1360,7 +1345,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
             id = static_cast<u16>(item->item_id);
             if (item->unlocked == 1 || id >= CHARCOUNT)
                 return 0;
-            if (__builtin_expect(!CollectIDUnlocked(id), 0))
+            if (!CollectIDUnlocked(id))
                 goto locked;
             if (!CheckCash(items, index))
                 break;
@@ -1374,7 +1359,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
         }
         case 2: {
             id = static_cast<u16>(item->item_id);
-            if (__builtin_expect(item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1), 1))
+            if (item->unlocked == 1 || ((Game.extra_purchased_bits[id >> 5] >> (id & 31)) & 1))
                 return 0;
             area = Cheat[id].area;
             if (area != -1 && !Game.area_save[area].red_brick_collected)
@@ -1391,7 +1376,7 @@ i32 SelectShopItem(shopitem_s *items, i32 index) {
         case 4:
             if (item->unlocked == 1 || item->price == 0)
                 return 0;
-            if (__builtin_expect(static_cast<f32>(index * 3600) > Game.field30_0x7c2c, 0))
+            if (static_cast<f32>(index * 3600) > Game.field30_0x7c2c)
                 goto locked;
             if (!CheckCash(items, index))
                 break;
@@ -1567,7 +1552,7 @@ void SelectSubItem() {
         default:
             return;
     }
-    if (__builtin_expect(index != -1 && items != NULL, 1)) {
+    if (index != -1 && items != NULL) {
         const i32 result = SelectShopItem(items, index);
         if (result == -1)
             PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);
@@ -1652,11 +1637,11 @@ static inline i32 SubItemMenu(MENU_s *menu) {
         if (previous < 0) {
             moved = MoveSubItemsLeft(ids, positions, *count);
             left = moveitems != 0 && previous != moveitems;
-        } else if (__builtin_expect(previous > 0, 1)) {
+        } else if (previous > 0) {
             moved = MoveSubItemsRight(ids, positions, *count);
             right = moveitems != 0 && previous != moveitems;
         }
-        if (moved && __builtin_expect(items != NULL, 0)) {
+        if (moved && (items != NULL)) {
             shopitem_s *selected = &items[ids[3]];
             if (selected->type == 0) {
                 if (selected->unlocked == 1)
@@ -1673,7 +1658,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             left = 1;
         else if (input.right_held)
             right = 1;
-        else if (__builtin_expect(input.confirm && !ExitMenu, 1))
+        else if (input.confirm && !ExitMenu)
             confirm = 1;
         else if (input.cancel)
             cancel = 1;
@@ -1724,7 +1709,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             pos = SubShelfPos[6];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
-            if (__builtin_expect(moveitems == 0, 1))
+            if (moveitems == 0)
                 moveitems = -1;
             slidetimer = 0.125f;
             hintdrawwait = 0.2f;
@@ -1742,7 +1727,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
             pos = SubShelfPos[0];
             pos.y += ypush;
             AddGameDebris(WORLD->debris_sys, qrand() / 10923 + 76, &pos);
-            if (__builtin_expect(moveitems == 0, 1))
+            if (moveitems == 0)
                 moveitems = 1;
             slidetimer = 0.125f;
             hintdrawwait = 0.2f;
@@ -1762,7 +1747,7 @@ static inline i32 SubItemMenu(MENU_s *menu) {
                 subitemselected = 1;
         }
     }
-    if (__builtin_expect(ExitMenu && slidetimer < 0.0f, 0)) {
+    if (ExitMenu && slidetimer < 0.0f) {
         ExitMenu = 0;
         easesubin = -1;
         lastitem = -1;
@@ -1787,7 +1772,7 @@ i32 DoShopMenu(MENU_s *menu) {
             subitemselected = 0;
         }
 
-        if (__builtin_expect(result == 5, 0)) {
+        if (result == 5) {
             done = 1;
         } else if (result == 6) {
             GameCam_Blend(GameCam, 0.6f, 0.0f, 1);
@@ -1966,7 +1951,7 @@ void DrawTopShelf(i32) {
     const f32 item_push = toppush[2];
     const f32 item_scale = topscale[2];
     const u16 item_angle = shelfang;
-    if (__builtin_expect(NuSpecialExistsFn(&TopShelf[2].special) != 0, 0)) {
+    if (NuSpecialExistsFn(&TopShelf[2].special) != 0) {
         NUMTX &matrix = item_matrix;
         const f32 scale_value = item_scale * alpha_scale;
         NUANGVEC rotation;
@@ -2002,7 +1987,7 @@ void DrawTopShelf(i32) {
         }
     }
 
-    if (__builtin_expect(GetMenuID() != 13, 0)) {
+    if (GetMenuID() != 13) {
         return;
     }
 
@@ -2035,9 +2020,9 @@ void DrawSubItems() {
     NUMTX_ALIGNED16 item_matrix_a;
     NUMTX_ALIGNED16 item_matrix_b;
     f32 alpha = 1.0f;
-    if (__builtin_expect(GetMenuID() == 13 && !TestForController(), 1)) {
+    if (GetMenuID() == 13 && !TestForController()) {
         const f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.64f);
-        if (__builtin_expect(since_touch > 4.0f, 1)) {
+        if (since_touch > 4.0f) {
             const f32 phase = NuFmod(since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
             const f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
@@ -2047,7 +2032,7 @@ void DrawSubItems() {
 
     f32 bing = 0.0f;
     i32 phase_angle = 0x2000;
-    if (__builtin_expect(pickedbing > 0.0f, 1)) {
+    if (pickedbing > 0.0f) {
         bing = pickedbing / 0.35f;
         pickedbing -= FRAMETIME;
         phase_angle = (static_cast<i32>(pickedbing * 32768.0f + 16384.0f) >> 1) & 0x7fff;
@@ -2105,7 +2090,7 @@ void DrawSubItems() {
     MENU *menu = &GameMenu[GameMenuLevel];
     for (i32 index = 0; index < 7; ++index) {
         i32 slot = index;
-        if (__builtin_expect(index == 6, 0)) {
+        if (index == 6) {
             slot = 3;
         } else if (index >= 3) {
             slot = index - 1;
@@ -2143,7 +2128,7 @@ void DrawSubItems() {
                 ypush = subpush[2];
                 break;
         }
-        if (__builtin_expect(!subitemselected, 0))
+        if (!subitemselected)
             scale *= alpha;
         shopitem_s *item = &items[shelf_ids[slot]];
         NUVEC position = positions[slot];
@@ -2231,7 +2216,7 @@ void DrawSubItems() {
                     const u16 angle = shelfang + (item->unlocked == 1 ? spin : 0);
                     DrawItem(&toolblank, &position, scale, 1.0f, ypush, 0, angle, 0);
                     shopitem_s *current_item = &items[shelf_ids[slot]];
-                    if (__builtin_expect(current_item != NULL, 1)) {
+                    if (current_item != NULL) {
                         if (NuSpecialExistsFn(&current_item->special) != 0) {
                             NUANGVEC item_rotation;
                             
@@ -2383,7 +2368,7 @@ void Shop_CollectAllCharacters(i32 mode) {
     const i32 count = ShopCollection.count_y;
     for (i32 i = 0; i != count && i != 100; ++i) {
         Game.shop_character_purchased_bits[i >> 5] |= static_cast<u32>(u64(1) << (i & 31));
-        if (__builtin_expect(WORLD->current_level == HUB_LDATA, 0))
+        if (WORLD->current_level == HUB_LDATA)
             CharItems[i].unlocked = SAVE_ON;
     }
 }

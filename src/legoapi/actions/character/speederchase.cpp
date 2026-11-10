@@ -163,7 +163,7 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     UpdateTrooperCannons(world);
 
     if (netclient == 0) {
-        if (LevAIMessage[4] != NULL && __builtin_expect(LevAIMessage[4]->value == 1.0f, 1)) {
+        if (LevAIMessage[4] != NULL && (LevAIMessage[4]->value == 1.0f)) {
             players_cannot_exit_speeder = 1;
         } else {
             players_cannot_exit_speeder = 0;
@@ -289,7 +289,7 @@ i32 SpeedersDroppedBack() {
 i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32 first_time,
                               f32 elapsed) {
     SOCK *socks = WORLD->sock_sys->sock;
-    if (__builtin_expect(packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL, 0))
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 0;
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (first_time != 0) {
@@ -317,10 +317,10 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
             else if (player_distance < length * -0.5f)
                 player_distance += length;
             GameObject_s *reference = player;
-            if (__builtin_expect(speedervals[processor->action_data_1].distance < 0.0f, 0)) {
-                if (__builtin_expect(!(player_distance > 0.0f), 1))
+            if (speedervals[processor->action_data_1].distance < 0.0f) {
+                if (!(player_distance > 0.0f))
                     reference = player2;
-            } else if (__builtin_expect(player_distance > 0.0f, 0)) {
+            } else if (player_distance > 0.0f) {
                 reference = player2;
             }
             distance = MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
@@ -341,9 +341,9 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
         }
         error = distance - speedervals[processor->action_data_1].distance;
         if (processor->action_data_1 == 0) {
-            if (__builtin_expect(processor->action_timer < zoom_ahead_extra_time, 1))
+            if (processor->action_timer < zoom_ahead_extra_time)
                 error -= (zoom_ahead_extra_time - processor->action_timer) / zoom_ahead_extra_time * zoom_ahead_extra;
-            if (__builtin_expect(speeder_mode_ahead_timer < 2.0f, 0))
+            if (speeder_mode_ahead_timer < 2.0f)
                 speeder_hitpoints_lost = 0;
         }
     }
@@ -353,7 +353,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
     if (error > 0.0f) {
         SPEEDERCHASEVALUES *values = &speedervals[processor->action_data_1];
         ratio = error / values->behind_range;
-        if (__builtin_expect(ratio > 1.0f, 0))
+        if (ratio > 1.0f)
             ratio = 1.0f;
         speed = values->behind_speed * ratio + (1.0f - ratio);
         seek = values->behind_seek;
@@ -367,11 +367,11 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
     object->run_speed_override = SeekValF(object->run_speed_override, speed * base_speed, seek);
     if (processor->speeder_ahead_latched != 0)
         speeder_mode_ahead_timer += elapsed;
-    else if (__builtin_expect(distance > 0.0f, 1))
+    else if (distance > 0.0f)
         processor->speeder_ahead_latched = 1;
     else
         processor->action_timer = 0.0f;
-    if (__builtin_expect(processor->action_data_1 == 1 || processor->speeder_ahead_latched == 0, 0))
+    if (processor->action_data_1 == 1 || processor->speeder_ahead_latched == 0)
         object->movement_spline_offset.y =
             SeekValF(object->movement_spline_offset.y, speeder_level_height, speeder_level_height_lerpf);
     else
@@ -397,7 +397,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 break;
             }
             if (distance > speedervals[0].distance * 0.8f || processor->action_timer > 0.0f) {
-                if (__builtin_expect(speeder_hitpoints_lost <= 1, 0)) {
+                if (speeder_hitpoints_lost <= 1) {
                     processor->action_timer += elapsed;
                     if (!(processor->action_timer > speeder_ahead_time))
                         break;
@@ -411,7 +411,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
             }
             break;
         case 1:
-            if (__builtin_expect(players_going_forward == 0, 0)) {
+            if (players_going_forward == 0) {
                 set_speedermode = 0;
                 processor->action_data_1 = 0;
                 processor->action_timer = 0.0f;
@@ -425,7 +425,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 goto reset_timers;
             }
             processor->action_timer -= elapsed;
-            if (__builtin_expect(!(processor->action_timer > 0.0f), 0)) {
+            if (!(processor->action_timer > 0.0f)) {
                 if (processor->action_timer < -1.0f && player->character_context == 0x36) {
                     set_speedermode = 3;
                     processor->action_data_1 = 3;
@@ -468,7 +468,7 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
             }
             break;
         case 3:
-            if (__builtin_expect(speeder_hitpoints_lost <= 2, 0)) {
+            if (speeder_hitpoints_lost <= 2) {
                 processor->action_timer += elapsed;
                 if (!(processor->action_timer > speeder_midrange_time))
                     break;

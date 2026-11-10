@@ -286,9 +286,6 @@ static HSV2RGB_BODY_ATTR void
 HSV2RGBBody(f32 hue, f32 saturation, f32 value, f32 *red, f32 *green, f32 *blue) __asm__("_ZL7HSV2RGBfffPfS_S_.part.18");
 
 // Editor UI callbacks retained in the original editor's menu code.
-#pragma GCC push_options
-#pragma GCC optimize("O2", "omit-frame-pointer")
-
 static eduimenu_s *submenu1;
 static eduimenu_s *submenu0;
 static eduimenu_s *testmenu0;
@@ -347,8 +344,6 @@ static __used__ void cbgpcfgCopy(eduimenu_s *menu, eduiitem_s *item, u32 value);
 static __used__ void cbgpcfgDel(eduimenu_s *menu, eduiitem_s *item, u32 value);
 static __used__ void cbgpcfgPaste(eduimenu_s *menu, eduiitem_s *item, u32 value);
 } // extern "C"
-
-#pragma GCC pop_options
 
 static i32 editor_return;
 static i32 bShowCursor = 1;
@@ -449,42 +444,42 @@ static inline void eduiSetFontColour(NUQFNT *font, u32 colour) {
 
 // Some original callers expect the draw to happen and keep the renderer call on the fallthrough path.
 static inline void eduiDrawRectLikely(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrRect2di(x, y, width, height, colour, material);
 }
 
 static inline void eduiDrawLineRectLikely(i32 x, i32 y, i32 width, i32 height, i32 colour, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrLineRect2di(x, y, width, height, colour, material);
 }
 
 static inline void eduiDrawGradRectLikely(i32 x, i32 y, i32 width, i32 height, i32 *colours, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrGradRect2di(x, y, width, height, colours, material);
 }
 
 static inline void eduiDrawLineLikely(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrLine2di(x0, y0, x1, y1, colour, material);
 }
 
 static inline void eduiDrawLineStripLikely(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrLineStrip2di(points, uvs, count, colour, material);
 }
 
 static inline void eduiDrawTriStripLikely(i32 *points, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuRndrTriStrip2di(points, uvs, count, colour, material);
 }
 
 static inline void eduiDrawFontSetLikely(NUQFNT *font) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuQFntSet(font);
 }
 
 static inline void eduiSetFontColourLikely(NUQFNT *font, u32 colour) {
-    if (__builtin_expect(!edui_donotdraw, 1))
+    if (!edui_donotdraw)
         NuQFntSetColour(font, colour);
 }
 
@@ -771,11 +766,10 @@ static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u
 
 // Text-picker commit callbacks. Retail keeps them unmangled and local.
 extern "C" {
-__attribute__((visibility("hidden"), optimize("O3"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item,
-                                                                            unsigned int buttons);
+    __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item, unsigned int buttons);
 
-__attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
-                                                                                unsigned int buttons);
+    __attribute__((visibility("hidden"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
+                                                                unsigned int buttons);
 }
 
 extern f32 HUB_EPISODETITLEY;
@@ -1011,20 +1005,20 @@ extern "C" {
 extern "C" {
     static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32) {
         ed_curr = static_cast<ed_module_s *>(selected->data_ptr);
-        if (__builtin_expect(!ed_curr->reserved, 1)) {
+        if (!ed_curr->reserved) {
             ed_module_active = 1;
             if (ed_curr->activate)
                 ed_curr->activate();
         }
     }
 
-    __attribute__((optimize("O2", "tree-vectorize"))) static __used__ i32 eduicbInteractSel(edui_interact_s *interact) {
+    static __used__ i32 eduicbInteractSel(edui_interact_s *interact) {
         eduimenu_s *menu = interact->menu;
         edui_sel_s *item = static_cast<edui_sel_s *>(interact->item);
         if (interact->callback) {
             if (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY)
                 item->selected(menu, item, edui_cursor_buttons);
-            else if (__builtin_expect((edui_cursor_buttons & EDUI_CURSOR_PRIMARY) && item->held, 1))
+            else if ((edui_cursor_buttons & EDUI_CURSOR_PRIMARY) && item->held)
                 item->held(menu, item, edui_cursor_buttons);
         }
         return 0;
@@ -1081,7 +1075,7 @@ extern "C" {
         }
         if (pad->digital_buttons_pressed & 0x80)
             pick->selected_corner = corner != 1;
-        if (__builtin_expect((pad->digital_buttons_pressed & 0x40) && pick->changed, 1))
+        if ((pad->digital_buttons_pressed & 0x40) && pick->changed)
             pick->changed(menu, item, pad->digital_buttons);
         return 0;
     }
@@ -1132,7 +1126,7 @@ extern "C" {
             if (!rep_timer || (pad->digital_buttons_pressed & 0x08)) {
                 f32 step = slider->granularity * accel;
                 f32 value = slider->value + step;
-                if (__builtin_expect(value > slider->minimum + slider->range, 0))
+                if (value > slider->minimum + slider->range)
                     value = slider->minimum + slider->range;
                 value = static_cast<i32>((value > 0.0f ? value + step * 0.5f : value - step * 0.5f) / step) * step;
                 slider->value = value;
@@ -1421,7 +1415,7 @@ extern "C" {
             nugraphCalcCurve(graph_item->graph, 100);
             return 1;
         }
-        if (__builtin_expect((pressed & 0x40) && graph_item->selected_point >= 0, 0)) {
+        if ((pressed & 0x40) && graph_item->selected_point >= 0) {
             graph_item->cursor_x = graph_item->graph->x[graph_item->selected_point];
             graph_item->cursor_y = graph_item->graph->y[graph_item->selected_point];
         }
@@ -2120,7 +2114,7 @@ extern "C" {
             else
                 eduiDrawRect(x << 4, y << 3, item_width << 4, (height * 5) << 3, item->colours[2], material);
             for (i32 row = 0; row < 4; ++row) {
-                auto draw_key = [&](i32 column) {
+                for (i32 column = 0; column < 10; ++column) {
                     if (row == picker->keyboard_row && column == picker->keyboard_column) {
                         eduiDrawFontSet(edui_font);
                         eduiSetFontColour(edui_font, item->colours[1]);
@@ -2131,17 +2125,7 @@ extern "C" {
                     letter[0] = textrow[row][column];
                     eduiFntPrintExLeft(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16,
                                        letter);
-                };
-                draw_key(0);
-                draw_key(1);
-                draw_key(2);
-                draw_key(3);
-                draw_key(4);
-                draw_key(5);
-                draw_key(6);
-                draw_key(7);
-                draw_key(8);
-                draw_key(9);
+                }
             }
             eduiDrawFontSetLikely(edui_font);
             eduiSetFontColour(edui_font, item->colours[1]);
@@ -2251,14 +2235,12 @@ extern "C" {
     static __used__ i32 eduicbInteractExpander(edui_interact_s *interact) {
         eduimenu_s *menu = interact->menu;
         edui_expander_s *expander = static_cast<edui_expander_s *>(interact->item);
-        if (__builtin_expect(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY, 1)) {
+        if (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) {
             if (expander->changed)
                 expander->changed(menu, expander, 0);
-            if (__builtin_expect(edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
-                                     edui_cursor_x < expander->button_x + expander->button_size &&
-                                     edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f &&
-                                     expander->first_child,
-                                 1)) {
+            if (edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
+                edui_cursor_x < expander->button_x + expander->button_size &&
+                edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f && expander->first_child) {
                 if (!expander->open) {
                     expander->last_child->next = expander->next;
                     if (expander->next)
@@ -2279,10 +2261,10 @@ extern "C" {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
         u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
         bool handled = false;
-        if (__builtin_expect(edui_cursor_buttons & EDUI_CURSOR_PRIMARY, 0)) {
+        if (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) {
             if (!(property_flags & 0x0a)) {
                 if (!(property_flags & 1)) {
-                    if (__builtin_expect(edui_cursor_x >= interact->x, 0) && edui_cursor_y >= interact->y &&
+                    if ((edui_cursor_x >= interact->x) && edui_cursor_y >= interact->y &&
                         edui_cursor_x < interact->x + property->label_width - 1.0f &&
                         edui_cursor_y < interact->y + interact->height && property->selected) {
                         property->selected(menu, property, 0);
@@ -2370,7 +2352,7 @@ extern "C" {
                     slider->changed(menu, item, *(volatile u32 *)&pad->digital_buttons);
             }
         } else if (pad->digital_buttons & 0x08) {
-            if (__builtin_expect(rep_timer > 0, 1))
+            if (rep_timer > 0)
                 --rep_timer;
             else
                 rep_timer = 0;
@@ -2402,7 +2384,7 @@ extern "C" {
                     value = 0.0f;
             } else if (pad->analog_r2) {
                 f32 delta;
-                if (__builtin_expect(pad->unknown_a9 != 0, 1)) {
+                if (pad->unknown_a9 != 0) {
                     dynascale *= 1.05f;
                     delta = static_cast<u32>(pad->analog_r2) * dynascale;
                 } else {
@@ -2481,7 +2463,7 @@ extern "C" {
         if (edui_cursor_x >= interact->x &&
             edui_cursor_y >= interact->y + interact->height * 0.75f + interact->height * 0.125f &&
             edui_cursor_x < interact->x + interact->width && edui_cursor_y < interact->y + interact->height &&
-            __builtin_expect(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY, 0)) {
+            (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY)) {
             pick->dragging_colour = 0;
             pick->dragging_saturation = 0;
             pick->confirm = 1;
@@ -3321,7 +3303,7 @@ extern "C" {
     eduiitem_s *eduiItemGradPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
         edui_gradient_pick_s *item =
             static_cast<edui_gradient_pick_s *>(NU_ALLOC(sizeof(edui_gradient_pick_s), 4, 1, "", 0));
-        if (__builtin_expect(item != NULL, 1)) {
+        if (item != NULL) {
             memset(item, 0, sizeof(*item));
             item->type = 7;
             item->data = data;
@@ -3379,7 +3361,7 @@ extern "C" {
             f32 hue;
             if (red == maximum)
                 hue = (green - blue) / delta;
-            else if (__builtin_expect(green == maximum, 0))
+            else if (green == maximum)
                 hue = 2.0f + (blue - red) / delta;
             else if (blue == maximum)
                 hue = 4.0f + (red - green) / delta;
@@ -3517,7 +3499,7 @@ extern "C" {
                 slot = 5;
             else if (!item->onion_skins[6])
                 slot = 6;
-            else if (__builtin_expect(!item->onion_skins[7], 1))
+            else if (!item->onion_skins[7])
                 slot = 7;
             else
                 return;
@@ -3759,7 +3741,7 @@ extern "C" {
         (void)delta_time;
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
         u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
-        if (__builtin_expect(!!(*property_flags & 2), 1)) {
+        if (*property_flags & 2) {
             property->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (property->label_width < 5.0f)
                 property->label_width = 5.0f;
@@ -3894,7 +3876,7 @@ extern "C" {
                     i32 value_width = property->property_text
                                           ? static_cast<i32>(NuQFntPrintLenU(edui_font, property->property_text)) >> 4
                                           : 30;
-                    if (__builtin_expect(value_width > property_value_width, 1))
+                    if (value_width > property_value_width)
                         property_value_width = value_width;
                     item_text_width = value_width;
                     break;
@@ -3924,7 +3906,7 @@ extern "C" {
             width = property_width;
 
         for (eduiitem_s *item = menu->first; item; item = item->next) {
-            if (__builtin_expect(item->type == 17, 1))
+            if (item->type == 17)
                 static_cast<edui_prop_s *>(item)->label_width = static_cast<f32>(property_label_width + 1);
         }
         menu->width = width + padding;
@@ -4090,12 +4072,12 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         auto *filter = static_cast<edui_filter_s *>(item);
         (void)delta_time;
         u8 *filter_flags = reinterpret_cast<u8 *>(filter) + 0x4c;
-        if (__builtin_expect(!!(*filter_flags & 2), 1)) {
+        if (*filter_flags & 2) {
             filter->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (filter->label_width < 5.0f)
                 filter->label_width = 5.0f;
             for (eduiitem_s *other = menu->first; other; other = other->next) {
-                if (__builtin_expect(other->type == 17 && other != item, 0))
+                if (other->type == 17 && other != item)
                     static_cast<edui_prop_s *>(other)->label_width = filter->label_width;
             }
             if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
@@ -4178,7 +4160,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         i32 height = item->render(menu, item, x, y, width, selected);
         if (selected) {
             u32 colour = (item->flags & 4) ? eduiitem_context_outline_colour : eduiitem_selected_outline_colour;
-            if (__builtin_expect(!edui_donotdraw, 1))
+            if (!edui_donotdraw)
                 NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
         }
         if (item->disabled) {
@@ -4208,14 +4190,14 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
 
     void eduiSetActiveMenu(eduimenu_s *menu) {
         if (eduiGetUsingMenuFocus()) {
-            if (__builtin_expect(menu != 0, 1)) {
-                while (__builtin_expect(menu->child != NULL, 0))
+            if (menu != 0) {
+                while (menu->child != NULL)
                     menu = menu->child;
                 active_menu = menu;
             } else {
                 menu = default_active_menu;
                 if (menu)
-                    while (__builtin_expect(menu->child != 0, 1))
+                    while (menu->child != 0)
                         menu = menu->child;
                 active_menu = menu;
             }
@@ -4264,7 +4246,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             __attribute__((aligned(16))) = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
         u32 colours[4] __attribute__((aligned(16)));
         memcpy(colours, initial_colours, sizeof(colours));
-        if (__builtin_expect(highlighted == 1, 0))
+        if (highlighted == 1)
             colours[0] = 0x8000c000u;
         edui_messagemenu =
             eduiMenuCreate(70, 70, 180, 250, parent->font, eduicbCancelMessageMenu, const_cast<char *>("Message"));
@@ -4460,81 +4442,86 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         *picker_flags = (*picker_flags & ~2u) | (*source_flags & 2u);
     }
 
+    static inline void TextPickDeletePrevious(edui_textpicker_s *picker) {
+        if (picker->cursor == 0)
+            return;
+        if (picker->value[picker->cursor]) {
+            --picker->cursor;
+            for (i32 index = picker->cursor; index < 0xff; ++index)
+                picker->value[index] = picker->value[index + 1];
+        } else {
+            picker->value[--picker->cursor] = '\0';
+        }
+    }
+
+    static inline void TextPickInsertCharacter(edui_textpicker_s *picker, char character) {
+        if (NuStrLen(picker->value) >= picker->max_length)
+            return;
+        // The original includes the cursor slot in the shift before
+        // overwriting it. Read the enclosing object's bytes so cursor zero
+        // accesses the preceding object byte rather than value[-1].
+        const char *picker_bytes = reinterpret_cast<const char *>(picker);
+        for (i32 index = 0xff; index >= picker->cursor; --index)
+            picker->value[index] = picker_bytes[offsetof(edui_textpicker_s, value) + index - 1];
+        picker->value[picker->cursor++] = character;
+    }
+
+    static inline void TextPickNextRow(edui_textpicker_s *picker) {
+        ++picker->keyboard_row;
+        if (picker->keyboard_flags & 2) {
+            if (picker->keyboard_row > 5)
+                picker->keyboard_row = 0;
+        } else if (picker->keyboard_row > 3)
+            picker->keyboard_row = 0;
+    }
+
+    static inline void TextPickPreviousRow(edui_textpicker_s *picker) {
+        if (--picker->keyboard_row < 0)
+            picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
+    }
+
+    static inline void TextPickNextColumn(edui_textpicker_s *picker) {
+        if (picker->keyboard_row >= 4)
+            return;
+        if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
+            picker->keyboard_column = 0;
+    }
+
+    static inline void TextPickPreviousColumn(edui_textpicker_s *picker) {
+        if (picker->keyboard_row >= 4)
+            return;
+        if (--picker->keyboard_column < 0)
+            picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
+    }
+
     static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         auto *picker = static_cast<edui_textpicker_s *>(item);
         u32 modifiers;
         i32 key = NuKeyGet(&modifiers);
         NuStrLen(picker->value);
 
-        auto delete_previous = [&]() {
-            if (picker->cursor == 0)
-                return;
-            if (picker->value[picker->cursor]) {
-                --picker->cursor;
-                for (i32 index = picker->cursor; index < 0xff; ++index)
-                    picker->value[index] = picker->value[index + 1];
-            } else {
-                picker->value[--picker->cursor] = '\0';
-            }
-        };
-        auto insert_character = [&](char character) {
-            if (__builtin_expect(NuStrLen(picker->value) >= picker->max_length, 0))
-                return;
-            // The original includes the cursor slot in the shift before
-            // overwriting it. Read the enclosing object's bytes so cursor zero
-            // accesses the preceding object byte rather than value[-1].
-            const char *picker_bytes = reinterpret_cast<const char *>(picker);
-            for (i32 index = 0xff; index >= picker->cursor; --index)
-                picker->value[index] = picker_bytes[offsetof(edui_textpicker_s, value) + index - 1];
-            picker->value[picker->cursor++] = character;
-        };
-        auto next_row = [&]() {
-            ++picker->keyboard_row;
-            if (picker->keyboard_flags & 2) {
-                if (picker->keyboard_row > 5)
-                    picker->keyboard_row = 0;
-            } else if (picker->keyboard_row > 3)
-                picker->keyboard_row = 0;
-        };
-        auto previous_row = [&]() {
-            if (__builtin_expect(--picker->keyboard_row < 0, 1))
-                picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
-        };
-        auto next_column = [&]() {
-            if (__builtin_expect(picker->keyboard_row >= 4, 0))
-                return;
-            if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
-                picker->keyboard_column = 0;
-        };
-        auto previous_column = [&]() {
-            if (picker->keyboard_row >= 4)
-                return;
-            if (--picker->keyboard_column < 0)
-                picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
-        };
-
-        if (__builtin_expect(key != -1, 1)) {
+        if (key != -1) {
             switch (key) {
                 case 0xc8:
-                    previous_row();
+                    TextPickPreviousRow(picker);
                     break;
                 case 0xd0:
-                    next_row();
+                    TextPickNextRow(picker);
                     break;
                 case 0xcb:
-                    previous_column();
+                    TextPickPreviousColumn(picker);
                     break;
                 case 0xcd:
-                    next_column();
+                    TextPickNextColumn(picker);
                     break;
                 case 0x1c:
                 case 1:
-                    if (__builtin_expect(!!(picker->callback), 0))
+                    if (picker->callback)
                         picker->callback(menu, item, pad->digital_buttons);
                     break;
                 case 0x0e:
                 case 0xd3:
-                    delete_previous();
+                    TextPickDeletePrevious(picker);
                     break;
                 default: {
                     char character = NuKeyToAscii(key, modifiers & 1);
@@ -4548,26 +4535,26 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             }
         }
 
-        if (__builtin_expect(!picker || !picker->editing, 0)) {
+        if (!picker || !picker->editing) {
             if (pad->digital_buttons_pressed & 0x40)
                 eduiAddTextPickEnt(menu, item);
             return 0;
         }
 
-        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x4000), 0))
-            next_row();
+        if (pad->digital_buttons_pressed & 0x4000)
+            TextPickNextRow(picker);
         if (pad->digital_buttons_pressed & 0x1000)
-            previous_row();
+            TextPickPreviousRow(picker);
         if (pad->digital_buttons_pressed & 0x8000)
-            previous_column();
+            TextPickPreviousColumn(picker);
         if (pad->digital_buttons_pressed & 0x2000)
-            next_column();
+            TextPickNextColumn(picker);
         if ((pad->digital_buttons_pressed & 0x10) && picker->callback)
             picker->callback(menu, item, pad->digital_buttons);
         if ((pad->digital_buttons & 0xc) == 0xc) {
             picker->cursor = 0;
             picker->value[0] = '\0';
-            if (__builtin_expect((picker->keyboard_flags & 2) && TextPickCopyBuffer[0], 0)) {
+            if ((picker->keyboard_flags & 2) && TextPickCopyBuffer[0]) {
                 NuStrNCpy(picker->value, TextPickCopyBuffer, picker->max_length - 1);
                 picker->value[picker->max_length - 1] = '\0';
                 picker->cursor = NuStrLen(picker->value);
@@ -4586,11 +4573,11 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                 picker->cursor = NuStrLen(picker->value);
         }
         if (pad->digital_buttons_pressed & 0x40)
-            insert_character(textrow[picker->keyboard_row][picker->keyboard_column]);
-        if (__builtin_expect(!!(pad->digital_buttons_pressed & 0x80), 1))
-            delete_previous();
+            TextPickInsertCharacter(picker, textrow[picker->keyboard_row][picker->keyboard_column]);
+        if (pad->digital_buttons_pressed & 0x80)
+            TextPickDeletePrevious(picker);
         if (pad->digital_buttons_pressed & 0x20) {
-            if (__builtin_expect(textrow[1] == const_cast<char *>("QWERTYUIOP"), 0)) {
+            if (textrow[1] == const_cast<char *>("QWERTYUIOP")) {
                 textrow[0] = const_cast<char *>("1234567890");
                 textrow[1] = const_cast<char *>("qwertyuiop");
                 textrow[2] = const_cast<char *>("asdfghjkl_");
@@ -4615,41 +4602,31 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         return active_menu;
     }
 
+    static inline void eduiAddInteract(i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
+                                       i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
+        if (numInteracts < 64 && !eduiInteractLocked) {
+            edui_interact_s *entry = &eduiInteracts[numInteracts];
+            entry->x = static_cast<f32>(x);
+            entry->y = static_cast<f32>(y) * 0.5f;
+            entry->width = static_cast<f32>(width);
+            entry->height = static_cast<f32>(height) * 0.5f;
+            entry->menu = menu;
+            entry->item = item;
+            entry->callback = callback;
+            entry->buttons = buttons;
+            entry->field_20 = field_20;
+            ++numInteracts;
+        }
+    }
+
     void eduiMenuRender(eduimenu_s *menu) {
-        const auto font_set = [](void *font) { eduiDrawFontSet(font); };
-        const auto font_colour = [](void *font, u32 colour) { eduiSetFontColour(font, colour); };
-        const auto rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            eduiDrawRect(x, y, width, height, colour, material);
-        };
-        const auto line = [](i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, numtl_s *material) {
-            eduiDrawLine(x0, y0, x1, y1, colour, material);
-        };
-        const auto outline_rect = [](i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material) {
-            eduiDrawLineRect(x, y, width, height, colour, material);
-        };
-        const auto interact = [](i32 x, i32 y, i32 width, i32 height, eduimenu_s *menu, eduiitem_s *item,
-                                 i32 (*callback)(edui_interact_s *), u32 buttons, i32 field_20) {
-            if (__builtin_expect(numInteracts < 64 && !eduiInteractLocked, 0)) {
-                edui_interact_s *entry = &eduiInteracts[numInteracts];
-                entry->x = static_cast<f32>(x);
-                entry->y = static_cast<f32>(y) * 0.5f;
-                entry->width = static_cast<f32>(width);
-                entry->height = static_cast<f32>(height) * 0.5f;
-                entry->menu = menu;
-                entry->item = item;
-                entry->callback = callback;
-                entry->buttons = buttons;
-                entry->field_20 = field_20;
-                ++numInteracts;
-            }
-        };
         ++NuPrimCSPos;
         i32 x = menu->x;
         i32 y = menu->y;
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
         NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
         NuQFntPushPrintMode(2);
-        font_set(edui_font);
+        eduiDrawFontSet(edui_font);
         NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
 
         const f32 font_height = NuQFntHeight(edui_font);
@@ -4657,11 +4634,11 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         const f32 baseline = NuQFntBaseline(edui_font);
         if (menu->title && menu->title[0]) {
             const i32 title_height = static_cast<i32>(font_height * 0.15625f);
-            if (__builtin_expect(!menu->child, 0))
-                interact(x, y, menu->width, title_height, menu, NULL, cbInteractMenuTitle, 0x40, 0);
-            rect(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
-            font_set(edui_font);
-            font_colour(edui_font, 0x807f7f7f);
+            if (!menu->child)
+                eduiAddInteract(x, y, menu->width, title_height, menu, NULL, cbInteractMenuTitle, 0x40, 0);
+            eduiDrawRect(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+            eduiDrawFontSet(edui_font);
+            eduiSetFontColour(edui_font, 0x807f7f7f);
             eduiFntPrintClipEx(edui_font, (x + 1) << 4,
                                static_cast<i32>(title_font_height * 0.125f + baseline) + (y << 3), 0x10, x << 4,
                                menu->width << 4, menu->title);
@@ -4676,14 +4653,14 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             if (item != menu->first) {
                 const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
                 if (!menu->child)
-                    interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
-                rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                    eduiAddInteract(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollUp, 0x40, 0);
+                eduiDrawRect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
                 const i32 bottom = ((y + scroll_height) << 3) - 16;
-                line(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
-                line(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 y += scroll_height;
             }
 
@@ -4698,8 +4675,8 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                     max_item_height = item_height;
 
                 if (!menu->child)
-                    interact(x, y, menu->width, item_height, menu, item, reinterpret_cast<edui_sel_s *>(item)->interact,
-                             0x40, 0);
+                    eduiAddInteract(x, y, menu->width, item_height, menu, item,
+                                    reinterpret_cast<edui_sel_s *>(item)->interact, 0x40, 0);
 
                 item = item->next;
                 if (menu->flags & 2)
@@ -4713,15 +4690,15 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                     continue;
                 }
                 const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
-                if (__builtin_expect(!menu->child, 1))
-                    interact(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
-                rect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                if (!menu->child)
+                    eduiAddInteract(x, y, menu->width, scroll_height, menu, NULL, cbInteractMenuScrollDown, 0x40, 0);
+                eduiDrawRect(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
                 const i32 bottom = ((y + scroll_height - 2) << 3);
                 i32 centre = (x * 2 + menu->width) << 3;
                 const i32 top = (y << 3) + 8;
-                line(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                 centre = (x * 2 + menu->width) << 3;
-                line(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                eduiDrawLine(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                 break;
             }
 
@@ -4737,11 +4714,12 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         menu->field_28 = y - menu->y;
 
         const u32 outline = eduiGetActiveMenu() == menu ? eduimenu_selected_outline_colour : eduimenu_outline_colour;
-        outline_rect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,
-                     outline, uimtls[ui_outmtl]);
+        eduiDrawLineRect((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4, (menu->field_28 << 3) + 16,
+                         outline, uimtls[ui_outmtl]);
 
         if (menu->child) {
-            interact(menu->x, menu->y, menu->field_24, menu->field_28, menu, NULL, cbInteractMenuCancelChild, 0x40, 1);
+            eduiAddInteract(menu->x, menu->y, menu->field_24, menu->field_28, menu, NULL, cbInteractMenuCancelChild,
+                            0x40, 1);
             eduiMenuRender(menu->child);
         }
 
@@ -4774,7 +4752,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         property->button_size = indent_width;
         property->button_x = draw_x + draw_width - (1.0f + indent_width);
         property->button_y = draw_y + 1.0f;
-        for (eduimenu_s *descendant = menu; __builtin_expect(descendant != NULL, 1); descendant = descendant->child) {
+        for (eduimenu_s *descendant = menu; (descendant != NULL); descendant = descendant->child) {
             if (descendant == eduiGetActiveMenu()) {
                 eduiDrawRect(static_cast<i32>(draw_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                              static_cast<i32>(draw_width * 16.0f), static_cast<i32>(height * 8.0f),
@@ -4783,7 +4761,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             }
         }
         u32 divider_colour = divider_colours[(property->unknown_property_flags >> 2) & 1];
-        if (__builtin_expect(!edui_donotdraw, 1))
+        if (!edui_donotdraw)
             NuRndrLine2di(static_cast<i32>((draw_x + property->label_width) * 16.0f), static_cast<i32>(draw_y * 8.0f),
                           static_cast<i32>((draw_x + property->label_width) * 16.0f),
                           static_cast<i32>((draw_y + height) * 8.0f), divider_colour, uimtls[0]);
@@ -4800,7 +4778,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
         f32 clip_x = draw_x + property->label_width;
         eduiFntPrintClipEx(edui_font, value_x, draw_y + baseline, 32, clip_x, value_x - clip_x,
                            property->property_text);
-        if (__builtin_expect(property->button_type == 3, 0)) {
+        if (property->button_type == 3) {
             u32 fill_colour;
             memcpy(&fill_colour, property->unknown_4e + 2, sizeof(fill_colour));
             eduiDrawRect(static_cast<i32>(property->button_x * 16.0f), static_cast<i32>(property->button_y * 8.0f),
@@ -4811,7 +4789,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
                          static_cast<i32>(property->button_size * 16.0f),
                          static_cast<i32>(property->button_size * 8.0f), 0xff000000, uimtls[ui_outmtl]);
         i32 points[6];
-        if (__builtin_expect(property->button_type == 1, 0)) {
+        if (property->button_type == 1) {
             points[0] = static_cast<i32>((property->button_x + property->button_size * 0.1f) * 16.0f);
             points[1] = static_cast<i32>((property->button_y + property->button_size * 0.1f) * 8.0f);
             points[2] = static_cast<i32>((property->button_x + property->button_size * 0.9f) * 16.0f);
@@ -4861,7 +4839,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             highlighted = (*flags >> 3) & 1;
         *flags = (*flags & ~16u) | (highlighted << 4);
         eduiDrawFontSetLikely(edui_font);
-        if (__builtin_expect(item->unknown_10 == 2, 0)) {
+        if (item->unknown_10 == 2) {
             eduiSetFontColour(edui_font, 0xff006000);
         } else if (item->unknown_10 == 3) {
             eduiSetFontColour(edui_font, 0xff600000);
@@ -4869,7 +4847,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             eduiSetFontColour(edui_font, 0xff000060);
         } else {
             u32 colour = item->colours[item->highlighted];
-            if (__builtin_expect(!edui_donotdraw, 0))
+            if (!edui_donotdraw)
                 NuQFntSetColour(edui_font, colour);
         }
         f32 height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
@@ -4883,23 +4861,23 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             f32 text_width = NuQFntPrintLenU(edui_font, eduiPropTextEdit) * 0.0625f;
             f32 edit_width = draw_width - property->label_width - 4.0f;
             edit_width = MAX(edit_width, text_width);
-            if (__builtin_expect(!edui_donotdraw, 0))
+            if (!edui_donotdraw)
                 NuRndrRect2di(static_cast<i32>(draw_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                               static_cast<i32>(draw_width * 16.0f), static_cast<i32>(height * 8.0f),
                               item->colours[2 + item->highlighted], uimtls[0]);
-            if (__builtin_expect(!edui_donotdraw, 0))
+            if (!edui_donotdraw)
                 NuRndrRect2di(static_cast<i32>((draw_x + property->label_width + 2.0f) * 16.0f),
                               static_cast<i32>((draw_y + 2.0f) * 8.0f), static_cast<i32>(edit_width * 16.0f),
                               static_cast<i32>((height - 4.0f) * 8.0f), 0xffffffff, uimtls[0]);
             for (i32 depth = 0; depth < property->depth; ++depth) {
                 f32 guide_x = draw_x + (depth + 0.5f) * indent_width;
-                if (__builtin_expect(!edui_donotdraw, 1))
+                if (!edui_donotdraw)
                     NuRndrLine2di(static_cast<i32>(guide_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                                   static_cast<i32>(guide_x * 16.0f), static_cast<i32>((draw_y + height) * 8.0f),
                                   0xff000000, uimtls[0]);
             }
             u32 divider_colour = divider_colours[(property->unknown_property_flags >> 2) & 1];
-            if (__builtin_expect(!edui_donotdraw, 1))
+            if (!edui_donotdraw)
                 NuRndrLine2di(static_cast<i32>((draw_x + property->label_width) * 16.0f),
                               static_cast<i32>(draw_y * 8.0f),
                               static_cast<i32>((draw_x + property->label_width) * 16.0f),
@@ -4912,7 +4890,7 @@ extern "C" void eduiMenuDestroyItems(eduimenu_s *menu) {
             prefix[eduiPropTextPos + 1] = '\0';
             f32 caret_width = NuQFntPrintLenU(edui_font, prefix) * 0.0625f;
             f32 caret_x = draw_x + property->label_width + 2.0f + caret_width;
-            if (__builtin_expect(!edui_donotdraw, 1))
+            if (!edui_donotdraw)
                 NuRndrLine2di(static_cast<i32>(caret_x * 16.0f), static_cast<i32>(draw_y * 8.0f),
                               static_cast<i32>(caret_x * 16.0f), static_cast<i32>((draw_y + height) * 8.0f), 0xff000000,
                               uimtls[0]);
@@ -4974,7 +4952,7 @@ extern "C" {
         edui_gradient_pick_s *picker = reinterpret_cast<edui_gradient_pick_s *>(item->data_ptr);
         edui_gradient_node_s *stage = picker->selected_stage;
         if (stage != nullptr) {
-            if (__builtin_expect(item->type == 7, 0)) {
+            if (item->type == 7) {
                 cliph = stage->hue;
                 clips = stage->saturation;
                 clipv = stage->value;
@@ -5066,32 +5044,28 @@ extern "C" {
         eduiMenuDestroy(menu);
     }
 
-    __attribute__((visibility("hidden"), optimize("O3"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
-                                                                                unsigned int buttons) {
+    __attribute__((visibility("hidden"))) void tpentPropOnEnter(eduimenu_s *menu, eduiitem_s *item,
+                                                                unsigned int buttons) {
         void *original = *(void **)((char *)item + 0x0c);
+        NuStrCpy(*(char **)((char *)original + 0x64), (char *)item + 0x4c);
         void (*callback)(void *, void *, unsigned int) =
             *(void (**)(void *, void *, unsigned int))((char *)original + 0x78);
-        eduimenu_s *parent = *(eduimenu_s **)((char *)menu + 0x40);
-
-        NuStrCpy(*(char **)((char *)original + 0x64), (char *)item + 0x4c);
         if (callback)
-            callback(parent, original, buttons);
+            callback(*(eduimenu_s **)((char *)menu + 0x40), original, buttons);
+        eduimenu_s *parent = *(eduimenu_s **)((char *)menu + 0x40);
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
         if (parent)
             eduiSetActiveMenu(parent);
     }
 
-    __attribute__((visibility("hidden"), optimize("O3"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item,
-                                                                            unsigned int buttons) {
+    __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *menu, eduiitem_s *item, unsigned int buttons) {
         void *original = *(void **)((char *)item + 0x0c);
+        NuStrCpy((char *)original + 0x4c, (char *)item + 0x4c);
         void (*callback)(void *, void *, unsigned int) =
             *(void (**)(void *, void *, unsigned int))((char *)original + 0x15c);
-        void *parent = *(void **)((char *)menu + 0x40);
-
-        NuStrCpy((char *)original + 0x4c, (char *)item + 0x4c);
         if (callback)
-            callback(parent, original, buttons);
+            callback(*(void **)((char *)menu + 0x40), original, buttons);
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
     }
@@ -5185,7 +5159,7 @@ extern "C" {
     }
 
     i32 eduiMenuIsActive(eduimenu_s *menu) {
-        if (__builtin_expect(!eduiGetUsingMenuFocus(), 1))
+        if (!eduiGetUsingMenuFocus())
             return 1;
         if (eduiGetUsingMenuFocus() && active_menu == menu)
             return 1;
@@ -5209,7 +5183,7 @@ extern "C" {
     }
 
     i32 eduiCheckForPadMenuCancel(eduimenu_s *menu, nupad_s *pad) {
-        if (__builtin_expect(!pad || !(pad->digital_buttons_pressed & 0x10), 1))
+        if (!pad || !(pad->digital_buttons_pressed & 0x10))
             return 0;
 
         eduimenu_s *parent = menu->parent;
@@ -5273,7 +5247,7 @@ extern "C" {
             up_rept = 1.0f / 3.0f;
             up = 1;
         }
-        if (__builtin_expect((buttons & up_button) && up_rept > 0.0f, 1)) {
+        if ((buttons & up_button) && up_rept > 0.0f) {
             up_rept -= delta_time;
             if (up_rept <= 0.0f) {
                 up_rept = 1.0f / 6.0f;
@@ -5314,7 +5288,7 @@ extern "C" {
             i32 count = 1;
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
-            while (__builtin_expect(menu->selected->next != 0, 1)) {
+            while (menu->selected->next != 0) {
                 menu->selected = menu->selected->next;
                 if (!--count)
                     break;
@@ -5326,7 +5300,7 @@ extern "C" {
             for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                 ++count;
             menu->selected = menu->field_0c;
-            while (__builtin_expect(menu->selected->previous != 0, 0)) {
+            while (menu->selected->previous != 0) {
                 menu->selected = menu->selected->previous;
                 menu->field_0c = menu->selected;
                 if (!--count)
@@ -5352,12 +5326,12 @@ extern "C" {
                     item = item->next;
                 menu->selected = item;
             } while (menu->selected->next && to_last);
-            if (__builtin_expect(!!(to_last), 1)) {
+            if (to_last) {
                 i32 count = 1;
                 for (eduiitem_s *item = menu->field_0c; item && item != menu->field_10; item = item->next)
                     ++count;
                 menu->field_0c = menu->selected;
-                while (__builtin_expect(menu->field_0c->previous != 0, 1)) {
+                while (menu->field_0c->previous != 0) {
                     menu->field_0c = menu->field_0c->previous;
                     if (!--count)
                         break;
@@ -5375,14 +5349,14 @@ extern "C" {
 
     i32 eduiProcessInteracts(eduimenu_s *menu, nupad_s *pad) {
         i32 result = 0;
-        if (__builtin_expect(!!(edmainGetCursorEnabled()), 0)) {
+        if (edmainGetCursorEnabled()) {
             if (eduiInteractLocked) {
                 if ((!eduiInteractLocked->menu || !eduiInteractLocked->item) && eduiInteractLocked->field_20)
                     eduiInteractLocked = NULL;
             }
             if (eduiInteractLocked) {
                 result = 1;
-                if (__builtin_expect(menu == eduiInteractLocked->menu || menu->parent == eduiInteractLocked->menu, 0)) {
+                if (menu == eduiInteractLocked->menu || menu->parent == eduiInteractLocked->menu) {
                     eduiInteractLocked = eduiInteractLocked->callback(eduiInteractLocked) ? eduiInteractLocked : NULL;
                     result = eduiInteractLocked != NULL;
                 }
@@ -5396,7 +5370,7 @@ extern "C" {
                         if (menu && interact->item && interact->item->type != 0x12)
                             menu->selected = interact->item;
                         result = 1;
-                        if (__builtin_expect(!interact->field_20, 0)) {
+                        if (!interact->field_20) {
                             if (!(interact->buttons & edui_cursor_buttons))
                                 break;
                             if (eduiGetActiveMenu() != menu)
@@ -5563,7 +5537,7 @@ extern "C" {
                 return editor_return;
             if (ed_curr->deactivate)
                 ed_curr->deactivate();
-            if (__builtin_expect(result == 2, 1))
+            if (result == 2)
                 editor_return = 1;
             ed_module_active = 0;
             return editor_return;
@@ -5690,7 +5664,7 @@ extern "C" {
         if (configuration_file) {
             NuStrCpy(ed_levelfile, configuration_file);
             i32 file;
-            if (__builtin_expect(ed_levelfile[0] && (file = NuFileOpen(ed_levelfile, NUFILE_READ)) != 0, 1)) {
+            if (ed_levelfile[0] && (file = NuFileOpen(ed_levelfile, NUFILE_READ)) != 0) {
                 NuFileBeginBlkRead(file, 0x3032554e);
                 i32 block;
                 while ((block = NuFileBeginBlkRead(file, 0)) != 0) {
@@ -6357,7 +6331,7 @@ i32 EdFileOpen(char *filepath, NUFILEMODE mode) {
         return 0;
     }
 
-    if (__builtin_expect(edfile_pakfile != NULL, 1)) {
+    if (edfile_pakfile != NULL) {
         item_handle = NuFilePakGetItem(edfile_pakfile, filepath);
 
         if (item_handle != 0) {
@@ -6389,7 +6363,7 @@ i32 EdFileOpen(char *filepath, NUFILEMODE mode) {
 }
 
 void EdFileFlushBuffer() {
-    if (__builtin_expect(edfile_handle == -1, 0)) {
+    if (edfile_handle == -1) {
         return;
     }
 
@@ -6408,19 +6382,20 @@ i32 EdFileClose() {
         return 0;
     }
 
-    if (__builtin_expect(edfile_write_flag != 0, 0)) {
+    if (edfile_write_flag != 0) {
         EdFileFlushBuffer();
     }
 
-    if (edfile_media != 1) {
-        return 0;
+    switch (edfile_media) {
+        case 0:
+            return 0;
+        case 1:
+            NuFileClose(edfile_handle);
+            edfile_handle = -1;
+            edfile_media = 0;
+            return 1;
     }
-
-    NuFileClose(edfile_handle);
-    edfile_handle = -1;
-    edfile_media = 0;
-
-    return 1;
+    return 0;
 }
 
 void EdFileWrite(void *data, i32 len) {
@@ -6612,7 +6587,7 @@ i32 EdFileBackup(char *source, char *destination) {
     if (remaining > 0) {
         NUFILE output = NuFileOpen(destination, NUFILE_WRITE);
         NUFILE input = NuFileOpen(source, NUFILE_READ);
-        if (output > 0 && input > 0) {
+        if (input > 0 && output > 0) {
             while (remaining > 0) {
                 i32 size = MIN(static_cast<i32>(remaining), 0x1000);
                 NuFileRead(input, edfile_buffer, size);
@@ -6623,10 +6598,10 @@ i32 EdFileBackup(char *source, char *destination) {
             NuFileClose(output);
             return 1;
         }
-        if (__builtin_expect(output > 0, 1))
-            NuFileClose(output);
         if (input > 0)
             NuFileClose(input);
+        if (output > 0)
+            NuFileClose(output);
     }
     return 0;
 }
@@ -6704,9 +6679,9 @@ static void RenderFileSel3Body(i32 draw_title) {
         text = FS_Path;
         const f32 available = full_width - 8.0f;
         f32 length = NuQFntPrintLenU(system_qfont, text) / 16.0f;
-        if (__builtin_expect(length > available, 0)) {
+        if (length > available) {
             f32 scale = available / length;
-            if (__builtin_expect(scale < 0.5f, 0)) {
+            if (scale < 0.5f) {
                 // Too long even at half width: keep the drive and first
                 // directory, then "\....", then the last directory.
                 char *first = NuStrChr(text, '\\');
@@ -6844,14 +6819,14 @@ void FS_MoveCursorDown(i32 steps) {
 }
 
 i32 FS_PrevNameLen(char *name) {
-    if (__builtin_expect(name == FS_FileList, 1)) {
+    if (name == FS_FileList) {
         return 0;
     }
     char *previous = name - 2;
-    if (__builtin_expect(*previous == '\0', 0)) {
+    if (*previous == '\0') {
         return 1;
     }
-    if (__builtin_expect(previous == FS_FileList, 0)) {
+    if (previous == FS_FileList) {
         return 2;
     }
     i32 length = 0;
@@ -6938,7 +6913,7 @@ char *FS_GetFilterString(char *input, char *output) {
     if (*end != '|' && *end != '\0') {
         do {
             ++end;
-        } while (__builtin_expect(*end != '\0' && *end != '|' && *end != '*', 0));
+        } while (*end != '\0' && *end != '|' && *end != '*');
 
         char *trimmed = end;
         while (trimmed != input && trimmed[-1] == ' ') {
@@ -6983,12 +6958,12 @@ i32 FS_FileNameFilter(char *name) {
                     if (match == NULL)
                         break;
                 }
-                if (__builtin_expect(match == NULL || (slot == 6 && filterblocks[i][72] != '\0'), 0))
+                if (match == NULL || (slot == 6 && filterblocks[i][72] != '\0'))
                     continue;
             }
             i32 dots = 0;
             for (char *p = match; *p != '\0'; ++p) {
-                if (__builtin_expect(*p == '.', 1)) {
+                if (*p == '.') {
                     if (++dots > 1)
                         break;
                 }
@@ -7090,7 +7065,7 @@ void FS_SetCursorToLastFileName() {
             FS_CurrentPos = entry;
             FS_CursorLine = 0;
             FS_CurrentPosFileNum = index;
-            if (__builtin_expect(index == 0 || index + 13 < FS_NumFiles, 1)) {
+            if (index == 0 || index + 13 < FS_NumFiles) {
                 return;
             }
             char *current = entry;
@@ -7138,13 +7113,12 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
     if (directory != 0) {
         for (;;) {
             i32 name_length = NuFileReadDir(directory, entry);
-            if (__builtin_expect(name_length == 0, 0)) {
+            if (name_length == 0) {
                 break;
             }
             char *name = entry + 0x18;
-            if (__builtin_expect(*reinterpret_cast<u16 *>(name) == '.' ||
-                                     (*reinterpret_cast<u32 *>(name) & 0xffffff) == 0x2e2e || !(entry[0] & 8),
-                                 1)) {
+            if (*reinterpret_cast<u16 *>(name) == '.' || (*reinterpret_cast<u32 *>(name) & 0xffffff) == 0x2e2e ||
+                !(entry[0] & 8)) {
                 continue;
             }
             if (next + name_length + 8 >= FS_FileList + sizeof(FS_FileList)) {
@@ -7178,7 +7152,7 @@ void FS_GetDirList(char *path, char *filter, char *filter_out) {
     if (directory != 0) {
         for (;;) {
             i32 name_length = NuFileReadDir(directory, entry);
-            if (__builtin_expect(name_length == 0, 0)) {
+            if (name_length == 0) {
                 break;
             }
             char *name = entry + 0x18;
@@ -7394,7 +7368,7 @@ eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemC
     DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(FileSelectorItem) == 0x64, "file selector item ABI");
 
     auto *item = static_cast<FileSelectorItem *>(NU_ALLOC(sizeof(FileSelectorItem), 4, 1, "", 0));
-    if (__builtin_expect(item != NULL, 1)) {
+    if (item != NULL) {
         memset(item, 0, sizeof(*item));
         item->type = 0x10;
         item->data = data;

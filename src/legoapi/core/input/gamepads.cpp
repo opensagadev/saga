@@ -283,7 +283,7 @@ void PadOutPause(i32 port, WORLDINFO_s *world) {
     if (Paused != 0 || NoPad(port, 1) == 0 || NewMode != 0 || NewLData != NULL || FadeSys.fade != 0.0f) {
         return;
     }
-    if (__builtin_expect(GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0, 1)) {
+    if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
         return;
     }
     if (MiniCutCam != 0 || (world->area != NULL && (world->area->flags & AREAFLAG_ENDING_AREA) != 0) ||
@@ -341,7 +341,7 @@ i32 ReadPad(i32 port) {
         return result;
     }
 
-    if (__builtin_expect(input_mode == 3, 0)) {
+    if (input_mode == 3) {
         gamepad->buttons_down_08 |= pad->digital_buttons_pressed & GAMEPAD_START;
         return 3;
     }
@@ -356,7 +356,7 @@ i32 ReadPad(i32 port) {
     const f32 left_y = static_cast<f32>(pad->analog_left_y) - 127.5f;
     if (left_y < -85.0f) {
         gamepad->unknown_0c |= GAMEPAD_DUP;
-    } else if (__builtin_expect(left_y > 85.0f, 1)) {
+    } else if (left_y > 85.0f) {
         gamepad->unknown_0c |= GAMEPAD_DDOWN;
     }
     gamepad->unknown_10 = gamepad->unknown_0c & ~gamepad->unknown_14;
@@ -394,7 +394,7 @@ void ReadPads() {
 }
 
 void DoInput(WORLDINFO_s *world) {
-    if (__builtin_expect(world == NULL, 0)) {
+    if (world == NULL) {
         world = WorldInfo_CurrentlyActive();
     }
 
@@ -431,8 +431,8 @@ void DoInput(WORLDINFO_s *world) {
             continue;
         }
 
-        if (__builtin_expect(Paused == 0, 1)) {
-            if (__builtin_expect(GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0, 1)) {
+        if (Paused == 0) {
+            if (GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0) {
                 if ((CUTSTOPGAME == 0 || CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) &&
                     MiniCutCam == 0 && memcard_autosavestarted == 0 && !(memcard_autosavepostdelay > 0.0f) &&
                     !(memcard_autosavepredelay > 0.0f) && GameTimer.update_count != 0) {

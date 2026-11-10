@@ -144,7 +144,7 @@ void DrawSnakeBody(GameObject_s *object) {
         nuhspecial_s *special = &snake_hspecials[special_index];
         if (NuSpecialExistsFn(special))
             NuSpecialDrawAt(special, &matrix);
-    } while (__builtin_expect(object->snake_body->segment_count > ++segment_index, 1));
+    } while (object->snake_body->segment_count > ++segment_index);
 }
 
 #define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
@@ -197,8 +197,7 @@ void BlowUpSnakeBody(GameObject_s *object) {
 }
 
 void SnakeBeenHit(GameObject_s *object) {
-    if (__builtin_expect(object != NULL, 1) && __builtin_expect(object->snake_body != NULL, 1) &&
-        __builtin_expect(object->snake_body->segment_count > 2, 1)) {
+    if ((object != NULL) && (object->snake_body != NULL) && (object->snake_body->segment_count > 2)) {
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 1);
         ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 2);
         object->snake_body->segment_count -= 2;

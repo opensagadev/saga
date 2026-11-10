@@ -125,14 +125,14 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                         area_count++;
                     }
                 } else if (NuStrICmp(fp->word_buf, "dir") == 0) {
-                    if (NuFParGetWord(fp) != 0 && __builtin_expect(NuStrLen(fp->word_buf) <= 0x3f, 0))
+                    if (NuFParGetWord(fp) != 0 && (NuStrLen(fp->word_buf) <= 0x3f))
                         NuStrCpy(area->dir, fp->word_buf);
                     in_area = 1;
                 } else if (NuStrICmp(fp->word_buf, "file") == 0) {
                     if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x1f)
                         NuStrCpy(area->file, fp->word_buf);
                     in_area = 1;
-                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "level") == 0, 1)) {
+                } else if (NuStrICmp(fp->word_buf, "level") == 0) {
                     if (area->level_count > 0xb || NuFParGetWord(fp) == 0) {
                         in_area = 1;
                     } else {
@@ -142,7 +142,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                             u8 n = area->level_count;
                             i32 k;
                             for (k = 0; k < n; k++) {
-                                if (__builtin_expect(area->levels[k] == li, 0))
+                                if (area->levels[k] == li)
                                     break;
                             }
                             if (k == n) {
@@ -214,7 +214,7 @@ AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferE
                     area->challenge_trial_time = NuFParGetInt(fp);
                 } else if (NuStrICmp(fp->word_buf, "redbrick_cheat") == 0 ||
                            NuStrICmp(fp->word_buf, "redbrick_extra") == 0) {
-                    if (__builtin_expect(NuFParGetWord(fp) == 0, 1)) {
+                    if (NuFParGetWord(fp) == 0) {
                         in_area = 1;
                     } else {
                         area->cheat = Cheat_FindByName(fp->word_buf);
@@ -366,7 +366,7 @@ struct LEVELDATA_s *Area_FindStatusLevel(AREADATA *area, i32 *indexDest) {
         *indexDest = -1;
     }
 
-    if (__builtin_expect(area == NULL || area->level_count == 0, 0)) {
+    if (area == NULL || area->level_count == 0) {
         return NULL;
     }
 
@@ -391,15 +391,15 @@ LEVELDATA *Area_FindNextPlayLevel(i32 levelIdx) {
 
     if (areaIdx != -1) {
         AREADATA *area = &ADataList[areaIdx];
-        if (__builtin_expect(areaLevelIdx < area->level_count - 1, 1)) {
+        if (areaLevelIdx < area->level_count - 1) {
             LEVELDATA *result = &LDataList[area->levels[areaLevelIdx]];
-            if (__builtin_expect((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0, 0)) {
+            if ((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
                 return result;
             }
             while (areaLevelIdx != area->level_count - 2) {
                 result = &LDataList[area->levels[areaLevelIdx + 1]];
                 ++areaLevelIdx;
-                if (__builtin_expect((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0, 0)) {
+                if ((result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
                     return result;
                 }
             }
@@ -603,9 +603,9 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
         }
         APICHARACTERMODELLIST_s *player_models = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
         for (i32 index = 0; index < count; ++index) {
-            if (__builtin_expect(Area_MissionModelCount < 0x30, 0))
+            if (Area_MissionModelCount < 0x30)
                 Area_MissionModelList[Area_MissionModelCount++] = {mission_characters[index], 1};
-            if (__builtin_expect(Area_PlayerModelCount < 8, 0))
+            if (Area_PlayerModelCount < 8)
                 player_models[Area_PlayerModelCount++] = {mission_characters[index], 1};
         }
         if (Area_MissionModelCount < 0x30)
@@ -687,13 +687,13 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                             }
                         }
                     }
-                    if (__builtin_expect(counter->pickups[counter->pickup_count].level_index != -1, 0))
+                    if (counter->pickups[counter->pickup_count].level_index != -1)
                         ++counter->pickup_count;
                 } else if (NuStrICmp(fp->word_buf, "colour") == 0) {
                     counter->red = static_cast<u8>(NuFParGetInt(fp));
                     counter->green = static_cast<u8>(NuFParGetInt(fp));
                     counter->blue = static_cast<u8>(NuFParGetInt(fp));
-                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "all_together") == 0, 1)) {
+                } else if (NuStrICmp(fp->word_buf, "all_together") == 0) {
                     counter->processed_flags |= 1;
                 }
             } else {
@@ -765,7 +765,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                     if (NuFParGetWord(fp) == 0)
                         continue;
                     Level_FindByName(fp->word_buf, &level_index);
-                    if (__builtin_expect(level_index == -1 || LDataList[level_index].area_index != area, 1))
+                    if (level_index == -1 || LDataList[level_index].area_index != area)
                         continue;
                     LevelLoad[LevelLoadCount].first_level = static_cast<i16>(level_index);
                     LevelLoad[LevelLoadCount].second_level = -1;

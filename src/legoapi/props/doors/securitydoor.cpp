@@ -36,7 +36,7 @@ void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 return;
             }
         } else {
-            if (__builtin_expect(playing == NULL, 1)) {
+            if (playing == NULL) {
                 return;
             }
             f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
@@ -141,7 +141,7 @@ static void SecurityDoors_Update(void *world_data, void *, float) {
     }
 
     for (i32 i = 0; i < world->security_door_count; ++i, ++door) {
-        if (__builtin_expect(door->state == 2 && door->opening < 1.0f, 0)) {
+        if (door->state == 2 && door->opening < 1.0f) {
             door->opening += FRAMETIME;
             if (door->opening >= 1.0f) {
                 door->opening = 1.0f;
@@ -360,7 +360,7 @@ static void SecurityDoors_Reset(void *world_data, void *, void *progress_data) {
         PlatInstRotate(door->platform_id[0], 1);
         PlatInstRotate(door->platform_id[1], 1);
 
-        if (__builtin_expect(progress != NULL && i <= 31, 1)) {
+        if (progress != NULL && i <= 31) {
             const u32 mask = 1U << i;
             door->visible = (progress->state[0] & mask) != 0;
             door->active = (progress->state[1] & mask) != 0;
@@ -391,7 +391,7 @@ static void *SecurityDoors_ReserveBufferSpace(void *world_data) {
     world->security_doors = NULL;
     world->security_door_count = 0;
 
-    if (__builtin_expect(world->current_level->max_security_doors != 0, 1)) {
+    if (world->current_level->max_security_doors != 0) {
         world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
         doors = static_cast<SECURITYDOOR *>(world->giz_buffer.void_ptr);
         world->security_doors = doors;

@@ -136,6 +136,14 @@ static i32 Tag_FindNextPlayer(GameObject_s *object) {
     return -1;
 }
 
+static inline i32 GetBundlePackProduct(STOREBUNDLE *bundle, i32 pack, NuIOS_InAppProduct *product) {
+    if (Store_IsPackUnlocked(pack))
+        return 0;
+    if ((bundle->pack_mask & (1u << pack)) == 0)
+        return 0;
+    return NuIOS_GetInAppProductByID(StorePack[pack].product_id, product);
+}
+
 static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
     struct InAppProductData {
         u8 field_0x0[0x300];
@@ -163,21 +171,16 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
                  message->blue, alpha & 0xff);
 
         const f32 savings_height = text3d_height;
-        uintptr_t cursor = reinterpret_cast<uintptr_t>(&StoreBundle[0].pack_mask);
-        for (i32 count = 3; count != 0; --count, cursor += sizeof(STOREBUNDLE)) {
-            u32 *bundle_mask = reinterpret_cast<u32 *>(cursor);
-            if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
+        STOREBUNDLE *bundle = StoreBundle;
+        for (i32 count = 3; count != 0; --count, ++bundle) {
+            if ((bundle->pack_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
                 continue;
             product.price = 0.0f;
-            NuIOS_GetInAppProductByID(reinterpret_cast<STOREBUNDLE *>(cursor - offsetof(STOREBUNDLE, pack_mask))->name,
-                                      reinterpret_cast<NuIOS_InAppProduct *>(&product));
+            NuIOS_GetInAppProductByID(bundle->name, reinterpret_cast<NuIOS_InAppProduct *>(&product));
             const f32 bundle_price = product.price;
             f32 pack_total = 0.0f;
             for (i32 index = 0; index < 11; ++index) {
-                if (__builtin_expect(Store_IsPackUnlocked(index), 0) == 0 &&
-                    __builtin_expect((*bundle_mask & (1u << index)) != 0, 1) &&
-                    NuIOS_GetInAppProductByID(StorePack[index].product_id,
-                                              reinterpret_cast<NuIOS_InAppProduct *>(&product)))
+                if (GetBundlePackProduct(bundle, index, reinterpret_cast<NuIOS_InAppProduct *>(&product)))
                     pack_total += product.price;
             }
             if (!(pack_total > bundle_price))
@@ -411,31 +414,22 @@ i32 TagCode(GameObject_s *source, GameObject_s *destination, i32 takeover, i32 b
     return 1;
 }
 
+static inline i32 TagAvailable(GameObject_s *candidate, GameObject_s *source) {
+    return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
+           candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
+           (candidate->tag_context_flags & 2) == 0;
+}
+
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
-    const auto available = [source](GameObject_s *candidate) {
-        return candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate != source &&
-               candidate->apiobj.field_0x287 == 0 && !candidate->apiobj.player_controlled &&
-               (candidate->tag_context_flags & 2) == 0;
-    };
-    if (!available(target)) {
-        if (available(Player[0]))
-            target = Player[0];
-        else if (available(Player[1]))
-            target = Player[1];
-        else if (__builtin_expect(!!(available(Player[2])), 0))
-            target = Player[2];
-        else if (available(Player[3]))
-            target = Player[3];
-        else if (__builtin_expect(!!(available(Player[4])), 0))
-            target = Player[4];
-        else if (__builtin_expect(!!(available(Player[5])), 0))
-            target = Player[5];
-        else if (__builtin_expect(available(Player[6]) != 0, 0))
-            target = Player[6];
-        else if (available(Player[7]))
-            target = Player[7];
-        else
+    if (!TagAvailable(target, source)) {
+        i32 i;
+        for (i = 0; i < 8; ++i) {
+            if (TagAvailable(Player[i], source))
+                break;
+        }
+        if (i == 8)
             return 0;
+        target = Player[i];
     }
     const u8 target_active = target->apiobj.flags_low >> 7;
     const u8 source_active = source->apiobj.flags_low >> 7;
@@ -447,7 +441,7 @@ i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
         source->tag_context_flags = flags;
         return 0;
     }
-    if (__builtin_expect(result == 0, 0))
+    if (result == 0)
         return 0;
     target->apiobj.flags_low = (target->apiobj.flags_low & 0x7f) | (source_active << 7);
     source->apiobj.flags_low = (source->apiobj.flags_low & 0x7f) | (target_active << 7);
@@ -486,7 +480,7 @@ void ReleaseTakeOver(GameObject_s *self, i32) {
     u8 object_set = object->ai.creature_set;
     u8 rider_flag = rider->apiobj.script_enabled;
     u8 object_flag = object->apiobj.script_enabled;
-    if ((rider->field_0xf00 & 2) == 0 && __builtin_expect(TagCode(rider, object, 1, 0, 0) == 0, 0))
+    if ((rider->field_0xf00 & 2) == 0 && (TagCode(rider, object, 1, 0, 0) == 0))
         return;
     object_script.process.creature_set = object_set;
     memcpy(&rider->ai, &object_script, sizeof(object_script));
@@ -660,8 +654,8 @@ void Tag_Check(GameObject_s *object) {
                 if ((object->pad_gamepad->buttons_pressed & GAMEPAD_TAG) != 0)
                     object->hud_icon_timer = 2.0f;
             } else {
-                if (__builtin_expect(Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1, 1)) {
-                    if (__builtin_expect(FindGameMsgsWithID(-1, 0, -1, NULL) == 0, 1)) {
+                if (Arcade == 0 && Tag_Mode == 3 && GetMenuID() == -1) {
+                    if (FindGameMsgsWithID(-1, 0, -1, NULL) == 0) {
                         i32 pack_index = -1;
                         f32 nearest = 0.7f * 0.7f * 2.0f;
 
@@ -738,8 +732,7 @@ void Tag_Check(GameObject_s *object) {
                             }
                         } else {
                             if (Tag_Mode == 1) {
-                                if (object->character_context == 0x17 ||
-                                    __builtin_expect(object->character_context == -1, 0) ||
+                                if (object->character_context == 0x17 || (object->character_context == -1) ||
                                     (CInfo[object->character_context].flags & (0x10ull << 32)) != 0 ||
                                     (CInfo[object->character_context].flags & 4) != 0) {
                                     GameObject_s *found = Tag_FindGameObject_TRANSFER(object);
@@ -754,7 +747,7 @@ void Tag_Check(GameObject_s *object) {
                         }
                         if (target != NULL) {
                             no_target = 0;
-                            if (__builtin_expect((target->field_0xf00 & 2) != 0, 0)) {
+                            if ((target->field_0xf00 & 2) != 0) {
                                 TakeOver2GetIn(target, object);
                             } else if (!object->apiobj.player_controlled || !target->apiobj.player_controlled) {
                                 result = TagCode(object, target, 0, 0, 1);
@@ -773,7 +766,7 @@ void Tag_Check(GameObject_s *object) {
                             }
                         }
                     }
-                    if (no_target && __builtin_expect(object->field_0xcc0 == NULL, 1))
+                    if (no_target && (object->field_0xcc0 == NULL))
                         object->hud_icon_timer = 2.0f;
                 }
             }
@@ -800,7 +793,7 @@ void Tag_Check(GameObject_s *object) {
         else
             GameCam_Reset(GameCam);
         RememberPlayerIDs(0, Player[0] != NULL ? Player[0]->id : -1, Player[1] != NULL ? Player[1]->id : -1);
-        if (__builtin_expect((Tag_Mode & ~2) == 1, 0))
+        if ((Tag_Mode & ~2) == 1)
             Tag_NewTransfer(object, target);
         if (static_cast<u8>(object->apiobj.field_0x27c) < 2 && static_cast<u8>(target->apiobj.field_0x27c) < 2)
             ResetTimer(&JoinInTimer, 0.0f);
@@ -829,7 +822,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
             if (api.player_controlled) {
-                if (target->id == id_GRABCONTROL || __builtin_expect(target->id == id_GRABR2CONTROL, 0)) {
+                if (target->id == id_GRABCONTROL || (target->id == id_GRABR2CONTROL)) {
                     Hint_SetComplete(0x28a);
                 } else if (target->apiobj.character_data->move_fn == Move_BEAST) {
                     Hint_SetComplete(0x263);
@@ -913,8 +906,8 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         object->takeover_timer -= FRAMETIME;
         return;
     }
-    if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 ||
-        __builtin_expect(!(object->takeover_timer <= 0.0f), 0) || object->character_context == 0x2b ||
+    if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 || (!(object->takeover_timer <= 0.0f)) ||
+        object->character_context == 0x2b ||
         (object->character_context != -1 && (object->character_context != 0 || object->action_movement_state == 3 ||
                                              object->action_movement_state == 4)) ||
         api.field_0x27d == 0) {
@@ -925,22 +918,19 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
     GameObject_s *candidate = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
         const APIOBJECT &other = candidate->apiobj;
-        if (__builtin_expect((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 ||
-                                 other.field_0x27c != -1 || (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
-                                 candidate->field_0xcc0 != NULL ||
-                                 (other.character_data->game_character->flags_090 & 0x40) == 0 ||
-                                 ((other.character_data->model_flags & 0x40000000) != 0 &&
-                                  (candidate->character_context == 0x17 || candidate->character_context == 0x3e)) ||
-                                 (candidate->tag_flags & 2) != 0,
-                             1))
+        if ((other.field_0x1f8 & 0x1001) != 0x1001 || other.field_0x287 != 0 || other.field_0x27c != -1 ||
+            (CInfo[candidate->character_context].flags & 0x8000) != 0 || candidate->field_0xcc0 != NULL ||
+            (other.character_data->game_character->flags_090 & 0x40) == 0 ||
+            ((other.character_data->model_flags & 0x40000000) != 0 &&
+             (candidate->character_context == 0x17 || candidate->character_context == 0x3e)) ||
+            (candidate->tag_flags & 2) != 0)
             continue;
-        if (__builtin_expect(candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA, 1)) {
+        if (candidate->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
             if (api.field_0x281 == 0x13)
                 nearest = candidate;
             continue;
         }
-        if (__builtin_expect(api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y,
-                             1))
+        if (api.collision_min.y > other.collision_max.y || other.collision_min.y > api.collision_max.y)
             continue;
         destination.x = other.collision_position.x - api.collision_position.x;
         destination.z = other.collision_position.z - api.collision_position.z;

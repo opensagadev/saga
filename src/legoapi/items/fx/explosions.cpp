@@ -124,7 +124,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
         GameObject_s *target = Obj;
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             APIOBJECT_s *object = &target->apiobj;
-            if (__builtin_expect((object->field_0x1f8 & 0x1001) != 0x1001 || object->field_0x287 != 0, 1))
+            if ((object->field_0x1f8 & 0x1001) != 0x1001 || object->field_0x287 != 0)
                 continue;
             if ((CInfo[static_cast<i8>(target->character_context)].flags & 0x20008000) != 0)
                 continue;
@@ -138,9 +138,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 (((object->field_0x1e4 & explosion->field_0x00) | (object->field_0x1e8 & explosion->field_0x04)) != 0 ||
                  explosion->object == target))
                 continue;
-            if (__builtin_expect(object->collision_min.x > maximum.x || minimum.x > object->collision_max.x ||
+            if (object->collision_min.x > maximum.x || minimum.x > object->collision_max.x ||
                 object->collision_min.y > maximum.y || minimum.y > object->collision_max.y ||
-                object->collision_min.z > maximum.z || minimum.z > object->collision_max.z, 0))
+                object->collision_min.z > maximum.z || minimum.z > object->collision_max.z)
                 continue;
             if (!SphereSphereOverlapScaleY(&object->collision_position, object->field_0x1dc, object->field_0x1e0,
                                            &explosion->position, radius, radius))
@@ -185,7 +185,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                     continue;
                 }
             }
-            if (__builtin_expect(!!(CannotKill(target)), 0)) {
+            if (CannotKill(target)) {
                 hit_character = 1;
                 continue;
             }
@@ -207,7 +207,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                     source = Player[1];
             }
             u16 hit_flags;
-            if (__builtin_expect((explosion->field_0x24 & 0x200) != 0, 0))
+            if ((explosion->field_0x24 & 0x200) != 0)
                 hit_flags = explosion->field_0x2e | 0x4200;
             else
                 hit_flags = explosion->field_0x2e | 0x200;

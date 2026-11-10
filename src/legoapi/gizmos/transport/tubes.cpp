@@ -73,7 +73,7 @@ static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only) {
 
     TUBE *tube = static_cast<TUBE *>(gizmo->object);
     if ((check_only & 1) != 0) {
-        return ((tube->flags & TUBE_FLAG_REVERSED) != 0) != (reverse != 0);
+        return reverse != (static_cast<u8>(tube->flags >> 3) & 1);
     }
 
     if (reverse != 0) {
@@ -340,11 +340,11 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time) {
 
                 GameObject_s *object = Obj;
                 for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
-                    if (__builtin_expect((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
+                    if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                             (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
                         object->apiobj.field_0x287 != 0 ||
                         (object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_TUBE_USER) == 0 ||
-                        (GCDataList[object->id].field_0x94 & GAME_CHARACTER_FLAG_EXCLUDE_DIRECTIONAL_TUBE) != 0, 1)) {
+                        (GCDataList[object->id].field_0x94 & GAME_CHARACTER_FLAG_EXCLUDE_DIRECTIONAL_TUBE) != 0) {
                         continue;
                     }
 
@@ -388,7 +388,7 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time) {
 }
 
 void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
-    if (__builtin_expect(LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL, 0)) {
+    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL) {
         if (Tube_InCylinder(object, static_cast<TUBE *>(object->field_0x788), NULL, 0) == 0)
             object->field_0x788 = NULL;
         return;
@@ -397,7 +397,7 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
     if (LEGOCONTEXT_TUBE == -1)
         return;
     if (object->character_context == LEGOCONTEXT_TUBE) {
-        if (__builtin_expect(Tube_InCylinder(object, static_cast<TUBE *>(object->field_0x788), NULL, 0) == 0, 0))
+        if (Tube_InCylinder(object, static_cast<TUBE *>(object->field_0x788), NULL, 0) == 0)
             object->character_context = -1;
         return;
     }

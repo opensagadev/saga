@@ -86,7 +86,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
         i32 target;
         for (target = 0; target < batarang->active; ++target) {
-            if (__builtin_expect(batarang->targets[target].object != candidate, 0)) {
+            if (batarang->targets[target].object != candidate) {
                 continue;
             }
             break;
@@ -101,7 +101,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             if (!(delta.x * forward.x + delta.z * forward.z > 0.0f)) {
                 continue;
             }
-            if (__builtin_expect(distance < nearest_distance, 1)) {
+            if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest_object = candidate;
             }
@@ -188,7 +188,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             if (!(delta.x * forward.x + delta.z * forward.z > 0.0f)) {
                 continue;
             }
-            if (__builtin_expect(distance < nearest_distance, 0)) {
+            if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest_blowup = candidate;
             }
@@ -219,7 +219,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
     }
     u8 count = batarang->active;
-    if (__builtin_expect(count > 4, 0)) {
+    if (count > 4) {
         if (static_cast<i32>(GameTimer.time_elapsed / 0.2f) == static_cast<i32>(GameTimer.last_time_elapsed / 0.2f)) {
             return 0;
         }
@@ -361,7 +361,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
         if (GameRayCast(&batarang->position, &travel, 0.1f, 0x1f) != 0) {
             i32 platform = TerrainPlatId();
             bool ricochet = batarang->field_0x7d != 0 && batarang->current_target >= batarang->active;
-            if (__builtin_expect(!ricochet, 1)) {
+            if (!ricochet) {
                 BATARANG_TARGET_s *current = &batarang->targets[batarang->current_target];
                 switch (current->type) {
                     case 0:
@@ -376,7 +376,7 @@ i32 Batarang_SeekToTarget(BATARANG_s *batarang) {
                         break;
                 }
             }
-            if (__builtin_expect(ricochet != 0, 1)) {
+            if (ricochet != 0) {
                 NewRayCastGetImpactNormal(&travel);
                 Batarang_InitRicochet(batarang, &travel);
             }
@@ -417,35 +417,32 @@ void Batarangs_Draw() {
 
 void Batarangs_CheckLostData(void *data) {
     BATARANG_s *batarang = Batarang;
-    BATARANG_s *end = Batarang + 8;
-    do {
+    i32 i, j, k;
+    for (i = 0; i < 8; ++i, ++batarang) {
         if (batarang->owner == data) {
-        reset:
             batarang->field_0x7d = 0;
             batarang->active = 0;
             batarang->owner = NULL;
             batarang->cooldown = 0x32;
-        } else {
-            BATARANG_TARGET_s *target_data = batarang->targets;
-            for (i32 target = 0; target < batarang->active; ++target, ++target_data) {
-                if (target_data->object != data) {
+        } else if (batarang->active > 0) {
+            for (j = 0; j < batarang->active; ++j) {
+                if (batarang->targets[j].object != data)
                     continue;
+                if (data == batarang->owner) {
+                    batarang->field_0x7d = 0;
+                    batarang->active = 0;
+                    batarang->owner = NULL;
+                    batarang->cooldown = 0x32;
+                } else if (batarang->field_0x7d != 0) {
+                    batarang->targets[j].lost = 1;
+                } else {
+                    for (k = j; k < batarang->active - 1; ++k)
+                        batarang->targets[k] = batarang->targets[k + 1];
+                    --batarang->active;
                 }
-                if (batarang->owner == data) {
-                    goto reset;
-                }
-                if (__builtin_expect(batarang->field_0x7d != 0, 0)) {
-                    target_data->lost = 1;
-                    continue;
-                }
-                for (i32 move = target + 1; move < batarang->active; ++move) {
-                    batarang->targets[move - 1] = batarang->targets[move];
-                }
-                --batarang->active;
             }
         }
-        ++batarang;
-    } while (batarang != end);
+    }
 }
 
 i32 Batarang_GetObjectFromCharID(i32 character) {
@@ -487,7 +484,7 @@ void Batarangs_Update() {
             continue;
         }
         batarang->flight_time += FRAMETIME;
-        if (__builtin_expect(batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f, 1))
+        if (batarang->flight_time >= 2.0f && batarang->flight_time > 4.0f)
             batarang->flight_time = 4.0f;
 
         while (batarang->targets[batarang->current_target].lost != 0 && batarang->current_target < batarang->active) {
@@ -596,7 +593,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             object->field_0xc54 > 0.0f && object->hold_timer >= 0.25f && object->apiobj.field_0x27d != 0 &&
             ObjLandReady(object) != 0) {
             object->field_0xe22 |= 0x40;
-            if (__builtin_expect(0.25f > object->hold_timer - FRAMETIME, 0)) {
+            if (0.25f > object->hold_timer - FRAMETIME) {
                 Batarang_StartTargetting(object);
             }
         }
@@ -606,7 +603,7 @@ void Batarang_MoveCode(GameObject_s *object) {
         GAMEPAD_s *pad = object->pad_gamepad;
         object->field_0xe22 |= 0x40;
         object->jump_flags |= 2;
-        if (__builtin_expect((pad->buttons_pressed & GAMEPAD_JUMP) != 0, 0)) {
+        if ((pad->buttons_pressed & GAMEPAD_JUMP) != 0) {
             StartJump(object, 0);
             return;
         }
@@ -694,7 +691,7 @@ void Batarang_MoveCode(GameObject_s *object) {
             object->landing_followup = 1;
         }
         if ((object->context_flags & 0x40) != 0) {
-            if (__builtin_expect(object->landing_followup == 1 && 0.2f <= object->context_animation_timer, 1)) {
+            if (object->landing_followup == 1 && 0.2f <= object->context_animation_timer) {
                 StartJump(object, 0);
                 object->movement_runtime_flags |= 0x10;
                 goto finish;

@@ -91,7 +91,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 f32 frame = *playing;
                 if (!(frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
                     return;
-            } else if (__builtin_expect(object->context_animation_timer < 0.25f, 0)) {
+            } else if (object->context_animation_timer < 0.25f) {
                 return;
             }
         }
@@ -109,7 +109,7 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
         return;
-    if (__builtin_expect(!(!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a)), 1)) {
+    if (!(!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))) {
         LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
         if (objInNetWaitContext(object, 0x4a)) {
             object->context_animation_timer -= FRAMETIME;
@@ -126,10 +126,9 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 show_lever_hint = 1;
         }
         f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
-        if (__builtin_expect(!(distance < range * range), 0))
+        if (!(distance < range * range))
             return;
-        if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) &&
-            __builtin_expect(!objInNetWaitContext(object, 0x4a), 0))
+        if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && (!objInNetWaitContext(object, 0x4a)))
             return;
         Lever_StartPull(object, lever);
     }
@@ -381,9 +380,8 @@ static void Levers_Draw(void *world_ptr, void *, float) {
                 draw_target = world->lev_objs[LEVER_SPECIAL_TARGET].active != 0;
             }
 
-            if (__builtin_expect((lever.flags & LEVER_FLAG_IDLE_STATE_MASK) == LEVER_FLAG_ENABLED &&
-                                     world->lev_objs[LEVER_SPECIAL_READY].active != 0,
-                                 0)) {
+            if ((lever.flags & LEVER_FLAG_IDLE_STATE_MASK) == LEVER_FLAG_ENABLED &&
+                world->lev_objs[LEVER_SPECIAL_READY].active != 0) {
                 NuSpecialDrawAtAlpha(&world->lev_objs[LEVER_SPECIAL_READY].special, &target_matrix, ready_alpha);
             } else if (!draw_target) {
                 goto draw_status;
@@ -484,7 +482,7 @@ static void Lever_Activate(GIZMO *gizmo, i32 enabled) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    if (__builtin_expect(enabled == 0, 0)) {
+    if (enabled == 0) {
         lever->flags &= ~LEVER_FLAG_ENABLED;
     } else {
         lever->flags |= LEVER_FLAG_ENABLED;
@@ -517,7 +515,7 @@ static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
     const u8 was_visible = lever->visible;
     lever->visible = visible != 0;
     if (lever->visible) {
-        if (__builtin_expect(!was_visible, 0)) {
+        if (!was_visible) {
             lever->platform_id = NewPlatPickupInst(lever, 3);
             PlatInstRotate(lever->platform_id, 1);
         }

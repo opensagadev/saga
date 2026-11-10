@@ -42,12 +42,12 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &object) {
         if (first_recent && later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (__builtin_expect(!(tracker != NULL && tracker->OnDoubleClick(object, holder)), 1)) {
+                if (!(tracker != NULL && tracker->OnDoubleClick(object, holder))) {
                     continue;
                 }
                 break;
             }
-        } else if (__builtin_expect(first_recent || later_recent, 0)) {
+        } else if (first_recent || later_recent) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
                 if (!(tracker != NULL && tracker->OnClick(object, holder))) {
@@ -137,7 +137,7 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
         if (squared_path > 0.05f) {
             for (i32 priority = 0; priority < 10; ++priority) {
                 MechInputTouchGestureTracker *tracker = entries[priority].tracker;
-                if (__builtin_expect(tracker != NULL && tracker->OnSwipe(object, holder, previous_index), 0)) {
+                if (tracker != NULL && tracker->OnSwipe(object, holder, previous_index)) {
                     break;
                 }
             }
@@ -276,7 +276,7 @@ void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouc
     do {
         trackers[index] = trackers[index + 1];
         ++index;
-    } while (__builtin_expect(index != 9, 0));
+    } while (index != 9);
     trackers[9].tracker = NULL;
     trackers[9].priority = -1;
 }

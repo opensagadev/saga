@@ -68,109 +68,109 @@ extern "C" {
         return NuIOS_GetAspectRatio() > 1.5f;
     }
 
-extern "C" __attribute__((optimize("O2"))) i32 NuMain(i32 argc, char **argv) {
-    static i32 frameCount = 0;
-    static f32 pastFrameTimes[8] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f};
+    extern "C" i32 NuMain(i32 argc, char **argv) {
+        static i32 frameCount = 0;
+        static f32 pastFrameTimes[8] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f};
 
-    WORLDINFO_s *world;
-    GAMECAMERA_s *gameCam;
-    AREADATA *afterArea;
-    nucamera_s *cam;
-    char c;
-    GIZAIMESSAGESYS_s *messageSystem;
-    GIZAIMESSAGE_s *gizMessage;
-    GIZAIMESSAGE_s *missionModeMessage;
-    nupad_s *rumblePad0;
-    nupad_s *rumblePad1;
-    GameObject_s *pausePlayer;
-    u32 pauseFlag;
-    i32 renderPaused;
-    LEVELDATA_s *level;
-    i32 currentEpisodeIndex;
-    i32 previousEpisodeIndex;
-    i32 i;
-    i32 averagedFrameCount;
-    i32 longestFrameIndex;
-    i32 shortestFrameIndex;
-    byte panelOpts;
-    f32 frameTimeAccumulator;
-    f32 shortestFrameTime;
-    f32 savedFrametime;
-    FADETYPE fadeType;
-    nupad_s *pads[2];
-    ThingProcessData framePacket;
-    // The original realigns the stack to 16 bytes for this array, which is
-    // passed by address to the wind and fade-object updaters.
-    NUVEC *windObjs[8] __attribute__((aligned(16)));
+        WORLDINFO_s *world;
+        GAMECAMERA_s *gameCam;
+        AREADATA *afterArea;
+        nucamera_s *cam;
+        char c;
+        GIZAIMESSAGESYS_s *messageSystem;
+        GIZAIMESSAGE_s *gizMessage;
+        GIZAIMESSAGE_s *missionModeMessage;
+        nupad_s *rumblePad0;
+        nupad_s *rumblePad1;
+        GameObject_s *pausePlayer;
+        u32 pauseFlag;
+        i32 renderPaused;
+        LEVELDATA_s *level;
+        i32 currentEpisodeIndex;
+        i32 previousEpisodeIndex;
+        i32 i;
+        i32 averagedFrameCount;
+        i32 longestFrameIndex;
+        i32 shortestFrameIndex;
+        byte panelOpts;
+        f32 frameTimeAccumulator;
+        f32 shortestFrameTime;
+        f32 savedFrametime;
+        FADETYPE fadeType;
+        nupad_s *pads[2];
+        ThingProcessData framePacket;
+        // The original realigns the stack to 16 bytes for this array, which is
+        // passed by address to the wind and fade-object updaters.
+        NUVEC *windObjs[8] __attribute__((aligned(16)));
 
-    NuSoundAppTerminateCallback = NuSoundAppTerminate;
-    NuCommandLine(&argc, &argv);
-    NuIOS_RecordFlurryEvent("app_open");
-    WorldInfo_InitOnce();
-    InitOnce(argc, argv);
-    TriggerExtraDataLoad();
-    MenuInitialise(GameMenuInfo, LEGO_MENU_ID_COUNT, LANGUAGECOUNT, DrawSaveSlots, 1, 0);
-    MenuReset();
-    edGraInitTerrainSwapProtection();
-    NuHGobjReversibleCharacters(1);
-    NuHGobjForceShadowsOnCharacters(1);
-    GameAISysInit();
-    APITransparentInit();
-    NuSound3SetLoopHoldTime(0.5f);
-    InitShadowLights();
-    GamePads_Init();
-    MechSystems::Get()->EnterLevel((WORLDINFO_s *)0);
-    bgProcInit();
-    FinishLoop(2);
-    Text_InitLanguageList(Game_LanguageList);
-    Text_SetLanguage(-1);
-    StartPerm();
-    LoadPerm();
-    EndPerm();
-
-    if (GAMEDEMO != 0) {
-        world = WORLD;
-        WORLD = NULL;
-        PLAYERCOUNT = 0;
-        Movie_Play(Trailer[0], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL,
-                   (float)Game.options_save.field4_0x4 / 10.0f);
+        NuSoundAppTerminateCallback = NuSoundAppTerminate;
+        NuCommandLine(&argc, &argv);
+        NuIOS_RecordFlurryEvent("app_open");
+        WorldInfo_InitOnce();
+        InitOnce(argc, argv);
+        TriggerExtraDataLoad();
+        MenuInitialise(GameMenuInfo, LEGO_MENU_ID_COUNT, LANGUAGECOUNT, DrawSaveSlots, 1, 0);
+        MenuReset();
+        edGraInitTerrainSwapProtection();
+        NuHGobjReversibleCharacters(1);
+        NuHGobjForceShadowsOnCharacters(1);
+        GameAISysInit();
+        APITransparentInit();
+        NuSound3SetLoopHoldTime(0.5f);
+        InitShadowLights();
+        GamePads_Init();
+        MechSystems::Get()->EnterLevel((WORLDINFO_s *)0);
+        bgProcInit();
         FinishLoop(2);
-        WORLD = world;
-    }
+        Text_InitLanguageList(Game_LanguageList);
+        Text_SetLanguage(-1);
+        StartPerm();
+        LoadPerm();
+        EndPerm();
 
-    if (__builtin_expect(openlevels != 0, 1)) {
-        Areas_OpenAll(0);
-    }
+        if (GAMEDEMO != 0) {
+            world = WORLD;
+            WORLD = NULL;
+            PLAYERCOUNT = 0;
+            Movie_Play(Trailer[0], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL,
+                       (float)Game.options_save.field4_0x4 / 10.0f);
+            FinishLoop(2);
+            WORLD = world;
+        }
 
-    if (Level == -1) {
-        Level = 0;
-        i = 0;
-    } else {
-        i = Level * sizeof(LEVELDATA_s);
-    }
-    Area = reinterpret_cast<LEVELDATA_s *>(reinterpret_cast<char *>(LDataList) + i)->area_index;
-    last_area = -1;
-    LastAData = NULL;
+        if (openlevels != 0) {
+            Areas_OpenAll(0);
+        }
 
-    if (Area == -1) {
-        goto check_gamedemo;
-    }
-    if (__builtin_expect((ADataList[Area].flags & AREAFLAG_BONUS_AREA) == 0, 0)) {
-        goto check_gamedemo;
-    }
-    NextArea_FreePlay = 1;
-    FreePlay = 1;
-    goto continue_init;
-check_gamedemo:
-    if (!(1 < GAMEDEMO)) {
-        if (GAMEDEMO != 0 && FreePlay != 0) {
+        if (Level == -1) {
+            Level = 0;
+            i = 0;
+        } else {
+            i = Level * sizeof(LEVELDATA_s);
+        }
+        Area = reinterpret_cast<LEVELDATA_s *>(reinterpret_cast<char *>(LDataList) + i)->area_index;
+        last_area = -1;
+        LastAData = NULL;
+
+        if (Area == -1) {
+            goto check_gamedemo;
+        }
+        if ((ADataList[Area].flags & AREAFLAG_BONUS_AREA) == 0) {
+            goto check_gamedemo;
+        }
+        NextArea_FreePlay = 1;
+        FreePlay = 1;
+        goto continue_init;
+    check_gamedemo:
+        if (!(1 < GAMEDEMO)) {
+            if (GAMEDEMO != 0 && FreePlay != 0) {
+                FreePlay = 1;
+                GAMEDEMO = 2;
+            }
+        } else {
             FreePlay = 1;
             GAMEDEMO = 2;
         }
-    } else {
-        FreePlay = 1;
-        GAMEDEMO = 2;
-    }
 continue_init:
     makefreeplaymodellist = 0;
     if (!((HUB_ADATA == NULL) || (Area != (u32)(byte)HUB_ADATA->index))) {
@@ -278,7 +278,7 @@ giz_freeplay:
     ResetCharacterBuffer(0);
     memset(Player, 0, 8 * sizeof(Player[0]));
 
-    if (__builtin_expect((PlayTrailer != -1) && (characterbuffer_ptr.void_ptr == characterbuffer_base.void_ptr), 1)) {
+    if ((PlayTrailer != -1) && (characterbuffer_ptr.void_ptr == characterbuffer_base.void_ptr)) {
         Movie_Play(Trailer[PlayTrailer * 3], &characterbuffer_ptr, &characterbuffer_end, DEFAULTFRAMETIME, NULL,
                    (float)Game.options_save.field4_0x4 / 10.0f);
     }
@@ -435,16 +435,12 @@ giz_freeplay:
                     (((world == NULL) ||
                       ((world->area == NULL) || ((world->area->flags & AREAFLAG_ENDING_AREA) == 0))) &&
                      (NewMode == 0))) {
-                    if (__builtin_expect(
-                            ((((NewLData == NULL) && (FadeSys.fade == 0.0f)) && (editor_active == 0)) &&
-                             ((GamePads_IgnoreInputFn == NULL) || (i = (*GamePads_IgnoreInputFn)(), i == 0))) != 0,
-                            1) &&
-                        __builtin_expect(
-                            ((CUTSTOPGAME == 0) || ((i = CutScene_IsSkippable((CUTINFO *)CutStopInfo), i != 0))) != 0,
-                            1)) {
+                    if ((((((NewLData == NULL) && (FadeSys.fade == 0.0f)) && (editor_active == 0)) &&
+                          ((GamePads_IgnoreInputFn == NULL) || (i = (*GamePads_IgnoreInputFn)(), i == 0))) != 0) &&
+                        (((CUTSTOPGAME == 0) || (i = CutScene_IsSkippable((CUTINFO *)CutStopInfo), i != 0)) != 0)) {
                         if ((MiniCutCam == 0) && (CutSceneWaiting == 0)) {
                             if (GameMenu[GameMenuLevel].menu == -1) {
-                                if (__builtin_expect(Paused == 0, 0)) {
+                                if (Paused == 0) {
                                     if ((Player[0] != NULL) && Player[0]->apiobj.player_controlled) {
                                         pausePlayer = Player[0];
                                     } else if ((Player[1] != NULL) && Player[1]->apiobj.player_controlled) {
@@ -502,14 +498,9 @@ giz_freeplay:
                     ProcessMusicChanges(world->current_level, &Game.options_save);
                 }
 
-                windObjs[0] = Player[0] != NULL ? (NUVEC *)&Player[0]->apiobj.field_0x19c : NULL;
-                windObjs[1] = Player[1] != NULL ? (NUVEC *)&Player[1]->apiobj.field_0x19c : NULL;
-                windObjs[2] = Player[2] != NULL ? (NUVEC *)&Player[2]->apiobj.field_0x19c : NULL;
-                windObjs[3] = Player[3] != NULL ? (NUVEC *)&Player[3]->apiobj.field_0x19c : NULL;
-                windObjs[4] = Player[4] != NULL ? (NUVEC *)&Player[4]->apiobj.field_0x19c : NULL;
-                windObjs[5] = Player[5] != NULL ? (NUVEC *)&Player[5]->apiobj.field_0x19c : NULL;
-                windObjs[6] = Player[6] != NULL ? (NUVEC *)&Player[6]->apiobj.field_0x19c : NULL;
-                windObjs[7] = Player[7] != NULL ? (NUVEC *)&Player[7]->apiobj.field_0x19c : NULL;
+                for (i32 i = 0; i < 8; ++i) {
+                    windObjs[i] = Player[i] != NULL ? (NUVEC *)&Player[i]->apiobj.field_0x19c : NULL;
+                }
 
                 if (!(((Paused == 0) || (screendump != 0)) || ((c = IsGrabbingScreen(), c != 0)))) {
                     NuMtlAnimateSetSpeedScale(0.0f);
@@ -590,37 +581,11 @@ giz_freeplay:
                     }
 
                     if (CUTSTOPGAME != 0) {
-                        if ((Player[0] != NULL) && Player[0]->apiobj.player_controlled &&
-                            (Player[0]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[0]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[1] != NULL) && Player[1]->apiobj.player_controlled &&
-                            (Player[1]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[1]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[2] != NULL) && Player[2]->apiobj.player_controlled &&
-                            (Player[2]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[2]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[3] != NULL) && Player[3]->apiobj.player_controlled &&
-                            (Player[3]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[3]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[4] != NULL) && Player[4]->apiobj.player_controlled &&
-                            (Player[4]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[4]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[5] != NULL) && Player[5]->apiobj.player_controlled &&
-                            (Player[5]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[5]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[6] != NULL) && Player[6]->apiobj.player_controlled &&
-                            (Player[6]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[6]->pad_gamepad->rumble_packet);
-                        }
-                        if ((Player[7] != NULL) && Player[7]->apiobj.player_controlled &&
-                            (Player[7]->pad_gamepad->pad != NULL)) {
-                            UpdateRumble(&Player[7]->pad_gamepad->rumble_packet);
+                        for (i32 i = 0; i < 8; ++i) {
+                            if ((Player[i] != NULL) && Player[i]->apiobj.player_controlled &&
+                                (Player[i]->pad_gamepad->pad != NULL)) {
+                                UpdateRumble(&Player[i]->pad_gamepad->rumble_packet);
+                            }
                         }
                     } else {
                         ManageGameObjects();
@@ -764,15 +729,13 @@ giz_freeplay:
                     level = world->current_level;
                     if ((level != NULL) && ((level->flags & LEVEL_STATUS) != 0) && (HUB_LDATA != NULL) &&
                         (HUB_LDATA != NewLData) && (NewLData != NULL) && (NewLData->area_index != -1) &&
-                        __builtin_expect(((ADataList[NewLData->area_index].flags & AREAFLAG_ENDING_AREA) == 0) != 0,
-                                         1)) {
+                        (((ADataList[NewLData->area_index].flags & AREAFLAG_ENDING_AREA) == 0) != 0)) {
                         FadeSys.fade = 1.0f;
                         FinishLoop_On = 0;
                     } else {
                         if ((FadeSys.pending_type == FADE_TYPE_NONE) ||
-                            __builtin_expect(((NewLData != NULL) && (WORLD->current_level != NewLData) &&
-                                              (NewLData == HUB_LDATA)) != 0,
-                                             1)) {
+                            (((NewLData != NULL) && (WORLD->current_level != NewLData) && (NewLData == HUB_LDATA)) !=
+                             0)) {
                             level = WORLD->current_level;
                             if (level != NULL) {
                                 if (NewLData == NULL) {
@@ -889,7 +852,7 @@ giz_freeplay:
                     Grabber_Draw(world);
                     SetLevelLights(world->rtl_set, 1.0f);
 
-                    if (__builtin_expect((editor_active == 0) && (Paused == 0) && (CUTSTOPGAME == 0), 1)) {
+                    if ((editor_active == 0) && (Paused == 0) && (CUTSTOPGAME == 0)) {
                         CharShadows_Update();
                         GameObjectStuffAfterAnimation();
                     }
@@ -907,7 +870,7 @@ giz_freeplay:
                     if ((world->lev_objs[1].active != 0) && ((CUTSTOPGAME == 0) || (CUTDRAWWORLD != 0))) {
                         DrawParallax(&world->lev_objs[1].special);
                     }
-                    if (__builtin_expect(CUTSTOPGAME == 0, 1)) {
+                    if (CUTSTOPGAME == 0) {
                         if (TimingBarSet == 5) {
                             TBOPENFN("DrwWld", 5);
                         }
@@ -1124,7 +1087,7 @@ giz_freeplay:
 
             if (shortestFrameIndex != 1) {
                 if (longestFrameIndex != 1) {
-                    if (__builtin_expect(0.0f <= pastFrameTimes[1], 1)) {
+                    if (0.0f <= pastFrameTimes[1]) {
                         frameTimeAccumulator += pastFrameTimes[1];
                         averagedFrameCount += 1;
                     }
@@ -1148,7 +1111,7 @@ giz_freeplay:
             }
             if (shortestFrameIndex != 4) {
                 if (longestFrameIndex != 4) {
-                    if (__builtin_expect(0.0f <= pastFrameTimes[4], 1)) {
+                    if (0.0f <= pastFrameTimes[4]) {
                         frameTimeAccumulator += pastFrameTimes[4];
                         averagedFrameCount += 1;
                     }
@@ -1265,9 +1228,9 @@ giz_freeplay:
         MusicClearAll();
         SoundKillAll();
     }
-    if (__builtin_expect(HUB_ADATA != NULL, 1)) {
+    if (HUB_ADATA != NULL) {
         i = (u32)(byte)HUB_ADATA->index;
-        if (__builtin_expect(i == last_area, 0)) {
+        if (i == last_area) {
             goto after_sound;
         }
         if (Arcade == 0) {
@@ -1282,7 +1245,7 @@ giz_freeplay:
     Arcade = 0;
 
 after_sound:
-    if (__builtin_expect((NewLData == STATUS_LDATA) || ((NewLData->flags & LEVEL_STATUS) != 0), 1)) {
+    if ((NewLData == STATUS_LDATA) || ((NewLData->flags & LEVEL_STATUS) != 0)) {
         InitStatusScreen(WORLD);
         if ((NewLData != STATUS_LDATA) && (StatusPacket.status_flags != 0)) {
             UpdateAchievements(&StatusPacket);
@@ -1414,5 +1377,4 @@ after_status:
     }
     goto restart_level;
 }
-
 }

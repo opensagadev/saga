@@ -1074,7 +1074,7 @@ static __used__ i32 MatrixReflection_CanOverride() {
     i32 result = 1;
     if (WORLD->current_level == DEATHSTARESCAPEA_LDATA) {
         const i8 sock = GameCam->sock_position.location.sock;
-        if (__builtin_expect(sock != 0, 0)) {
+        if (sock != 0) {
             result = sock == 3;
         }
     }
@@ -1197,10 +1197,10 @@ static i32 CheckMusicOther() {
     if (level == KAMINOE_LDATA) {
         return KaminoInside() == 0;
     }
-    if (__builtin_expect(level == MOSEISLEYD_LDATA, 0)) {
+    if (level == MOSEISLEYD_LDATA) {
         return socket_position.location.sock == 3;
     }
-    if (__builtin_expect(level == DEATHSTARBATTLED_LDATA, 0)) {
+    if (level == DEATHSTARBATTLED_LDATA) {
         if (DeathStarShieldDown() != 0) {
             deathstar_hold_count = 30;
             return 1;
@@ -1211,7 +1211,7 @@ static i32 CheckMusicOther() {
         }
     } else if (level == ASTEROIDCHASEB_LDATA) {
         return GameCam->sock_position.location.sock == 4;
-    } else if (__builtin_expect(level == SARLACCPITB_LDATA, 0)) {
+    } else if (level == SARLACCPITB_LDATA) {
         return SarlaccPitDiscoActive(WORLD) != 0;
     }
     return 0;
@@ -1356,13 +1356,13 @@ static i32 ActionMusicFn() {
         level == DEATHSTARRESCUEE_LDATA) {
         return 1;
     }
-    if (__builtin_expect(level == MOSEISLEYD_LDATA && CheckMusicOther() != 0, 0)) {
+    if (level == MOSEISLEYD_LDATA && CheckMusicOther() != 0) {
         return 1;
     }
     if (level == CLOUDCITYESCAPEA_LDATA) {
         return 1;
     }
-    if (__builtin_expect(level == SPEEDERCHASEA_LDATA, 0)) {
+    if (level == SPEEDERCHASEA_LDATA) {
         nuvec_s position;
         SOCKPOSITION_s socket_position;
         if (Players_AveragePos(&position, &socket_position) != 0) {
@@ -1381,10 +1381,10 @@ static i32 ActionMusicFn() {
     }
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *player = Player[i];
-        if (__builtin_expect(player != NULL &&
+        if (player != NULL &&
             (player->ai.opponent != NULL || (player->ai.nearest_opponent != NULL &&
                                              static_cast<APIOBJECT *>(player->ai.nearest_opponent)->field_0x287 == 0 &&
-                                             player->ai.nearest_opponent_metric < 3.0f)), 1)) {
+                                             player->ai.nearest_opponent_metric < 3.0f))) {
             return 1;
         }
     }
@@ -1488,7 +1488,7 @@ void ResetAdaptiveDifficulty() {
 
 void InitGameBeforeConfig(void) {
     f32 frame_time;
-    if (__builtin_expect(PAL != 0, 1)) {
+    if (PAL != 0) {
         NuStrCpy(prodcode, "BESLES-54221");
         frame_time = 0.02f;
     } else {
@@ -1579,7 +1579,7 @@ void InitGameBeforeConfig(void) {
 i32 DoBuckStart(GameObject_s *object) {
     NUVEC delta;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (__builtin_expect(world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB, 0))
+    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
         return 0;
     static NUVEC forward = {0.0f, 0.0f, 1.0f};
     i32 jumped = 0;
@@ -1635,7 +1635,7 @@ void InitGameAfterConfig(void) {
     GOLDBRICKFORSUPERSTORY = 0;
     GOLDBRICKFORCHALLENGE = 1;
 
-    if (__builtin_expect(EPISODECOUNT > 0, 1)) {
+    if (EPISODECOUNT > 0) {
         i32 p = (EPISODECOUNT - 1) * POINTS_PER_SUPERSTORY;
         COMPLETIONPOINTS = p + (POINTS_PER_SUPERSTORY + COMPLETIONPOINTS);
         CompletionPointInfo[0] = POINTS_PER_SUPERSTORY + CompletionPointInfo[0] + p;
@@ -1644,7 +1644,7 @@ void InitGameAfterConfig(void) {
     AREADATA *pAVar10 = ADataList;
 
     i32 areaIndex;
-    if (__builtin_expect(0 < AREACOUNT, 1)) {
+    if (0 < AREACOUNT) {
         i32 areaId = 0;
         AREADATA *area = pAVar10;
         u16 areaFlags;
@@ -1669,11 +1669,11 @@ void InitGameAfterConfig(void) {
                         }
                         COMPLETIONPOINTS = POINTS_PER_STORY + COMPLETIONPOINTS;
                         CompletionPointInfo[1] = POINTS_PER_STORY + CompletionPointInfo[1];
-                        if (__builtin_expect((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0, 1)) {
+                        if ((areaFlags & AREAFLAG_NO_GOLDBRICK) == 0) {
                             GOLDBRICKPOINTS = GOLDBRICKPOINTS + 1;
                         }
 
-                        if (__builtin_expect((areaFlags & 0x10) != 0, 1)) {
+                        if ((areaFlags & 0x10) != 0) {
                             i32 local_24 = COMPLETIONPOINTS + POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI;
                             i32 iVar4 = GOLDBRICKPOINTS + 2;
                             i32 local_28 = POINTS_PER_MINIKIT + POINTS_PER_TRUEJEDI + CompletionPointInfo[1];
@@ -1736,7 +1736,7 @@ void InitGameAfterConfig(void) {
             }
             level->area_index = 0xff;
             level->area_level_index = 0xff;
-            if (__builtin_expect(iVar3 < 1, 0)) {
+            if (iVar3 < 1) {
                 areaIndex = 0;
             } else {
                 areaIndex = 0;
@@ -1757,12 +1757,11 @@ void InitGameAfterConfig(void) {
                                 areaIndex = areaIndex + 1;
                                 bVar1 = pAVar2[(char)episode].episode_index;
                                 level->unknown_0ae = bVar1;
-                                if (__builtin_expect((pAVar2[(char)episode].flags & 1) != 0, 0)) {
+                                if ((pAVar2[(char)episode].flags & 1) != 0) {
                                     level->camera_judder_distance = 0x32;
                                     level->unknown_0da = 0x14;
                                 }
-                                if (__builtin_expect(
-                                        ((bVar1 != 0xff) && ((pAVar2[(char)episode].flags & 0x106) == 0)) != 0, 1) &&
+                                if ((((bVar1 != 0xff) && ((pAVar2[(char)episode].flags & 0x106) == 0)) != 0) &&
                                     ((level->flags & (LEVEL_STATUS | LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0)) {
                                     level->flags |= 0x2000;
                                 }
@@ -2191,12 +2190,12 @@ void ReCalculateCompletionPoints() {
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_STORY;
         if (save->area_complete != 0) {
             AddToCompletionPoints(POINTS_PER_STORY);
-            if (__builtin_expect((area->flags & AREAFLAG_NO_GOLDBRICK) == 0, 0)) {
+            if ((area->flags & AREAFLAG_NO_GOLDBRICK) == 0) {
                 AddToGoldBricks();
             }
         }
 
-        if (__builtin_expect((area->flags & AREAFLAG_MINIKIT) == 0, 0)) {
+        if ((area->flags & AREAFLAG_MINIKIT) == 0) {
             const u8 *hero = save->true_hero_complete;
             if ((area->flags & AREAFLAG_TRUE_JEDI) != 0 && (hero[0] != 0 || hero[1] != 0)) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
@@ -2236,7 +2235,7 @@ void ReCalculateCompletionPoints() {
         }
 
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_CHALLENGE;
-        if (__builtin_expect(save->reserved_0x7 != 0, 1)) {
+        if (save->reserved_0x7 != 0) {
             AddToCompletionPoints(POINTS_PER_CHALLENGE);
             if (GOLDBRICKFORCHALLENGE != 0) {
                 AddToGoldBricks();
@@ -2489,37 +2488,11 @@ void InitGameMode() {
         MenuReset();
     }
 
-    GameObject_s *player = Player[0];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[1];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[2];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[3];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[4];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[5];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[6];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
-    }
-    player = Player[7];
-    if (player != NULL && !player->not_with_party) {
-        ResetPlayer(player, 1, NULL, 1);
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL && !player->not_with_party) {
+            ResetPlayer(player, 1, NULL, 1);
+        }
     }
 
     f32 remember_speed = GetVehicleAreaRememberSpeed();
@@ -2763,22 +2736,10 @@ void CheckResetBits() {
     AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
     AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
     if ((ResetBits & 0x10) != 0) {
-        if (Player[0] != NULL)
-            ResetPlayer(Player[0], 1, NULL, 0);
-        if (Player[1] != NULL)
-            ResetPlayer(Player[1], 1, NULL, 0);
-        if (Player[2] != NULL)
-            ResetPlayer(Player[2], 1, NULL, 0);
-        if (Player[3] != NULL)
-            ResetPlayer(Player[3], 1, NULL, 0);
-        if (Player[4] != NULL)
-            ResetPlayer(Player[4], 1, NULL, 0);
-        if (Player[5] != NULL)
-            ResetPlayer(Player[5], 1, NULL, 0);
-        if (Player[6] != NULL)
-            ResetPlayer(Player[6], 1, NULL, 0);
-        if (Player[7] != NULL)
-            ResetPlayer(Player[7], 1, NULL, 0);
+        for (i32 i = 0; i < 8; ++i) {
+            if (Player[i] != NULL)
+                ResetPlayer(Player[i], 1, NULL, 0);
+        }
         VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
     }
 
@@ -2939,15 +2900,15 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if (force_player_mask == 0) {
             if (part->owner == object) {
-                if (__builtin_expect(part->scale_time < 0.5f, 1))
+                if (part->scale_time < 0.5f)
                     continue;
-            } else if (__builtin_expect(api->field_0x27c != -1 && part->scale_time < 0.25f, 0))
+            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
                 continue;
         } else if ((part->flags & 0x8000) == 0 && part->owner == object)
             continue;
-        if (context == 0x39 || context == 0x3b || __builtin_expect(context == 0x3c, 0))
+        if (context == 0x39 || context == 0x3b || (context == 0x3c))
             continue;
-        if (__builtin_expect((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289, 0))
+        if ((part->flags & 0x4000) != 0 && part->field_207 == api->field_0x289)
             continue;
         if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
             continue;
@@ -2964,10 +2925,8 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             GAMECHARACTERDATA_s *character = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24);
             if ((character->flags_090 & 0x8000) != 0)
                 continue;
-            if (__builtin_expect(!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4,
-                                                            &api->collision_position, api->collision_radius,
-                                                            api->field_0x1e0),
-                                 0))
+            if (!SphereSphereOverlapScaleY(&part->position, part->field_0e4, part->field_0e4, &api->collision_position,
+                                           api->collision_radius, api->field_0x1e0))
                 continue;
             if (!((part->active & 2) != 0 && (part->flags & 0x1000008) == 0x1000008))
                 KillPart(part, 1);
@@ -2987,7 +2946,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                     ReleasePush(object);
                     if (object->field_0xd24 >= 1.0f)
                         ObjHitShield(part->owner, object, object->field_0xe37, NULL);
-                    else if (__builtin_expect(!CannotKill(object), 0)) {
+                    else if (!CannotKill(object)) {
                         ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
                                   static_cast<u16>(part->force_flags), 0, 1);
                     } else if (part->owner != NULL) {
@@ -3007,7 +2966,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 api->velocity.x += direction.x * speed;
                 api->velocity.z += direction.z * speed;
             }
-            if (__builtin_expect((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0), 1)) {
+            if ((part->flags & 0x2000000) != 0 && ((part->flags & 0x4000000) == 0 || (part->active & 2) != 0)) {
                 u16 angle = NuAtan2D(api->position.x - part->position.x, api->position.z - part->position.z);
                 f32 speed = static_cast<GAMECHARACTERDATA_s *>(api->character_data->field11_0x24)->run_speed;
                 api->field_0x1fc = NU_SIN_LUT(angle) * speed;
@@ -3019,14 +2978,13 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 if (part->pickup_type == 0xcb) {
                     if (part->scale_time < 0.5f)
                         continue;
-                    if (__builtin_expect(VehicleArea == 0, 0) &&
-                        (static_cast<i8>(object->current_hp) <= 0 ||
-                         static_cast<i8>(object->current_hp) >= object->hitpoints))
+                    if ((VehicleArea == 0) && (static_cast<i8>(object->current_hp) <= 0 ||
+                                               static_cast<i8>(object->current_hp) >= object->hitpoints))
                         continue;
                 } else if (!(part->scale_time >= 0.1f))
                     continue;
             }
-            if (__builtin_expect((api->field_0x1f4 & 0x40000) != 0, 0)) {
+            if ((api->field_0x1f4 & 0x40000) != 0) {
                 KillPart(part, 2);
                 continue;
             }
@@ -3087,10 +3045,10 @@ void PartKill_ForceThrow(PART_s *part, i32) {
     if (level == CLOUDCITYTRAPB_LDATA) {
         debris = 0x75;
         part_debris = 8;
-    } else if (__builtin_expect(level == MAULA_LDATA, 0)) {
+    } else if (level == MAULA_LDATA) {
         debris = 0x2d;
         part_debris = 9;
-    } else if (__builtin_expect(level == MAULF_LDATA, 0)) {
+    } else if (level == MAULF_LDATA) {
         i32 type = 11;
         if (NuSpecialExistsFn(&LevHSpecial[0]) && NuSpecialCompare(&LevHSpecial[0], &part->special))
             type = 11;
@@ -3335,7 +3293,7 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
         if (cut != game_cutscenes.podsprint_out_of_time && cut != game_cutscenes.podsprint_sebulba) {
             return -1;
         }
-        if (__builtin_expect(id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0, 1)) {
+        if (id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0) {
             return -1;
         }
         GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;
@@ -3371,7 +3329,7 @@ i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) 
 }
 
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *momentum) {
-    if (__builtin_expect(object == NULL, 0))
+    if (object == NULL)
         return 0;
     if (LSW1 != 0 && momentum != NULL) {
         f32 scale = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0.25f : 0.5f;

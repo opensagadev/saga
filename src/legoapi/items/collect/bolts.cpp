@@ -526,7 +526,7 @@ void Bolts_Draw(WORLDINFO_s *world) {
         if (bolt->field_0xe8 != 2000000.0f) {
             NUMTX reflection;
             if (MatrixReflectionVU0_AXISY(&matrix, bolt->field_0xe8, world->current_level->unknown_0cc, &reflection)) {
-                if (__builtin_expect(NuSpecialExistsFn(type->pad_68 + 24) != 0, 1))
+                if (NuSpecialExistsFn(type->pad_68 + 24) != 0)
                     NuSpecialDrawAt(type->pad_68 + 24, &reflection);
                 if (NuSpecialExistsFn(type->pad_68 + 36))
                     NuSpecialDrawAt(type->pad_68 + 36, &reflection);
@@ -593,7 +593,7 @@ void BoltTypes_Init(WORLDINFO_s *world) {
         type->specials.shadow_special.display_special = NULL;
 
         const i32 object_id = type->object_ids[0];
-        if (__builtin_expect(object_id != -1, 1)) {
+        if (object_id != -1) {
             type->specials.object_special = world->lev_objs[object_id].special;
             if (type->object_ids[1] != -1) {
                 type->specials.glow_special = world->lev_objs[type->object_ids[1]].special;
@@ -640,10 +640,10 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
         }
 
         if (reading_type != 0) {
-            if (__builtin_expect(NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0, 1)) {
-                if (__builtin_expect(type.name[0] != '\0', 0)) {
+            if (NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0) {
+                if (type.name[0] != '\0') {
                     for (i32 i = 0; i < 8; ++i) {
-                        if (__builtin_expect(NuStrLen(world->bolt_types[i].name) != 0, 1)) {
+                        if (NuStrLen(world->bolt_types[i].name) != 0) {
                             continue;
                         }
                         world->bolt_types[i] = type;
@@ -715,7 +715,7 @@ PART_s *Bolt_HitParts(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maximu
             continue;
         BoltSys->debris(bolt, points, hit, &part->velocity, 0);
         Bolt_PlayHitSfx(bolt);
-        if (__builtin_expect(bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 1) != 0, 1))
+        if (bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 1) != 0)
             NewRumble(bolt->owner->pad_gamepad->pad, 0.7f, 0);
         Bolt_End(bolt, 1);
         if (BoltSys->hit_part != NULL && BoltSys->hit_part(bolt, part) == 1)
@@ -741,7 +741,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&position, message.data->bytes + message.read_offset, 12);
-        if (__builtin_expect(message.swap_endianness, 1)) {
+        if (message.swap_endianness) {
             EdFileSwapEndianess32(&position.x);
             EdFileSwapEndianess32(&position.y);
             EdFileSwapEndianess32(&position.z);
@@ -750,7 +750,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&orientation, message.data->bytes + message.read_offset, 64);
-        if (__builtin_expect(message.swap_endianness, 1))
+        if (message.swap_endianness)
             for (i32 i = 0; i < 16; ++i)
                 EdFileSwapEndianess32(reinterpret_cast<u8 *>(&orientation) + i * 4);
         message.read_offset += 64;
@@ -758,7 +758,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     message.Read32(type_id);
     if (message.data != NULL) {
         memmove(&hit_flags, message.data->bytes + message.read_offset, 4);
-        if (__builtin_expect(message.swap_endianness, 1))
+        if (message.swap_endianness)
             EdFileSwapEndianess32(&hit_flags);
         message.read_offset += 4;
     }
@@ -773,7 +773,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
     addbolt_newsfx = -1;
     if (type == NULL || !NuSpecialExistsFn(type->pad_68))
         return;
-    if (__builtin_expect(bolt->active != 0, 0)) {
+    if (bolt->active != 0) {
         old_points[1] = bolt->position;
         if ((bolt->flags & 0x200) == 0) {
             NUVEC offset = {0.0f, 0.0f, bolt->collision_radius + bolt->collision_radius};
@@ -798,12 +798,12 @@ void Bolt_Init(void *storage, NetMessage &message) {
     bolt->scale = type->field_20;
     bolt->hit_part_debris = type->field_38;
     bolt->index = bolt - Bolt;
-    if (__builtin_expect(hit_flags == 0, 0))
+    if (hit_flags == 0)
         hit_flags = ObjHitObj_Flags(owner);
     bolt->hit_flags = hit_flags | 0x80;
     u32 flags = type->field_60;
-    if (__builtin_expect(owner != NULL, 1)) {
-        if (__builtin_expect((owner->apiobj.flags_low & 0x80) != 0, 0)) {
+    if (owner != NULL) {
+        if ((owner->apiobj.flags_low & 0x80) != 0) {
             if (owner->apiobj.field_0x27c != 0)
                 flags |= owner->apiobj.field_0x27c == 1 ? 0x2a : 0x28;
             else
@@ -822,14 +822,14 @@ void Bolt_Init(void *storage, NetMessage &message) {
                 speed = 0.0f;
             bolt->speed += speed;
         }
-        if (__builtin_expect(owner->field_0xcc0 != NULL, 1))
+        if (owner->field_0xcc0 != NULL)
             flags |= 0x40000;
         if (BoltInitSfxFn != NULL)
             addbolt_newsfx = BoltInitSfxFn(owner);
         if (addbolt_newsfx == -1)
             addbolt_newsfx = owner->apiobj.character_data->game_character->sfx_shoot;
     }
-    if (__builtin_expect(addbolt_newsfx == -1, 0))
+    if (addbolt_newsfx == -1)
         addbolt_newsfx = type->shoot_sfx_id;
     if (!no_sfx && addbolt_newsfx != -1)
         GameAudio_PlaySfxById(addbolt_newsfx, &position, 0, 0);
@@ -851,7 +851,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
             bolt->surface_x_rotation = owner->field_0x105e;
             bolt->surface_z_rotation = owner->field_0x1060;
         }
-        if (__builtin_expect(owner->field_0x1020 != 2000000.0f && owner->field_0x1087 == 2, 1))
+        if (owner->field_0x1020 != 2000000.0f && owner->field_0x1087 == 2)
             bolt->field_0xe8 = owner->field_0x1020;
     }
     f32 collision_radius = bolt->radius;
@@ -895,9 +895,8 @@ void Bolt_Init(void *storage, NetMessage &message) {
         movement.y = 0.2f * bolt->velocity.y + (bolt->acceleration_y * 0.5f) * 0.04000000283122063f;
     f32 back_distance;
     if (owner != NULL) {
-        if (__builtin_expect((owner->apiobj.character_data->model_flags & 0x2000) == 0 &&
-                                 (owner->apiobj.character_data->game_character->flags_090 & 0x80) == 0,
-                             1))
+        if ((owner->apiobj.character_data->model_flags & 0x2000) == 0 &&
+            (owner->apiobj.character_data->game_character->flags_090 & 0x80) == 0)
             back_distance = owner->apiobj.collision_radius * 3.0f;
         else
             back_distance = owner->apiobj.collision_radius;
@@ -909,11 +908,11 @@ void Bolt_Init(void *storage, NetMessage &message) {
     NuVecAdd(&movement, &movement, &back);
     bolt->ray_radius = bolt->collision_radius;
     bolt->ray_time = 0.2f;
-    if (__builtin_expect((bolt->flags & 4) == 0 && Bolt_RayCast(bolt, &start, &movement, bolt->ray_radius), 0)) {
+    if ((bolt->flags & 4) == 0 && Bolt_RayCast(bolt, &start, &movement, bolt->ray_radius)) {
         f32 offset_time = (back_distance / (initial_speed * initial_lifetime)) * bolt->lifetime;
         bolt->lifetime = bolt->ray_time + offset_time;
         bolt->lifetime = NewRayCastGetTOFI() * bolt->lifetime - offset_time;
-        if (__builtin_expect(bolt->lifetime <= 0.0f, 0)) {
+        if (bolt->lifetime <= 0.0f) {
             NuVecAdd(&start, &start, &movement);
             AddGameDebris(world->debris_sys, bolt->hit_debris, &start);
             AddGameDebris(world->debris_sys, bolt->hit_debris, &bolt->position);
@@ -921,10 +920,8 @@ void Bolt_Init(void *storage, NetMessage &message) {
             if ((bolt->flags & 0x10000) == 0 && !Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
                                                                      bolt->collision_radius, NULL)) {
                 bool hit = false;
-                if (__builtin_expect(__builtin_expect((bolt->flags & 0x13) != 0, 0) ||
-                                         (bolt->owner != NULL &&
-                                          (bolt->owner->can_shoot_obstructions || bolt->owner->use_action == 5)),
-                                     1)) {
+                if (((bolt->flags & 0x13) != 0) ||
+                    (bolt->owner != NULL && (bolt->owner->can_shoot_obstructions || bolt->owner->use_action == 5))) {
                     hit = bolt->hit_platform != -1 && Bolt_HitPlat(bolt, NULL);
                     if (!hit)
                         hit = GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
@@ -946,7 +943,7 @@ void Bolt_Init(void *storage, NetMessage &message) {
                         }
                     }
                 }
-                if (__builtin_expect(!hit, 0))
+                if (!hit)
                     Bolt_PlayHitSfx(bolt);
                 if (BoltSys->stop_targeting != NULL && bolt->owner != NULL &&
                     (bolt->owner->apiobj.flags_low & 0x80) != 0)
@@ -1011,8 +1008,8 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     NUVEC delta, target_velocity, origin, direction;
     BoltSys->shoot_origin(object, &origin);
     u16 heading = BoltSys->shoot_direction(object, &direction);
-    if (__builtin_expect(object->character_context != -1 && object->context_animation != -1, 1)) {
-        if (__builtin_expect(object->context_animation == LEGOACT_SHOOTRIGHT, 0))
+    if (object->character_context != -1 && object->context_animation != -1) {
+        if (object->context_animation == LEGOACT_SHOOTRIGHT)
             heading += 0x4000;
         else if (object->context_animation == LEGOACT_SHOOTLEFT)
             heading -= 0x4000;
@@ -1047,7 +1044,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
                 adjusted_position.y += Bolt_ObjTargetPosYAdjust(target);
                 target_position = &adjusted_position;
             }
-        } else if (__builtin_expect((object->field_0xe21 & 8) != 0, 0)) {
+        } else if ((object->field_0xe21 & 8) != 0) {
             target_position = intercept_position = &aimed_position;
         }
     } else {
@@ -1066,11 +1063,11 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     for (i32 index = 0; index < 5; ++index) {
         if ((index == 1 && fire_flags == 1) || (index == 0 && fire_flags == 2))
             continue;
-        if (BoltSys->alternate_fire != NULL && __builtin_expect(BoltSys->alternate_fire(object, index) == 0, 1))
+        if (BoltSys->alternate_fire != NULL && (BoltSys->alternate_fire(object, index) == 0))
             continue;
         NUVEC *shot_position;
         if (index == 4) {
-            if (__builtin_expect(used_locator != 0, 0))
+            if (used_locator != 0)
                 break;
             shot_position = &origin;
         } else {
@@ -1078,10 +1075,9 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
                 continue;
             GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
             i32 locator = data->weapon_shoot_joints[index];
-            if (__builtin_expect(locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL,
-                                 0)) {
+            if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
                 locator = data->weapon_joints[index];
-                if (__builtin_expect(locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL, 0))
+                if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)
                     continue;
             }
             used_locator = 1;
@@ -1204,8 +1200,7 @@ static i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags) {
             GameObject_s *owner = bolt->owner;
             f32 hp =
                 (exclude & 1) != 0 && owner != NULL ? owner->apiobj.character_data->game_character->field_0x28 : 0.0f;
-            if (owner != NULL && __builtin_expect((blowup->draw_flags & 0x80000) != 0, 0) &&
-                (__builtin_expect(hp > 0.0f, 0) || owner->field_0xcc0 == NULL))
+            if (owner != NULL && ((blowup->draw_flags & 0x80000) != 0) && ((hp > 0.0f) || owner->field_0xcc0 == NULL))
                 return 0;
             if (GizmoBlowupBlowup(blowup, 1, 3, bolt->type->field_3c, NULL, 1) != 0 && bolt->owner != NULL)
                 NewRumble(bolt->owner->pad_gamepad->pad, 0.4f, 0);
@@ -1234,7 +1229,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
             EdFileSwapEndianess16(&bolt_index);
         message.read_offset += 2;
     }
-    if (__builtin_expect(message.data != NULL, 1)) {
+    if (message.data != NULL) {
         memmove(&object_index, message.data->bytes + message.read_offset, 2);
         if (message.swap_endianness)
             EdFileSwapEndianess16(&object_index);
@@ -1243,7 +1238,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     for (i32 i = 0; i < 3; ++i) {
         if (message.data != NULL) {
             memmove(&points[i], message.data->bytes + message.read_offset, 12);
-            if (__builtin_expect(message.swap_endianness, 1)) {
+            if (message.swap_endianness) {
                 EdFileSwapEndianess32(&points[i].x);
                 EdFileSwapEndianess32(&points[i].y);
                 EdFileSwapEndianess32(&points[i].z);
@@ -1259,7 +1254,7 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
     }
     if (message.data != NULL) {
         memmove(&client, message.data->bytes + message.read_offset, 4);
-        if (__builtin_expect(message.swap_endianness != 0, 1))
+        if (message.swap_endianness != 0)
             EdFileSwapEndianess32(&client);
         message.read_offset += 4;
     }
@@ -1300,10 +1295,8 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
         if (((bolt->flags & 0x40) == 0 || deflect) && object->apiobj.player_controlled &&
             ((LEGOCONTEXT_BLOCK != -1 && object->character_context == LEGOCONTEXT_BLOCK) || cheat_deflect) &&
             (object->apiobj.character_data->model_flags & 8) != 0) {
-            if (__builtin_expect(
-                    bolt->owner == NULL || (bolt->owner->apiobj.flags_low & 1) == 0 ||
-                        ((bolt->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 && bolt->owner->apiobj.field_0x287 == 0),
-                    0))
+            if (bolt->owner == NULL || (bolt->owner->apiobj.flags_low & 1) == 0 ||
+                ((bolt->owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 && bolt->owner->apiobj.field_0x287 == 0))
                 goto reflected;
         }
         if (!TouchHacks::TouchControlsActive) {
@@ -1368,16 +1361,16 @@ void Bolt_HitGameObjectRC(NetMessage &message) {
             }
             Bolt_PlayHitSfx(bolt);
             GameObject_s *owner = bolt->owner;
-            if (owner != NULL && (owner->apiobj.flags_low & 1) != 0 &&
-                __builtin_expect((owner->apiobj.flags_low & 0x80) == 0, 1) && (owner->apiobj.field_0x1f4 & 1) != 0 &&
+            if (owner != NULL && (owner->apiobj.flags_low & 1) != 0 && ((owner->apiobj.flags_low & 0x80) == 0) &&
+                (owner->apiobj.field_0x1f4 & 1) != 0 &&
                 ((owner->apiobj.field_0x1f4 ^ object->apiobj.field_0x1f4) & 1) == 0)
                 goto owner_feedback;
             objhitobj_bolt = bolt;
             ObjHitObj(owner, object, damage, bolt->hit_flags, 0, 0);
-            if (__builtin_expect((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10000000) == 0 &&
+            if ((bolt->flags & 0x800000) != 0 && (CInfo[object->character_context].flags & 0x10000000) == 0 &&
                 (CInfo[object->character_context].flags & 0x8000) == 0 &&
                 (object->apiobj.character_data->model_flags & 0x10) != 0 && LEGOACT_DEACTIVATED != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_DEACTIVATED] != NULL, 1)) {
+                object->apiobj.character_model->model_data_b[LEGOACT_DEACTIVATED] != NULL) {
                 DeactivatePlayer(object, DEACTIVATEDTIME, NULL);
                 if (bolt->owner != NULL)
                     NewBuzz(bolt->owner->pad_gamepad->pad, 0.1f, 0);
@@ -1395,7 +1388,7 @@ finish:
         object->apiobj.velocity.x += bolt->field_0xac.x * amount;
         object->apiobj.velocity.z += bolt->field_0xac.z * amount;
     }
-    if (__builtin_expect(object->apiobj.player_controlled != 0, 1))
+    if (object->apiobj.player_controlled != 0)
         GameCam_HitJudder();
     Bolt_End(bolt, 1);
 }
@@ -1448,14 +1441,14 @@ i32 Bolt_HitGameObject(BOLT_s *bolt, GameObject_s *object, NUVEC *points, NUVEC 
             message.write_offset += 12;
         }
     }
-    if (__builtin_expect(message.data != NULL, 1)) {
+    if (message.data != NULL) {
         u8 *destination = message.data->bytes + message.write_offset;
         memcpy(destination, &hit, 4);
         if (message.swap_endianness)
             EdFileSwapEndianess32(destination);
         message.write_offset += 4;
     }
-    if (__builtin_expect(message.data != NULL, 1)) {
+    if (message.data != NULL) {
         u8 *destination = message.data->bytes + message.write_offset;
         memmove(destination, &netclient, 4);
         if (message.swap_endianness)
@@ -1531,7 +1524,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                     f32 time = bolt->time;
                     f32 ray_time = bolt->ray_time;
                     bolt->lifetime = time + ray_time * NewRayCastGetTOFI();
-                    if (__builtin_expect(bolt->type->ricochet_callback != NULL, 1))
+                    if (bolt->type->ricochet_callback != NULL)
                         bolt->type->ricochet_callback(bolt, &normal);
                 }
                 bolt->field_0xe8 = 2000000.0f;
@@ -1542,7 +1535,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                         FindAnglesZX(&ShadNorm, &bolt->surface_x_rotation, &bolt->surface_z_rotation);
                     }
                     u32 surface = ShadowInfo();
-                    if (__builtin_expect(surface <= 31, 1) && (TerSurface[surface].flags & 2) != 0)
+                    if ((surface <= 31) && (TerSurface[surface].flags & 2) != 0)
                         bolt->field_0xe8 = height;
                     else if (static_cast<f32>(NewShadowOnPlatform()) != -1.0f)
                         bolt->field_0xe8 = FindReflectionNoPlatforms(&bolt->position);
@@ -1591,7 +1584,7 @@ void Bolts_Update(WORLDINFO_s *world) {
 
                 Bolt_Reflect(&bolt->hit_normal, &bolt->velocity, &reflection);
                 NuVecScale(&reflection, &reflection, 0.2f);
-                if (bolt->hit_platform != -1 && __builtin_expect(bolt->field_0x104 != -1, 1) &&
+                if (bolt->hit_platform != -1 && (bolt->field_0x104 != -1) &&
                     (TerSurface[bolt->field_0x104].flags & 0x1000) != 0)
                     BoltSys->debris(bolt, points, -1, &reflection, 1);
                 else
@@ -1622,7 +1615,7 @@ void Bolts_Update(WORLDINFO_s *world) {
                 }
             }
             if (handled == 0) {
-                if (surface_hit && __builtin_expect(bolt->field_0x104 >= 0, 1) && bolt->field_0x104 <= 31 &&
+                if (surface_hit && (bolt->field_0x104 >= 0) && bolt->field_0x104 <= 31 &&
                     (TerSurface[bolt->field_0x104].flags & 0x800) != 0 && (bolt->flags & 0x8000) == 0) {
                     GameAudio_PlaySfx(41, &bolt->position, 0, 0);
                     Bolt_AddDeflectedBolt(bolt, &bolt->velocity, &bolt->hit_normal, processed);
@@ -1686,7 +1679,7 @@ void Bolts_Update(WORLDINFO_s *world) {
             }
             if (character_hit)
                 continue;
-            bool interact = __builtin_expect((flags & 0x13) != 0, 0) ||
+            bool interact = ((flags & 0x13) != 0) ||
                             (bolt->owner != NULL &&
                              (bolt->owner->can_shoot_obstructions || static_cast<u8>(bolt->owner->use_action) == 5));
             if (interact) {

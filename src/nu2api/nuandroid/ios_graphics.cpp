@@ -122,7 +122,7 @@ extern "C" void Nu360_dxClear(u32 clear_flags, u32 colour) {
             lastColour = colour;
         }
     }
-    if (__builtin_expect((clear_flags & kNuClear_Depth) != 0, 0)) {
+    if ((clear_flags & kNuClear_Depth) != 0) {
         glMask |= GL_DEPTH_BUFFER_BIT;
         if (g_renderContext_zFunc != 2) {
             glDisable(GL_DEPTH_TEST);

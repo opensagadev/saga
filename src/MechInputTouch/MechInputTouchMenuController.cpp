@@ -157,34 +157,24 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
         }
         CUSTOMISER *customiser = CharacterCustomiser;
 
-#define CUSTOMISER_HIT(index)                                                                                          \
-    {                                                                                                                  \
-        const f32 width = customiser->touch_widths[index];                                                             \
-        if (width > 0.0f) {                                                                                            \
-            const f32 x = down_x - customiser->touch_positions[index].x;                                               \
-            const f32 centre_y = customiser->touch_positions[index].y;                                                 \
-            const f32 height = customiser->touch_heights[index];                                                       \
-            const f32 half_width = fabsf(0.5f * width);                                                                \
-            if (x > -half_width && x < half_width) {                                                                   \
-                const f32 y = down_y - centre_y;                                                                       \
-                const f32 half_height = fabsf(0.5f * height);                                                          \
-                if (y > -half_height && __builtin_expect(y < half_height, 0)) {                                        \
-                    hit = index;                                                                                       \
-                    break;                                                                                             \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-    }
         i32 hit = -1;
-        do {
-            CUSTOMISER_HIT(0);
-            CUSTOMISER_HIT(1);
-            CUSTOMISER_HIT(2);
-            CUSTOMISER_HIT(3);
-            CUSTOMISER_HIT(4);
-            CUSTOMISER_HIT(5);
-        } while (0);
-#undef CUSTOMISER_HIT
+        for (i32 index = 0; index < 6; ++index) {
+            const f32 width = customiser->touch_widths[index];
+            if (width > 0.0f) {
+                const f32 x = down_x - customiser->touch_positions[index].x;
+                const f32 centre_y = customiser->touch_positions[index].y;
+                const f32 height = customiser->touch_heights[index];
+                const f32 half_width = fabsf(0.5f * width);
+                if (x > -half_width && x < half_width) {
+                    const f32 y = down_y - centre_y;
+                    const f32 half_height = fabsf(0.5f * height);
+                    if (y > -half_height && (y < half_height)) {
+                        hit = index;
+                        break;
+                    }
+                }
+            }
+        }
         if (hit >= 0) {
             customiser->touch_requests[hit] = 1;
             return true;
@@ -253,7 +243,7 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
         item_delta.z = 0.0f;
         if (height == 0.0f) {
             item_delta.x /= GetAspectRatio();
-            if (__builtin_expect(!(NuVecMag(&item_delta) < width), 1)) {
+            if (!(NuVecMag(&item_delta) < width)) {
                 continue;
             }
         } else {
@@ -275,7 +265,7 @@ bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) 
     const volatile NuVec2 &touch = holder.touch_position;
     const f32 touch_y = touch.y;
     const f32 touch_x = touch.x;
-    if (__builtin_expect(!PackButtonActive, 1)) {
+    if (!PackButtonActive) {
         return false;
     }
     PackButtonActive = false;

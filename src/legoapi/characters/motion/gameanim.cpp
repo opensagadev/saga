@@ -135,7 +135,7 @@ void Animate_POD(GameObject_s *object) {
     packet.requested_animation = 1;
 
     {
-        if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
+        if (!object->apiobj.player_controlled) {
             goto normal_animation;
         }
         const i8 index = object->apiobj.field_0x27c;
@@ -159,9 +159,9 @@ void Animate_POD(GameObject_s *object) {
 normal_animation:
     if (PodSprint_InStartCountdown(WORLD) > 0.0f || PodRace_InStartCountdown(WORLD) != 0) {
         packet.requested_animation = 1;
-    } else if (__builtin_expect(object->camera_shake_strength > 0.0f, 1)) {
+    } else if (object->camera_shake_strength > 0.0f) {
         packet.requested_animation = 0x17;
-    } else if (__builtin_expect(!object->apiobj.player_controlled, 0)) {
+    } else if (!object->apiobj.player_controlled) {
         packet.requested_animation = 3;
     } else if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) {
         if (object->previous_block_animation != -1) {
@@ -874,7 +874,7 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
                 f32 frame;
                 if (frame_selection == 0)
                     frame = object->start_frame;
-                else if (__builtin_expect(frame_selection == 1, 0))
+                else if (frame_selection == 1)
                     frame = object->end_frame;
                 else
                     frame = object->instance_animation->ltime;
@@ -914,7 +914,7 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
             object = object->next;
         } while (object != NULL);
     }
-    if (__builtin_expect(count == 0, 0))
+    if (count == 0)
         return 0;
     NuVecScale(position, &sum, 1.0f / static_cast<f32>(count));
     return 1;
@@ -978,10 +978,10 @@ i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radiu
             object_centre.y + object_radius,
             object_centre.z + object_radius,
         };
-        if (__builtin_expect(object_minimum.x < minimum.x, 0)) {
+        if (object_minimum.x < minimum.x) {
             minimum.x = object_minimum.x;
         }
-        if (__builtin_expect(object_minimum.y < minimum.y, 0)) {
+        if (object_minimum.y < minimum.y) {
             minimum.y = object_minimum.y;
         }
         if (object_minimum.z < minimum.z) {
@@ -1127,7 +1127,7 @@ i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
     }
 
     GAMEANIMSET_STATE state = static_cast<GAMEANIMSET_STATE>(set->state & ~GAMEANIMSET_STATE_AT_END);
-    if (__builtin_expect(state != GAMEANIMSET_STATE_ACTIVE_FORWARD, 0)) {
+    if (state != GAMEANIMSET_STATE_ACTIVE_FORWARD) {
         return 1;
     }
 
@@ -1287,7 +1287,7 @@ f32 GameAnimSet_GetCompletionRatio(GAMEANIMSET_s *set) {
     }
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
         if (object->instance_animation != NULL) {
-            if (__builtin_expect(object->start_frame == object->end_frame, 1)) {
+            if (object->start_frame == object->end_frame) {
                 return 1.0f;
             }
             f32 ratio =
@@ -1465,7 +1465,7 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
             object = object->next;
         }
 
-        if (__builtin_expect((set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST) != any_special_no_visibility_test, 1)) {
+        if ((set->flags & GAMEANIMSET_FLAG_NO_VISIBILITY_TEST) != any_special_no_visibility_test) {
             object = set->objects;
             auto set_flags = set->flags;
             while (object != NULL) {

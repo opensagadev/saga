@@ -23,7 +23,7 @@ CRC16::CRC16() {
 
 u32 CRC16::hash(unsigned char const *data, i32 length) {
     u32 result = 0xffffffffu;
-    if (__builtin_expect(length > 0, 1)) {
+    if (length > 0) {
         unsigned char const *end = data + length;
         result = 0xffff;
         do {
@@ -37,7 +37,7 @@ u32 CRC16::hash(unsigned char const *data, i32 length) {
 u32 CRC16::hashInverse(unsigned char const *data, i32 length) {
     u32 result = 0xffffffffu;
     unsigned char const *cursor = data + length;
-    if (__builtin_expect(length > 0, 1)) {
+    if (length > 0) {
         result = 0xffff;
         do {
             --cursor;

@@ -248,7 +248,7 @@ i32 GizmoSys_SetBestBoltTarget(GIZMOSYS_s *system, void *, GameObject_s *object,
         object->field_0xe21 |= 8;
         return 1;
     }
-    if (__builtin_expect(previous != NULL, 0)) {
+    if (previous != NULL) {
         object->attack_target_position = previous_position;
         object->attack_target_velocity = previous_velocity;
         object->attack_gizmo_target = VehicleArea != 0 ? NULL : previous;
@@ -277,9 +277,8 @@ i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuve
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 index = 0; index < gizmotypes->count; ++index, ++set, ++type) {
         if (type->fns.bolt_hit_fn != NULL &&
-            __builtin_expect(type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius,
-                                                   minimum, maximum, bolt, 1, hit_flags) != 0,
-                             0)) {
+            (type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius, minimum,
+                                   maximum, bolt, 1, hit_flags) != 0)) {
             BoltSys->debris(bolt, points, -1, NULL, 0);
             if (bolt->owner != NULL) {
                 NewRumble(bolt->owner->pad_gamepad->pad, 0.6f, 0);

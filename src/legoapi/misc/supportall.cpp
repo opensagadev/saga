@@ -80,7 +80,7 @@ void CloakMovement(GameObject_s *object) {
     f32 high_weight;
     if (LEGOACT_FALL != -1) {
         i16 animation;
-        if (__builtin_expect(object->apiobj.anim_packet.blending == 0, 0)) {
+        if (object->apiobj.anim_packet.blending == 0) {
             animation = object->apiobj.anim_packet.animation_index;
         } else {
             animation = object->apiobj.anim_packet.blend_animation_b;
@@ -193,7 +193,7 @@ void ThingManager::AddThingAfterThis(BaseThing *thing) {
         i32 index = this->field_0x14 + 1;
         this->field_0x14 = index;
         index = index + this->count;
-        if (__builtin_expect(index < this->max_things, 1)) {
+        if (index < this->max_things) {
             this->things[index] = thing;
         }
     }
@@ -214,7 +214,7 @@ void ThingManager::RemoveTemporaryThings() {
 i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
     i32 removed = 1;
     for (i32 i = 0; i < this->count; ++i) {
-        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0, 1)) {
+        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_REMOVE_DEPENDANCIES) != 0) {
             continue;
         }
         removed &= this->things[i]->RemoveDependancies(data);
@@ -224,7 +224,7 @@ i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
 
 void ThingManager::EnterLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0, 1)) {
+        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_ENTER_LEVEL) != 0) {
             continue;
         }
         this->things[i]->EnterLevel(data);
@@ -233,7 +233,7 @@ void ThingManager::EnterLevelThings(ThingLevelData *data) {
 
 void ThingManager::ExitLevelThings(ThingLevelData *data) {
     for (i32 i = 0; i < this->count; ++i) {
-        if (__builtin_expect(this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0, 1)) {
+        if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EXIT_LEVEL) != 0) {
             continue;
         }
         this->things[i]->ExitLevel(data);
@@ -314,7 +314,7 @@ void ThingManager::EffectsThings(ThingRenderData *data) {
         if (this->things[i] == NULL || (this->things[i]->flags & THING_FLAG_SKIP_EFFECTS) != 0) {
             continue;
         }
-        if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
+        if (this->things[i]->profiling_0xc != 0) {
             _NuTimeBarSlotBegin(this->timebar, 5, name);
         }
         this->things[i]->Effects(data);
@@ -333,7 +333,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_DISPLAY) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 1)) {
+            if (thing->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 3, name);
                 thing = this->things[i];
             }
@@ -354,7 +354,7 @@ void ThingManager::RenderThings(ThingRenderData *data) {
     for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
         if (thing != NULL && (thing->flags & THING_FLAG_SKIP_RENDER) == 0) {
-            if (__builtin_expect(thing->profiling_0xc != 0, 1)) {
+            if (thing->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 1, name);
                 thing = this->things[i];
             }
@@ -376,7 +376,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     const char *name = "PROC";
     for (i32 i = 0; i < this->count; ++i) {
         if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_EVEN_WHEN_PAUSED) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
+            if (this->things[i]->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 0, name);
             }
             this->things[i]->ProcessEvenWhenPaused(data);
@@ -388,7 +388,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     if (data->paused == 0) {
         for (i32 i = 0; i < this->count; ++i) {
             if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS) == 0) {
-                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 0)) {
+                if (this->things[i]->profiling_0xc != 0) {
                     _NuTimeBarSlotBegin(this->timebar, 0, name);
                 }
                 this->things[i]->Process(data);
@@ -400,7 +400,7 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
     } else {
         for (i32 i = 0; i < this->count; ++i) {
             if (this->things[i] != NULL && (this->things[i]->flags & THING_FLAG_SKIP_PROCESS_ONLY_WHEN_PAUSED) == 0) {
-                if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
+                if (this->things[i]->profiling_0xc != 0) {
                     _NuTimeBarSlotBegin(this->timebar, 0, name);
                 }
                 this->things[i]->ProcessOnlyWhenPaused(data);
@@ -417,7 +417,7 @@ void ThingManager::ResetThings(ThingResetData *data) {
 
     for (i32 i = 0; i < this->count; ++i) {
         if (this->things[i] != NULL && (this->things[i]->flags & 8) == 0) {
-            if (__builtin_expect(this->things[i]->profiling_0xc != 0, 1)) {
+            if (this->things[i]->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 4, name);
             }
             this->things[i]->Reset(data);
@@ -492,7 +492,7 @@ ThingManager::ThingManager(i32 max_things) {
     const usize need = static_cast<usize>(max_things) * sizeof(*things);
 
     BaseThing **array = NULL;
-    if (__builtin_expect(*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need, 1)) {
+    if (*theMemoryManager.end_cell - *theMemoryManager.cursor_cell > need) {
         const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
         *theMemoryManager.cursor_cell = aligned + need;
         array = reinterpret_cast<BaseThing **>(aligned);

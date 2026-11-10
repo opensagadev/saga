@@ -101,7 +101,7 @@ bool NuRenderDevice::IsExtensionSupported(const char *wanted) {
         }
 
         const char *terminator = where + strlen(wanted);
-        if (__builtin_expect((where == start || where[-1] == ' ') && (*terminator == ' ' || *terminator == '\0'), 0)) {
+        if ((where == start || where[-1] == ' ') && (*terminator == ' ' || *terminator == '\0')) {
             return true;
         }
 

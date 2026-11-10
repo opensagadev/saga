@@ -635,7 +635,7 @@ static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
             progress->visible_mask[mask_index] &= ~mask;
         }
-        if (__builtin_expect((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0, 1)) {
+        if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
             progress->state_mask[mask_index] |= mask;
         }
 
@@ -836,7 +836,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     } else {
         u16 angle16 = facing;
         i32 angle = facing;
-        if (__builtin_expect(angle > 0xfc72, 1)) {
+        if (angle > 0xfc72) {
             mode = 2;
         } else if (angle16 <= 0x38d) {
             mode = 2;
@@ -867,9 +867,9 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
         if (angle16 == 0xc000) {
             mode = 1;
             goto have_mode;
-        } else if (__builtin_expect(angle <= 0xbc72, 0)) {
+        } else if (angle <= 0xbc72) {
             return nearest;
-        } else if (__builtin_expect(angle > 0xc38d, 0)) {
+        } else if (angle > 0xc38d) {
             return nearest;
         } else {
             mode = 1;
@@ -954,7 +954,7 @@ pushblock_s *NearestFacingPushBlock(WORLDINFO_s *world, GameObject_s *object, fl
     mode3_geometry: {
         f32 block_min_x = min_x + px - 0.01f;
         f32 block_max_x = px + block->bounds_max.x - 0.01f;
-        if (__builtin_expect(block_min_x >= cx, 1))
+        if (block_min_x >= cx)
             continue;
         if (cx >= block_max_x)
             continue;
@@ -1021,7 +1021,7 @@ i32 PushBlock(GameObject_s *object) {
 
 pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, pushblock_s **support) {
     NUVEC *position = block->position;
-    if (__builtin_expect(support != 0, 1))
+    if (support != 0)
         *support = NULL;
     for (i32 i = 0; i < world->push_block_count; ++i) {
         if (i == excluded)
@@ -1195,7 +1195,7 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
                     pushposincrease += required - world->current_level->max_push_block_end_pos;
                 }
             }
-            if (__builtin_expect(positions != 0 && runoutofpostabspace == 0, 1)) {
+            if (positions != 0 && runoutofpostabspace == 0) {
                 block->snap_positions = &world->push_block_positions[world->push_block_position_count];
                 f32 animation_frame = 1.0f;
                 for (i32 position = 0; position < block->snap_position_count; ++position, animation_frame += 1.0f) {
@@ -1349,11 +1349,11 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         GizObstacles_AddTrigger(p->position);
         if ((p->runtime_flags_0c8 & 0x81) == 0x81)
             p->runtime_flags_0c8 &= 0x3f;
-        if (__builtin_expect((i8)p->runtime_flags_0c8 < 0, 1))
+        if ((i8)p->runtime_flags_0c8 < 0)
             p->flag_0c8_6 = 1;
         if ((p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
-        if (__builtin_expect(!!(p->snap_positions), 1)) {
+        if (p->snap_positions) {
             if (p->runtime_flags_0c9 & 2) {
                 if (p->snap_timer <= snap_time) {
                     f32 fraction = NU_SIN_LUT((i32)((p->snap_timer / snap_time) * 16384.0f + 49152.0f + 16384.0f));
@@ -1422,13 +1422,13 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         if (p->runtime_flags_0c8 & 0x41) {
             i32 surface = p->terrain_info[0];
             bool same = p->terrain_info[1] == surface && p->terrain_info[2] == surface && p->terrain_info[3] == surface;
-            if (__builtin_expect(!!(same), 1)) {
+            if (same) {
                 if ((u32)surface <= 31 && (TerSurface[surface].flags & 0x20000))
                     p->runtime_flags_0c8 |= 0x40;
                 else
                     p->flag_0c8_6 = 0;
             }
-            if (__builtin_expect(!!(p->pushing_object), 1)) {
+            if (p->pushing_object) {
                 if (!(p->runtime_flags_0c8 & 0x40))
                     p->target_velocity.z = p->target_velocity.x = 0;
                 f32 x = p->pushing_object->target_velocity.x, z = p->pushing_object->target_velocity.z;
@@ -1468,8 +1468,8 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
     }
     for (i32 index = 0; index < world->push_block_count; ++index) {
         pushblock_s *p = &world->push_blocks[index];
-        if (__builtin_expect((p->flags_0ca & 4) && !(p->packed_state_flags & 0x04000100) && !(p->flags_0cb & 2) &&
-            (p->runtime_flags_0c8 & 0x69), 0))
+        if ((p->flags_0ca & 4) && !(p->packed_state_flags & 0x04000100) && !(p->flags_0cb & 2) &&
+            (p->runtime_flags_0c8 & 0x69))
             MoveBlocks(world, p, index, &p->velocity);
     }
     for (i32 index = 0; index < world->push_block_count; ++index) {
@@ -1561,7 +1561,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
         pushblock_s *p = &world->push_blocks[index];
         if (!(p->flags_0ca & 4) || (p->runtime_flags_0c9 & 1) || (p->flags_0cb & 2))
             continue;
-        if (!(p->runtime_flags_0c9 & 4) && __builtin_expect(p->runtime_flags_0c8 & 1, 1))
+        if (!(p->runtime_flags_0c9 & 4) && (p->runtime_flags_0c8 & 1))
             GameAudio_PlaySfx(72, p->position, GameAudio_GetPlrSfxBits(p->pushing_object), 0);
         if (p->runtime_flags_0c9 & 0xc) {
             if (p->flag_0c9_2) {
@@ -1596,7 +1596,7 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
             if ((p->runtime_flags_0c8 & 3) == 1 && p->pushing_object)
                 GameAudio_PlaySfx(71, &p->pushing_object->apiobj.collision_position,
                                   GameAudio_GetPlrSfxBits(p->pushing_object), 0);
-            if (__builtin_expect(LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object && (p->pushing_object->apiobj.flags_low & 0x81) == 0x81, 1))
+            if (LEGOHINT_PUSHBLOCKS != -1 && p->pushing_object && (p->pushing_object->apiobj.flags_low & 0x81) == 0x81)
                 Hint_SetComplete(LEGOHINT_PUSHBLOCKS);
         }
     }
@@ -1655,10 +1655,9 @@ i32 Push_UpdateHints(HINT_s *) {
         return 0;
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *object = Player[i];
-        if (__builtin_expect(object != NULL && object->apiobj.player_controlled &&
-                                 object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
-                                 NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL,
-                             1))
+        if (object != NULL && object->apiobj.player_controlled &&
+            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
+            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
             return 1;
     }
     return 0;

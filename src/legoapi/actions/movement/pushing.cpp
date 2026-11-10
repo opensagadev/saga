@@ -257,7 +257,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
     } else if (object->pad_gamepad->input_magnitude > 0.0f ||
                  (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE)) {
         object->field_0xdc4 -= FRAMETIME;
-        if (__builtin_expect(object->field_0xdc4 < 0.0f, 0))
+        if (object->field_0xdc4 < 0.0f)
             object->field_0xdc4 = 0.0f;
     } else {
         object->field_0xdc4 = 0.0f;
@@ -274,7 +274,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                 goto maintain;
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
-                if (__builtin_expect(object->landing_followup == 1, 0)) {
+                if (object->landing_followup == 1) {
                     StartJump(object, 9);
                     object->airborne_action_timer = 1.2f;
                     object->apiobj.movement_facing_angle += 0x8000;
@@ -282,7 +282,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                     object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
                     PlayGruntSfx(object);
                 } else if (!(object->landing_followup == 3 && LEGOACT_LUNGE != -1 &&
-                           object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL)) StartEndOfJump(object); else {
+                             object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL))
+                    StartEndOfJump(object);
+                else {
                     object->apiobj.movement_facing_angle += 0x8000;
                     object->apiobj.facing_angle = object->apiobj.movement_facing_angle;
                     object->apiobj.field_0x276 = object->apiobj.movement_facing_angle;
@@ -306,9 +308,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
              (LEGOACT_PUSH != -1 && object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL))) {
             if (!(object->field_0xdc4 >= 0.25f))
                 goto maintain;
-            if (__builtin_expect((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0, 1)) {
+            if ((static_cast<u32>(surface) - 30) < 2 || (object->field_0xf02 & 2) != 0) {
                 GIZSPINNER_s *spinner = NULL;
-                if (__builtin_expect(LEGOCONTEXT_PUSHSPINNER != -1, 0))
+                if (LEGOCONTEXT_PUSHSPINNER != -1)
                     spinner = GizSpinner_Find(WORLD, &object->apiobj.collision_position, 1);
                 if (spinner != NULL) {
                     if (((spinner->flags & 8) == 0 || ShadowMode != 0) && spinner->room_index == -1 &&
@@ -317,9 +319,9 @@ void PushCode(GameObject_s *object, i32 allow_push) {
                         const i32 spinner_context = LEGOCONTEXT_PUSHSPINNER;
                         bool occupied = false;
                         for (i32 player_index = 0; player_index < 8; ++player_index) {
-                            if (__builtin_expect(Player[player_index] != NULL && Player[player_index] != object &&
+                            if (Player[player_index] != NULL && Player[player_index] != object &&
                                 Player[player_index]->character_context == spinner_context &&
-                                Player[player_index]->field_0x788 == spinner, 0)) {
+                                Player[player_index]->field_0x788 == spinner) {
                                 occupied = true;
                                 break;
                             }
@@ -365,7 +367,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
             if ((character->flags_090 & 0x8000000) == 0 || LEGOCONTEXT_WALLJUMPWAIT == -1 ||
                 object->apiobj.supporting_platform_id != -1)
                 goto maintain;
-            if (__builtin_expect(static_cast<u32>(surface) <= 31 && (TerSurface[surface].flags & 0x10581) != 0, 0))
+            if (static_cast<u32>(surface) <= 31 && (TerSurface[surface].flags & 0x10581) != 0)
                 goto maintain;
             if (object->pad_gamepad->input_magnitude != character->run_speed && !jump_nine)
                 goto maintain;
@@ -437,7 +439,7 @@ maintain:
             }
             if (stopped && ParticlesPerSecond(3.0f, FRAMETIME) > 0) {
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
-            } else if (__builtin_expect(moving != 0, 1)) {
+            } else if (moving != 0) {
                 f32 strength = QRAND_FLOAT() * 0.3f;
                 NewRumble(object->pad_gamepad->pad, strength, 0);
             }
@@ -488,7 +490,7 @@ finalize:
             PlayLandSfx(object, 0, 0);
         else
             PlayGruntSfx(object);
-        if (__builtin_expect(!!(pushing), 1))
+        if (pushing)
             object->takeover_start_angle = wall_angle;
     }
 }

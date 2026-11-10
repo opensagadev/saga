@@ -18,9 +18,6 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
-// The file is built with -ftree-vectorize for the VuVec initializers; the
-// functions below were compiled without it.
-#define SCALAR_FN __attribute__((optimize("omit-frame-pointer", "no-tree-vectorize")))
 extern f32 FRAMETIME;
 extern i32 pause_rndr_on;
 extern i32 wait_till_next_frame;
@@ -226,9 +223,9 @@ i32 FadeSystem::AddFade(FadeBase *o) {
     return 1;
 }
 
-SCALAR_FN i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
+i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     FADETYPE_VALUE type = t.type;
-    if (__builtin_expect(type != FADE_TYPE_NONE && fades[type] != NULL, 1)) {
+    if (type != FADE_TYPE_NONE && fades[type] != NULL) {
         direction = frames;
         pending_type = type;
         return 1;
