@@ -1028,49 +1028,30 @@ void MenuUpdateStoreRestoring(MENU_s *menu) {
         restoring_wait -= FRAMETIME;
     }
 
-#define CHECK_RESTORING_PACK(INDEX)                                                                                    \
-    do {                                                                                                               \
-        char *product = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                                      \
-        if (NuIOS_IsProductPurchased(product) != 0 && (restoring_pack_bits & (1u << INDEX)) == 0) {                    \
-            restoring_wait = 3.0f;                                                                                     \
-            u8 n = restoring_pack_count;                                                                               \
-            restoring_pack_bits |= 1u << INDEX;                                                                        \
-            restoring_pack_list[n] = INDEX;                                                                            \
-            restoring_pack_count = n + 1;                                                                              \
-        }                                                                                                              \
-    } while (0)
     if (restoring_pack_count <= 10) {
-        CHECK_RESTORING_PACK(0);
-        CHECK_RESTORING_PACK(1);
-        CHECK_RESTORING_PACK(2);
-        CHECK_RESTORING_PACK(3);
-        CHECK_RESTORING_PACK(4);
-        CHECK_RESTORING_PACK(5);
-        CHECK_RESTORING_PACK(6);
-        CHECK_RESTORING_PACK(7);
-        CHECK_RESTORING_PACK(8);
-        CHECK_RESTORING_PACK(9);
-        CHECK_RESTORING_PACK(10);
+        for (i32 i = 0; i < 11; ++i) {
+            char *product = *reinterpret_cast<char **>(&StorePack[i].field1_0x4);
+            if (NuIOS_IsProductPurchased(product) != 0 && (restoring_pack_bits & (1u << i)) == 0) {
+                restoring_wait = 3.0f;
+                u8 n = restoring_pack_count;
+                restoring_pack_bits |= 1u << i;
+                restoring_pack_list[n] = i;
+                restoring_pack_count = n + 1;
+            }
+        }
     }
-#undef CHECK_RESTORING_PACK
 
-#define CHECK_RESTORING_BUNDLE(INDEX)                                                                                  \
-    do {                                                                                                               \
-        if ((NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0) &&                                                \
-            ((restoring_bundle_bits & (1u << INDEX)) == 0)) {                                                          \
-            restoring_wait = 3.0f;                                                                                     \
-            u8 n = restoring_bundle_count;                                                                             \
-            restoring_bundle_bits |= 1u << INDEX;                                                                      \
-            restoring_bundle_list[n] = INDEX;                                                                          \
-            restoring_bundle_count = n + 1;                                                                            \
-        }                                                                                                              \
-    } while (0)
     if (restoring_bundle_count <= 2) {
-        CHECK_RESTORING_BUNDLE(0);
-        CHECK_RESTORING_BUNDLE(1);
-        CHECK_RESTORING_BUNDLE(2);
+        for (i32 i = 0; i < 3; ++i) {
+            if (NuIOS_IsProductPurchased(StoreBundle[i].name) != 0 && (restoring_bundle_bits & (1u << i)) == 0) {
+                restoring_wait = 3.0f;
+                u8 n = restoring_bundle_count;
+                restoring_bundle_bits |= 1u << i;
+                restoring_bundle_list[n] = i;
+                restoring_bundle_count = n + 1;
+            }
+        }
     }
-#undef CHECK_RESTORING_BUNDLE
 
     if (menu->confirm_pressed != 0) {
         if (restoring_wait <= 0.0f) {

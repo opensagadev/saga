@@ -18859,8 +18859,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 // Cache geometry independently of the requesting material mask.
                 const i32 group_index = group_indices[cell_group];
                 TERRAIN_GROUP &group = CurTerr->groups[group_index];
-                if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
-                      group.bounds_max.z > min_z) ||
+                if (!ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max) ||
                     group.chunk_type == -1)
                     continue;
                 const f32 local_max_z = max_z - group.origin.z;
@@ -18921,8 +18920,7 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             const i16 group_index = reinterpret_cast<i16 *>(entry)[1];
             TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + sizeof(TERRAIN_SHAPE *));
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
-            if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
-                  group.bounds_max.z > min_z) ||
+            if (!ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max) ||
                 group.chunk_type == -1) {
                 entry = reinterpret_cast<u8 *>(shapes + count);
                 continue;
@@ -19350,51 +19348,12 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
         TERRAIN_SHAPE **next_surface = surfaces;
         for (i32 i = shape_count; i != 0; i--) {
             TERRAIN_SHAPE *surface = *next_surface++;
-            auto record_hit = [&](const NUVEC *normal, const NUVEC *corner, i32 facing) {
-                f32 nx = normal->x;
-                f32 ny = normal->y;
-                f32 nz = normal->z;
-                f32 y = corner->y + CurTerr->groups[group_index].origin.y +
-                        ((x - corner->x) * nx + (z - corner->z) * nz) / -ny;
-                if (surface->material[1] != 0) {
-                    if (position->y >= y && y > efloor_y && facing == 1) {
-                        efloor_nx = nx;
-                        efloor_ny = ny;
-                        efloor_nz = nz;
-                        efloor_poly = surface;
-                        efloor_y = y;
-                        ecastnum = group_index;
-                    } else if (y > position->y && eroof_y >= y && (y != eroof_y || eroof_ny > ny)) {
-                        eroof_nx = nx;
-                        eroof_ny = ny;
-                        eroof_nz = nz;
-                        eroof_poly = surface;
-                        eroof_y = y;
-                        eroof_group = group_index;
-                    }
-                } else {
-                    if (position->y >= y && y > floor_y && facing == 1) {
-                        floor_nx = nx;
-                        floor_ny = ny;
-                        floor_nz = nz;
-                        floor_poly = surface;
-                        floor_y = y;
-                        castnum = group_index;
-                    } else if (!(y <= position->y) && roof_y >= y && (y != roof_y || roof_ny > ny)) {
-                        roof_nx = nx;
-                        roof_ny = ny;
-                        roof_nz = nz;
-                        roof_poly = surface;
-                        roof_y = y;
-                        roof_group = group_index;
-                    }
-                }
-            };
 #define CAST_LINE(a, b)                                                                                                \
     InsideLineF(x, z, surface->vectors[a].x, surface->vectors[a].z, surface->vectors[b].x, surface->vectors[b].z)
+            i32 facing = 0;
+            i32 plane = 0;
             if (surface->normals[1].y > 65535.0f) {
                 // Triangle: a single plane.
-                i32 facing = 0;
                 if (surface->normals[0].y > 0.0f) {
                     if ((CAST_LINE(1, 0) != 0) && CAST_LINE(0, 2) && CAST_LINE(2, 1)) {
                         facing = 1;
@@ -19404,13 +19363,8 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
                         facing = 2;
                     }
                 }
-                if (facing != 0) {
-                    record_hit(&surface->normals[0], &surface->vectors[0], facing);
-                }
             } else {
                 // Quad: two planes sharing the 1-2 edge.
-                i32 facing = 0;
-                i32 plane = 0;
                 if (surface->normals[0].y > 0.0f) {
                     if (CAST_LINE(2, 1)) {
                         if (CAST_LINE(1, 0) && CAST_LINE(0, 2)) {
@@ -19430,11 +19384,53 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
                         plane = 1;
                     }
                 }
-                if (facing != 0) {
-                    if (plane != 0 && surface->normals[1].y != 0.0f) {
-                        record_hit(&surface->normals[1], &surface->vectors[3], facing);
-                    } else {
-                        record_hit(&surface->normals[0], &surface->vectors[0], facing);
+            }
+            if (facing != 0) {
+                const NUVEC *normal;
+                const NUVEC *corner;
+                if (plane != 0 && surface->normals[1].y != 0.0f) {
+                    normal = &surface->normals[1];
+                    corner = &surface->vectors[3];
+                } else {
+                    normal = &surface->normals[0];
+                    corner = &surface->vectors[0];
+                }
+                f32 nx = normal->x;
+                f32 ny = normal->y;
+                f32 nz = normal->z;
+                f32 y = corner->y + CurTerr->groups[group_index].origin.y +
+                        ((x - corner->x) * nx + (z - corner->z) * nz) / -ny;
+                if (surface->material[1] == 0) {
+                    if (position->y >= y && y > floor_y && facing == 1) {
+                        floor_nx = nx;
+                        floor_ny = ny;
+                        floor_nz = nz;
+                        floor_poly = surface;
+                        floor_y = y;
+                        castnum = group_index;
+                    } else if (!(y <= position->y) && roof_y >= y && (y != roof_y || roof_ny > ny)) {
+                        roof_nx = nx;
+                        roof_ny = ny;
+                        roof_nz = nz;
+                        roof_poly = surface;
+                        roof_y = y;
+                        roof_group = group_index;
+                    }
+                } else {
+                    if (position->y >= y && y > efloor_y && facing == 1) {
+                        efloor_nx = nx;
+                        efloor_ny = ny;
+                        efloor_nz = nz;
+                        efloor_poly = surface;
+                        efloor_y = y;
+                        ecastnum = group_index;
+                    } else if (y > position->y && eroof_y >= y && (y != eroof_y || eroof_ny > ny)) {
+                        eroof_nx = nx;
+                        eroof_ny = ny;
+                        eroof_nz = nz;
+                        eroof_poly = surface;
+                        eroof_y = y;
+                        eroof_group = group_index;
                     }
                 }
             }
