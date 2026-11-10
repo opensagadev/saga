@@ -135,7 +135,7 @@ static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
             damage = static_cast<i32>(NuAToF(value + NuStrLen("damage=")));
         }
     }
-    if (__builtin_expect(damage == 0 || name == NULL, 0)) {
+    if (damage == 0 || name == NULL) {
         return;
     }
     if (!turret) {
@@ -400,7 +400,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         }
         return;
     }
-    if (__builtin_expect(named_object != NULL, 1)) {
+    if (named_object != NULL) {
         origin = named_object->apiobj.collision_position;
     }
     // Retail never resets the match flag, so every later in-range object of any type also switches state.
@@ -415,7 +415,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-        if (__builtin_expect(type_count == 0, 0)) {
+        if (type_count == 0) {
             if (range_squared > distance_squared) {
                 object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
             }
@@ -425,7 +425,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
                     matching_type = 1;
                 }
             }
-            if (matching_type != 0 && __builtin_expect(range_squared > distance_squared, 0)) {
+            if (matching_type != 0 && (range_squared > distance_squared)) {
                 object->ai.script_process.next_state =
                     AIStateFind(state_name, object->apiobj.ai->script_process.script);
             }
@@ -482,7 +482,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
                 target_name = value + NuStrLen("target=");
             } else if (NuStrICmp(value, "Move_Waggle") == 0) {
                 movement = 1;
-            } else if (__builtin_expect(NuStrICmp(value, "Move_Spin") == 0, 1)) {
+            } else if (NuStrICmp(value, "Move_Spin") == 0) {
                 movement = 2;
             } else if (NuStrICmp(value, "Move_Horizontal") == 0) {
                 movement = 8;
@@ -504,7 +504,7 @@ static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, i
         i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
         GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type_id, techno_name);
         TECHNO *techno = gizmo != NULL ? static_cast<TECHNO *>(gizmo->object) : NULL;
-        if (__builtin_expect(techno == NULL, 1)) {
+        if (techno == NULL) {
             return;
         }
         if (movement != 0xff) {
@@ -590,7 +590,7 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
             name = value + 5;
         } else if (NuStrICmp(params[i], "TRUE") == 0) {
             activate = 1;
-        } else if (__builtin_expect(NuStrICmp(params[i], "FALSE") == 0, 1)) {
+        } else if (NuStrICmp(params[i], "FALSE") == 0) {
             activate = 0;
         } else if ((value = NuStrIStr(params[i], "buildit=")) != NULL) {
             GIZMO *gizmo = GizmoFindByName(flow->gizmo_sys, gizbuildit_gizmotype_id, value + 8);
@@ -617,7 +617,7 @@ static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
             DeactivateCharacter(name);
         }
     } else {
-        if (__builtin_expect(buildit != NULL, 1)) {
+        if (buildit != NULL) {
             if (ActivateCharacter(name, &buildit->position, buildit->field_0x7c) == NULL) {
                 GizBuildIt_KillParts(buildit);
             }
@@ -670,7 +670,7 @@ static void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **param
         pickup->state_activated = visible;
         return;
     }
-    if (__builtin_expect(id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL, 0)) {
+    if (id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL) {
         return;
     }
     pickup = WORLD->gizmo_pickup_sys->pickups;

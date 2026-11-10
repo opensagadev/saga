@@ -747,14 +747,14 @@ void MosEisleyB_Update(WORLDINFO_s *world) {
             if (selected == second) {
                 node0->position.x = 22.75f;
                 node0->position.z = -15.12f;
-                if (__builtin_expect(group->forces[1] == first, 0))
+                if (group->forces[1] == first)
                     SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.72f, -14.78f, 23.32f, -14.61f);
                 else
                     SET_STACK_NODE_POSITIONS(23.27f, -14.93f, 23.27f, -14.62f, 23.66f, -14.73f);
             } else if (selected == third) {
                 node0->position.x = 22.79f;
                 node0->position.z = -14.62f;
-                if (__builtin_expect(group->forces[1] == first, 0))
+                if (group->forces[1] == first)
                     SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.73f, -14.70f, 23.34f, -14.87f);
                 else
                     SET_STACK_NODE_POSITIONS(23.29f, -14.58f, 23.27f, -14.85f, 23.63f, -14.76f);
@@ -1176,7 +1176,7 @@ __attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Update(WORLDINFO_
     nuinstanim_s *animation1 = NuSpecialGetInstAnim(&LevHSpecial[1]);
     if (animation1 != NULL)
         data1 = LevHSpecial[1].scene->instance_animation_data[animation1->anim_ix];
-    if (__builtin_expect(data0 == NULL || data1 == NULL, 0))
+    if (data0 == NULL || data1 == NULL)
         return;
 
     if (NuSpecialGetVisibilityFn(&LevHSpecial[0])) {
@@ -1283,9 +1283,9 @@ i32 DeathStarShieldDown() {
     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[0]->object);
     if (blowup->output_flags & 1)
         return 1;
-    if (__builtin_expect(static_cast<i8>(blowup->state_flags) < 0, 1)) {
-        if (__builtin_expect(Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
-                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx)), 1)) {
+    if (static_cast<i8>(blowup->state_flags) < 0) {
+        if (Player[0] != NULL && (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                                  !ObjInNarrowSock(Player[0], WORLD->sock_sys, WORLD->level_idx))) {
             TORPEDOPACKET_s *packet = Player[0]->torpedo;
             if (packet != NULL && (packet->count != 0 || (packet->field_0x1 & 2) != 0))
                 return 1;
@@ -1314,7 +1314,7 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
         if (trenchrun.position.x < -500.0f) {
             trenchrun.position.y = trench_spawn_height - 10.5f;
             i32 &midtro = *reinterpret_cast<i32 *>(&trenchrun.reserved_0x18[0]);
-            if (__builtin_expect(FreePlay == 0 && midtro == 0, 0)) {
+            if (FreePlay == 0 && midtro == 0) {
                 if (trenchrun.objects[0] != NULL) {
                     KillGameObject(trenchrun.objects[0], 4, 0);
                     trenchrun.objects[0] = NULL;
@@ -1340,7 +1340,7 @@ void DeathStarBattleDUpdate(WORLDINFO_s *world) {
         else if (trenchrun.position.z > upper)
             trenchrun.position.z = upper;
 
-        if (__builtin_expect(aicreature_sets_alive[0] == 0, 1)) {
+        if (aicreature_sets_alive[0] == 0) {
             f32 &timer = *reinterpret_cast<f32 *>(&trenchrun.reserved_0x18[4]);
             timer -= FRAMETIME;
             if (timer <= 0.0f) {

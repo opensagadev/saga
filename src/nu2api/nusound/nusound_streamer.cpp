@@ -163,10 +163,10 @@ void NuSoundStreamer::ThreadFunc(void *self) {
                 loader->FillStreamBuffer(element.buffer, element.loop);
 
                 NuSoundBuffer::Context &context = element.buffer->GetCurrentContext();
-                if (__builtin_expect(context.size2 != 0, 1)) {
+                if (context.size2 != 0) {
                     NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
                     NuSoundBufferCallback *callback = (NuSoundBufferCallback *)element.weak_ptr.obj;
-                    if (__builtin_expect(callback != NULL, 1)) {
+                    if (callback != NULL) {
                         callback->SubmitBuffer(element.buffer);
                     }
                     NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
@@ -189,7 +189,7 @@ void NuSoundStreamer::ThreadFunc(void *self) {
                 break;
         }
 
-    } while (__builtin_expect(streamer->running != false, 1));
+    } while (streamer->running != false);
 }
 
 // ---------------------------------------------------------------------------
@@ -215,7 +215,7 @@ NuSoundStreamingSample::~NuSoundStreamingSample() {
 
 i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     LoadState load_state = GetLoadState();
-    if (__builtin_expect(GetResourceCount() == 0, 0) || __builtin_expect(load_state == LoadState::STREAM_READY, 0)) {
+    if ((GetResourceCount() == 0) || (load_state == LoadState::STREAM_READY)) {
         return 0;
     }
 
@@ -223,7 +223,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     i32 error = 0;
     i32 status = 0;
 
-    if (__builtin_expect(this->sound_buffers[0] == NULL, 0)) {
+    if (this->sound_buffers[0] == NULL) {
         u32 half_buffer_size = NuSoundSystem::GetStreamBufferSize() / 2;
 
         NuSoundBuffer *buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
@@ -232,8 +232,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffers[0] = buffer;
 
-        if (__builtin_expect(
-                this->sound_buffers[0]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1, 0)) {
+        if (this->sound_buffers[0]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
@@ -243,8 +242,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         }
         this->sound_buffers[1] = buffer;
 
-        if (__builtin_expect(
-                this->sound_buffers[1]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1, 0)) {
+        if (this->sound_buffers[1]->Allocate(half_buffer_size, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
@@ -272,8 +270,8 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         context.size3 = 0;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffers[0], loop);
-        if (__builtin_expect(context.size2 == 0, 1)) {
-            if (__builtin_expect(this->some_count == 0, 0)) {
+        if (context.size2 == 0) {
+            if (this->some_count == 0) {
                 this->file_loader->CloseStream();
                 status = 4;
             }
@@ -283,9 +281,9 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         this->sound_buffers[0]->SetCurrentContext(context);
 
         context.flags &= ~1u;
-        if (__builtin_expect(status == 1 && (context.flags & 2) == 0, 1)) {
+        if (status == 1 && (context.flags & 2) == 0) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffers[1], loop);
-            if (__builtin_expect(context.size2 != 0, 1)) {
+            if (context.size2 != 0) {
                 this->some_count++;
             } else {
                 if (this->some_count == 0) {
@@ -298,7 +296,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     }
 
     LoadState new_state;
-    if (__builtin_expect(status == 1, 0)) {
+    if (status == 1) {
         error = 0;
         new_state = LoadState::STREAM_READY;
     } else {
@@ -413,8 +411,8 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     this->sound_buffers[0]->Lock();
     context = this->file_loader->FillStreamBuffer(this->sound_buffers[0], loop);
 
-    if (__builtin_expect(context.size2 == 0, 1)) {
-        if (__builtin_expect((context.flags & 2) == 0, 0)) {
+    if (context.size2 == 0) {
+        if ((context.flags & 2) == 0) {
             goto stream_error;
         }
     } else {
@@ -424,12 +422,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     context.flags &= ~1;
     this->sound_buffers[0]->Unlock();
 
-    if (__builtin_expect((context.flags & 2) == 0, 1)) {
+    if ((context.flags & 2) == 0) {
         this->sound_buffers[1]->Lock();
         context = this->file_loader->FillStreamBuffer(this->sound_buffers[1], loop);
 
-        if (__builtin_expect(context.size2 == 0, 1)) {
-            if (__builtin_expect((context.flags & 2) == 0, 0)) {
+        if (context.size2 == 0) {
+            if ((context.flags & 2) == 0) {
                 goto stream_error;
             }
         } else {
@@ -448,7 +446,7 @@ stream_error:
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
-    if (__builtin_expect(this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked(), 0)) {
+    if (this->sound_buffers[0] != NULL && this->sound_buffers[0]->IsLocked()) {
         return true;
     }
     if (this->sound_buffers[1] != NULL && this->sound_buffers[1]->IsLocked()) {

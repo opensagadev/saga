@@ -1132,10 +1132,10 @@ void ClearStill() {
 
 void HandleStillRender() {
     GetMenuID();
-    if (__builtin_expect(pause_rndr_on != 0 && FadeSys.pending_type == FADE_TYPE_NONE, 1)) {
+    if (pause_rndr_on != 0 && FadeSys.pending_type == FADE_TYPE_NONE) {
         NuRndrBeginScene(-1);
         if (MainRenderTime < 1.0f) {
-            if (__builtin_expect(back_rgba[0] == back_rgba[1], 0)) {
+            if (back_rgba[0] == back_rgba[1]) {
                 NuRndrClear(0xf00, back_rgba[0], 1.0f);
             } else {
                 NuRndrGradClear(0xf00, back_rgba[0], back_rgba[1], 1.0f);
@@ -1147,7 +1147,7 @@ void HandleStillRender() {
         NuRndrEndScene();
     }
 
-    if (__builtin_expect(grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 && FadeSys.pending_type == FADE_TYPE_NONE, 0)) {
+    if (grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 && FadeSys.pending_type == FADE_TYPE_NONE) {
         DrawStillScreen(clear_screen_onstill);
     }
 

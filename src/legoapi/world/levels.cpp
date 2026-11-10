@@ -880,9 +880,9 @@ extern "C" {
 
 GameObject_s *CutDeadVehiclePlayer;
 
-__attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WORLDINFO_s *world) {
-    if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && __builtin_expect((world->area->flags & 8) == 0, 1) &&
-        NewLData == NULL && Mission_Active(NULL) == NULL) {
+void LevelStreaming_Update(WORLDINFO_s *world) {
+    if (LOADEROFF == 0 && BGLOAD != 0 && world->area != NULL && ((world->area->flags & 8) == 0) && NewLData == NULL &&
+        Mission_Active(NULL) == NULL) {
 
         other_level = -1;
         if (no_more_loads == 0) {
@@ -922,7 +922,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void LevelStreaming_Update(WOR
                     if (i < LevelLoadCount) {
                         const i16 first_level = load->first_level;
                         const i16 second_level = load->second_level;
-                        if (__builtin_expect(first_level != second_level, 0)) {
+                        if (first_level != second_level) {
                             if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
                                 NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
                                 if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
@@ -1045,7 +1045,7 @@ void PortalDoors_Update(WORLDINFO_s *world) {
                     NuPortalSetActive(world->current_gscn, door->portal_id, 0);
                     door->flags = static_cast<u16>((door->flags & ~PORTALDOOR_OPENED) | PORTALDOOR_CLOSED);
                 }
-            } else if (__builtin_expect((flags & PORTALDOOR_OPENED) == 0, 1)) {
+            } else if ((flags & PORTALDOOR_OPENED) == 0) {
                 NuPortalSetActive(world->current_gscn, door->portal_id, 1);
                 door->flags = static_cast<u16>((door->flags & ~PORTALDOOR_CLOSED) | PORTALDOOR_OPENED);
             }
@@ -1085,7 +1085,7 @@ void EquivalentObjects_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     u8 *cursor = reinterpret_cast<u8 *>(world->giz_buffer.addr);
     world->equivalent_groups = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
-    while (__builtin_expect(NuFParGetLine(parser) != 0, 1)) {
+    while (NuFParGetLine(parser) != 0) {
         if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, const_cast<char *>("equivalentobjects")) == 0) {
 
             EQUIVALENTOBJECTGROUP_s *group = reinterpret_cast<EQUIVALENTOBJECTGROUP_s *>(cursor);
@@ -1183,7 +1183,7 @@ void LoadGrassFile(WORLDINFO *world) {
         return;
     }
 
-    if (__builtin_expect(Grass_Available != 0, 1)) {
+    if (Grass_Available != 0) {
         sprintf(path, "%s.gra", config);
         if (NuFileExists(path)) {
             i32 page = edgraLoadPage(path, world->current_gscn, *(i32 *)&world->terrain, &world->giz_buffer,
@@ -1621,7 +1621,7 @@ LEVELDATA *Levels_ConfigureList(char *file, VARIPTR *buf, VARIPTR *buf_end, i32 
                     }
                 }
 
-                if (__builtin_expect(NuStrICmp(parser->word_buf, "test_level") == 0, 1)) {
+                if (NuStrICmp(parser->word_buf, "test_level") == 0) {
                     cur_level->flags |= LEVEL_TEST;
                 } else if (NuStrICmp(parser->word_buf, "intro_level") == 0) {
                     cur_level->flags |= LEVEL_INTRO;
@@ -1948,7 +1948,7 @@ void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, 
 
     const i32 object_range = LEVOBJREF_LASTOBJ - LEVOBJREF_FIRSTOBJ;
     const i32 reflection_range = LEVOBJREF_LASTREFOBJ - LEVOBJREF_FIRSTREFOBJ;
-    if (__builtin_expect(object_range > reflection_range, 1)) {
+    if (object_range > reflection_range) {
         LEVOBJREF_LASTOBJ = LEVOBJREF_FIRSTOBJ + reflection_range;
     } else if (object_range < reflection_range) {
         LEVOBJREF_LASTREFOBJ = LEVOBJREF_FIRSTREFOBJ + object_range;
@@ -2011,9 +2011,8 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
             case LEVEL_OBJECT_SCENE_CHARACTER_ICON:
                 for (i32 character_id = 0; character_id < CHARCOUNT; ++character_id) {
                     scene = IconScene_FindById(character_id);
-                    if (scene != NULL && __builtin_expect(NuSpecialFind(scene, &world->lev_objs[object_index].special,
-                                                                        ObjTabList[object_index].name, 1) != 0,
-                                                          0)) {
+                    if (scene != NULL && (NuSpecialFind(scene, &world->lev_objs[object_index].special,
+                                                        ObjTabList[object_index].name, 1) != 0)) {
                         goto object_resolved;
                     }
                 }
@@ -2034,12 +2033,10 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 
             case LEVEL_OBJECT_SCENE_THINGS:
             default:
-                if (__builtin_expect(area_scene != NULL && world->area != NULL &&
-                                         (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0,
-                                     1)) {
-                    if (__builtin_expect(NuSpecialFind(area_scene, &world->lev_objs[object_index].special,
-                                                       ObjTabList[object_index].name, 1) == 0,
-                                         0)) {
+                if (area_scene != NULL && world->area != NULL &&
+                    (world->area->flags & AREAFLAG_OVERRIDE_THINGS_SCENE) != 0) {
+                    if (NuSpecialFind(area_scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name,
+                                      1) == 0) {
                         NuSpecialFind(things_scene, &world->lev_objs[object_index].special,
                                       ObjTabList[object_index].name, 1);
                     }
@@ -2049,7 +2046,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
                 break;
         }
 
-        if (__builtin_expect(scene == NULL, 0)) {
+        if (scene == NULL) {
             continue;
         }
         NuSpecialFind(scene, &world->lev_objs[object_index].special, ObjTabList[object_index].name, 1);
@@ -2057,7 +2054,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
     object_resolved:
         world->lev_objs[object_index].active =
             static_cast<u8>(NuSpecialExistsFn(&world->lev_objs[object_index].special));
-        if (__builtin_expect(world->lev_objs[object_index].active != 0, 1)) {
+        if (world->lev_objs[object_index].active != 0) {
             NuSpecialSetVisibility(&world->lev_objs[object_index].special, 0);
         }
     }

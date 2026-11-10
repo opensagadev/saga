@@ -220,7 +220,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 }
 
 void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_squared, u8 *target_type) {
-    if (__builtin_expect(world->gizmo_blowup_count == 0, 0))
+    if (world->gizmo_blowup_count == 0)
         return NULL;
     void *nearest = NULL;
     f32 nearest_distance = distance_squared;
@@ -246,7 +246,7 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
                     NUVEC *draw_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
                     if (draw_position != NULL) {
                         f32 distance = NuVecDistSqr(draw_position, position, &delta);
-                        if (__builtin_expect(distance < nearest_distance, 1)) {
+                        if (distance < nearest_distance) {
                             nearest_distance = distance;
                             nearest = turret;
                             type = 1;
@@ -325,7 +325,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
 
     if (object->torpedo->field_08 < 0.8f) {
         object->torpedo->field_08 += FRAMETIME;
-        if (__builtin_expect(object->torpedo->field_08 >= 0.8f, 0))
+        if (object->torpedo->field_08 >= 0.8f)
             object->torpedo->field_03 = 0;
     } else {
         if (Cheat_IsOn(42) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
@@ -337,10 +337,10 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
                 object->torpedo->field_08 = 0.0f;
                 object->torpedo->field_03 = 0;
             }
-        } else if (__builtin_expect(object->torpedo->count < maximum, 1)) {
+        } else if (object->torpedo->count < maximum) {
             f32 distance;
             GIZTORPMACHINE *machine = GizTorpMachine_FindNearest(WORLD, &object->apiobj.collision_position, &distance);
-            if (machine != NULL && __builtin_expect((machine->flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0, 1) &&
+            if (machine != NULL && ((machine->flags & GIZTORPMACHINE_FLAG_ACTIVE) != 0) &&
                 distance < TORPEDOGRABRANGE2) {
                 NewRumble(object->pad_gamepad->pad, qrand() * 1.5259022e-05f * 0.4f, 0);
                 if (object->torpedo->count < maximum) {
@@ -356,7 +356,7 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
     }
 
     Torpedo_UpdateJobbies(object);
-    if (__builtin_expect(object->torpedo->count == 0, 0))
+    if (object->torpedo->count == 0)
         return;
 
     BOLTTYPE_s *type;
@@ -367,13 +367,13 @@ void TorpedoCode(GameObject_s *object, i32 fire, f32 fire_cooldown) {
     const f32 range = type->field_10 * type->field_14;
     void *target;
     u8 target_type;
-    if (__builtin_expect((object->torpedo->field_0x1 & 2) == 0, 0) || object->torpedo->target == NULL) {
+    if (((object->torpedo->field_0x1 & 2) == 0) || object->torpedo->target == NULL) {
         target = FindNearestTorpTarget(WORLD, &object->apiobj.position, range * range, &target_type);
     } else {
         target = object->torpedo->target;
         target_type = object->torpedo->target_type;
     }
-    if (__builtin_expect(target != NULL, 1)) {
+    if (target != NULL) {
         if (target == object->torpedo->target) {
             object->torpedo_target_timer += FRAMETIME;
             if (object->torpedo_target_timer > 0.25f)
@@ -432,7 +432,7 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     u8 target_type;
     if (target == NULL) {
         target = FindNearestTorpTarget(WORLD, &bolt->position, range * range, &target_type);
-        if (__builtin_expect(target == NULL, 1)) {
+        if (target == NULL) {
             if (bolt->time == 0.0f)
                 bolt->velocity.y += 6.0f;
             return;

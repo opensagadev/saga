@@ -225,7 +225,7 @@ static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible) {
     machine->flags = static_cast<HATMACHINE_FLAGS>(flags);
 
     if ((flags & HATMACHINE_FLAG_VISIBLE) != 0) {
-        if (__builtin_expect(was_visible == 0, 0)) {
+        if (was_visible == 0) {
             machine->platform_id = NewPlatPickupInst(machine, HATMACHINE_PLATFORM_COLLISION);
             PlatInstRotate(machine->platform_id, 1);
         }
@@ -356,12 +356,12 @@ static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr) {
 }
 
 static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
-    if (__builtin_expect(gizmo == NULL || gizmo->object == NULL, 0)) {
+    if (gizmo == NULL || gizmo->object == NULL) {
         return;
     }
 
     HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    if (__builtin_expect(enabled == 0, 0))
+    if (enabled == 0)
         goto disable;
 
     machine->progress_state0 = 1;
@@ -429,7 +429,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         }
 
         if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0) {
-            if (__builtin_expect(world->lev_objs[286].active != 0, 0)) {
+            if (world->lev_objs[286].active != 0) {
                 NuSpecialDrawAt(&world->lev_objs[286].special, &machine->transform);
             }
         } else {
@@ -487,7 +487,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                     machine->state_duration = 2.0f;
                 }
                 animation_frame = machine->animation_time * anims[0]->tfactor * 60.0f;
-                if (__builtin_expect(end_frames[0] <= animation_frame, 0)) {
+                if (end_frames[0] <= animation_frame) {
                     animation_frame = end_frames[0];
                 }
             }
@@ -546,7 +546,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
                 const f32 hat_scale = 1.0f - (1.0f - (hat_sine + 1.0f) * 0.5f);
                 hat_position.y += (1.0f - hat_scale) * 0.1f;
 
-                if (__builtin_expect(machine->animation_state <= 2, 1)) {
+                if (machine->animation_state <= 2) {
                     f32 bob_scale = 0.01f;
                     if (animation_frame != 0.0f) {
                         const f32 frame_fade = animation_frame / 50.0f;
@@ -835,7 +835,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 6) {
                 PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
             }
-            if (__builtin_expect(static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 5, 1)) {
+            if (static_cast<HATMACHINE_s *>(object->field_0x788)->configured_hat == 5) {
                 PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
             }
         }

@@ -701,7 +701,7 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
     f32 dx = position_b->x - position_a->x;
     f32 dz = position_b->z - position_a->z;
     f32 dy = position_b->y - position_a->y;
-    if (__builtin_expect(radius_b != y_radius_b || radius_a != y_radius_a, 0)) {
+    if (radius_b != y_radius_b || radius_a != y_radius_a) {
         dy *= (radius_b + radius_a) / (y_radius_b + y_radius_a);
     }
     f32 radius = radius_b + radius_a;
@@ -861,7 +861,7 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
         NuVecSub(direction, &prediction, origin);
         f32 distance = NuVecMag(direction);
         f32 time = distance;
-        if (__builtin_expect(distance == 0.0f || zero_speed, 0))
+        if (distance == 0.0f || zero_speed)
             time = 0.0f;
         else
             time /= speed;
@@ -1046,7 +1046,7 @@ f32 FindReflectionNoPlatforms(nuvec_s *position) {
 }
 
 f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
-    if (__builtin_expect(alpha <= 0.0f, 0)) {
+    if (alpha <= 0.0f) {
         return 0.0f;
     }
 
@@ -1056,7 +1056,7 @@ f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
         camera_delta.x * camera_delta.x + camera_delta.y * camera_delta.y + camera_delta.z * camera_delta.z;
 
     if (distance_squared < fade_end * fade_end) {
-        if (__builtin_expect(distance_squared > fade_start * fade_start, 0)) {
+        if (distance_squared > fade_start * fade_start) {
             const f32 distance = NuFsqrt(distance_squared);
             return (1.0f - (distance - fade_start) / (fade_end - fade_start)) * alpha;
         }
@@ -1070,7 +1070,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         *angle = 0;
     if (pitch != NULL)
         *pitch = 0;
-    if (__builtin_expect(spline == NULL, 0))
+    if (spline == NULL)
         return;
     if (along > 1.0f)
         along = 1.0f;
@@ -1081,7 +1081,7 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     i32 index = fixed >> 16;
     NUVEC *current = &spline->pts[index];
     *position = *current;
-    if (__builtin_expect(angle != NULL, 1) || pitch != NULL)
+    if ((angle != NULL) || pitch != NULL)
         SplinePointAngles(spline, index, looping, pitch, angle);
     index++;
     if (index >= spline->length) {
@@ -1097,11 +1097,11 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     position->x += (next->x - current->x) * fraction;
     position->y += (next->y - current->y) * fraction;
     position->z += (next->z - current->z) * fraction;
-    if (__builtin_expect(angle != NULL || pitch != NULL, 1)) {
+    if (angle != NULL || pitch != NULL) {
         u16 next_angle, next_pitch;
         SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
                           angle != NULL ? &next_angle : NULL);
-        if (__builtin_expect(angle != NULL, 1))
+        if (angle != NULL)
             *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
         if (pitch != NULL)
             *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
@@ -1154,7 +1154,7 @@ f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
     f32 px = point->x - start->x;
     f32 pz = point->z - start->z;
     f32 along = pz * cosine - px * sine;
-    if (__builtin_expect(along <= 0.0f, 0))
+    if (along <= 0.0f)
         return 0.0f;
     f32 length = dz * cosine - dx * sine;
     if (along >= length)
@@ -1245,7 +1245,7 @@ f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f
     NuVecRotateY(&bc, &bc, -angle);
 
     if (NuFsign(ca.x) != NuFsign(da.x)) {
-        if (__builtin_expect(NuFsign(ac.x) != NuFsign(bc.x), 0)) {
+        if (NuFsign(ac.x) != NuFsign(bc.x)) {
             *first = NuFabs(ac.x) / (NuFabs(ac.x) + NuFabs(bc.x));
             *second = NuFabs(ca.x) / (NuFabs(ca.x) + NuFabs(da.x));
             return 0.0f;
@@ -1303,8 +1303,8 @@ f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f
         *first = 0.0f;
         closest = distance;
     }
-    if (__builtin_expect(!(bc.z < 0.0f), 1)) {
-        if (__builtin_expect(bc.z > cd_length, 0)) {
+    if (!(bc.z < 0.0f)) {
+        if (bc.z > cd_length) {
             distance = NuVecXZDist(d, &bc, NULL);
             fraction = 1.0f;
         } else {
@@ -1315,7 +1315,7 @@ f32 XZLinesClosest(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, f32 *first, f
         distance = NuVecXZDist(c, &bc, NULL);
         fraction = 0.0f;
     }
-    if (__builtin_expect(distance < closest, 1)) {
+    if (distance < closest) {
         *second = fraction;
         *first = 1.0f;
         closest = distance;
@@ -1361,13 +1361,13 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                 while (distance > 0.0f) {
                     spline = position->spline;
                     position->segment_distance += distance;
-                    if (__builtin_expect(!(position->segment_distance >= position->segment_length), 0))
+                    if (!(position->segment_distance >= position->segment_length))
                         goto interpolate;
                     distance = position->segment_distance - position->segment_length;
                     i16 previous = position->segment;
                     position->segment++;
                     if (position->segment >= segments) {
-                        if (__builtin_expect(!position->looping, 0)) {
+                        if (!position->looping) {
                             position->reached_end = 1;
                             position->position =
                                 *(NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
@@ -1391,7 +1391,7 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                 for (;;) {
                     spline = position->spline;
                     position->segment_distance += distance;
-                    if (__builtin_expect(position->segment_distance >= 0.0f, 0))
+                    if (position->segment_distance >= 0.0f)
                         break;
                     distance = position->segment_distance;
                     i16 previous = position->segment;
@@ -1472,7 +1472,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
         i32 index = first_point;
         if (index < 0)
             index = 0;
-        else if (__builtin_expect(index >= logical_count, 0))
+        else if (index >= logical_count)
             return;
         i32 end = point_count;
         if (last_point >= 0 && last_point < end)
@@ -1674,7 +1674,7 @@ void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_i
 
     NUGSCN *scene = special->scene;
     nuanimdata_s *animation = scene->instance_animation_data[instance_animation->anim_ix];
-    if (__builtin_expect(animation == NULL, 1)) {
+    if (animation == NULL) {
         return;
     }
 

@@ -44,6 +44,7 @@ is generated from the local reference ELF alongside the Pages report.
 | File | Kind | What it checks |
 |---|---|---|
 | `check_bazel_optimization_map.py` | automatic `py_test` | Every Android per-file optimization mapping is exact, valid, and points to an existing source. |
+| `check_compiler_hints.py` | automatic `py_test` | No `__builtin_expect`, `optimize` attributes, `#pragma GCC optimize`, or `hot`/`cold` attributes in `src/`; code layout must come from source structure, not hints. |
 | `check_host_boundary.py` | automatic `py_test` | Shared source does not include host-only code or add unapproved `HOST_BUILD` forks. |
 | `check_duplicate_definitions.py` | automatic `py_test` | Duplicate C/C++ type definitions, plus optional duplicate object symbols. |
 | `check_forward_declarations.py` | automatic pre-commit `py_binary` | Uses libclang and the real 32-bit native Bazel compile flags to compare canonical, structural free-function signatures across translation units. Non-32-bit or erroneous parses are rejected; every mismatch fails the check. Pass `--list` to print the declaration index. |

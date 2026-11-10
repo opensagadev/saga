@@ -152,10 +152,10 @@ static void CC_layer(NUFPAR *parser);
 static inline __attribute__((always_inline)) i32 ParseLayerMask(NUFPAR *parser, u32 *mask) {
     i32 count = 0;
     *mask = 0;
-    if (__builtin_expect(charconfig.named_layers == 0, 0)) {
+    if (charconfig.named_layers == 0) {
         while (NuFParGetWord(parser) != 0) {
             const u32 layer = NuAToI(parser->word_buf);
-            if (__builtin_expect(layer < 32, 0)) {
+            if (layer < 32) {
                 ++count;
                 *mask |= 1u << layer;
             }
@@ -163,7 +163,7 @@ static inline __attribute__((always_inline)) i32 ParseLayerMask(NUFPAR *parser, 
     } else {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
-            if (__builtin_expect(layer != -1, 0)) {
+            if (layer != -1) {
                 ++count;
                 *mask |= 1u << layer;
             }
@@ -238,10 +238,10 @@ static void CC_air_gravity(NUFPAR *parser);
 #if defined(__i386__)
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone, regparm(2)))
 // Retail places the u32 clone in .text.unlikely with a push-based prologue.
-#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone, cold, regparm(2)))
+#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone, regparm(2)))
 #else
 #define CC_SET_ANIM_FLAGS_ATTR __attribute__((noinline, noclone))
-#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone, cold))
+#define CC_SET_ANIM_FLAGS_COLD_ATTR __attribute__((noinline, noclone))
 #endif
 static CC_SET_ANIM_FLAGS_COLD_ATTR void CC_SetAnimFlagsField(NUFPAR *parser, u32 *field, u32 flags)
     __asm__("_ZL15CC_SetAnimFlagsP8nufpar_sP10ANIMLIST_sj.isra.4");
@@ -849,7 +849,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
     if (first_id == -1)
         return 0;
     const u32 reject_flag_80 = model_flags & 8;
-    if (__builtin_expect(require_hats == 0, 0)) {
+    if (require_hats == 0) {
         if (reject_flag_40 != 0) {
             if (reject_flag_80 != 0) {
                 for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
@@ -892,7 +892,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                     if ((game_data.flags_090 & game_flags) != game_flags ||
                         (CDataList[current_id].model_flags & model_flags) != model_flags)
                         continue;
-                    if (__builtin_expect(!(static_cast<i8>(game_data.flags_094[1]) < 0), 1)) {
+                    if (!(static_cast<i8>(game_data.flags_094[1]) < 0)) {
                         return 1;
                     }
                 }
@@ -915,7 +915,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
         if (reject_flag_80 != 0) {
             if (reject_flag_40 == 0) {
                 for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
-                    if (__builtin_expect(Collection_Got(id) == 0, 0))
+                    if (Collection_Got(id) == 0)
                         continue;
                     const i32 current_id = models->model_id;
                     const GAMECHARACTERDATA &game_data = GCDataList[current_id];
@@ -931,7 +931,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                 return 0;
             } else {
                 for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
-                    if (__builtin_expect(Collection_Got(id) == 0, 0))
+                    if (Collection_Got(id) == 0)
                         continue;
                     const i32 current_id = models->model_id;
                     const GAMECHARACTERDATA &game_data = GCDataList[current_id];
@@ -949,7 +949,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                 return 0;
             }
         } else {
-            if (__builtin_expect(reject_flag_40 != 0, 0)) {
+            if (reject_flag_40 != 0) {
                 for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
                     if (Collection_Got(id) == 0)
                         continue;
@@ -967,7 +967,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                 return 0;
             } else {
                 for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
-                    if (__builtin_expect(Collection_Got(id) == 0, 0))
+                    if (Collection_Got(id) == 0)
                         continue;
                     const i32 current_id = models->model_id;
                     const GAMECHARACTERDATA &game_data = GCDataList[current_id];
@@ -1105,7 +1105,7 @@ static void CC_hand_locators(NUFPAR *parser) {
     charconfig.runtime->hand_locators[0] = -1;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
-        if (__builtin_expect(static_cast<u32>(locator) < 16, 0)) {
+        if (static_cast<u32>(locator) < 16) {
             charconfig.runtime->hand_locators[0] = static_cast<i8>(locator);
         }
     }
@@ -1395,7 +1395,7 @@ static void CC_hair_layer_index(NUFPAR *parser) {
 static void CC_layer(NUFPAR *parser) {
     if ((charconfig.flags & 2) == 0 || charconfig.runtime->layer_count >= 32)
         return;
-    if (__builtin_expect(NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24, 0))
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24)
         return;
     NuStrCpy(charconfig.runtime->layers[charconfig.runtime->layer_count].name, parser->word_buf);
     const u32 bit = NuFParGetInt(parser);
@@ -1403,7 +1403,7 @@ static void CC_layer(NUFPAR *parser) {
         return;
     GAMECHARACTERDATA_s *data = charconfig.runtime;
     for (i32 i = 0; i < data->layer_count; ++i) {
-        if (__builtin_expect(data->layers[i].mask_bit == static_cast<i32>(bit), 0))
+        if (data->layers[i].mask_bit == static_cast<i32>(bit))
             return;
     }
     GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];
@@ -2975,7 +2975,7 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
         NuStrCpy(path, directory);
         NuStrCat(path, filename);
         i32 size = NuFileLoadBuffer(path, MiniBuffer, sizeof(MiniBuffer));
-        if (__builtin_expect(size < 1, 0))
+        if (size < 1)
             goto done;
         MiniBuffer[size] = 0;
         length = Text_StripComments(MiniBuffer, MiniBuffer, 1);
@@ -3019,15 +3019,14 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     charconfig.layer_scratch = layers;
     memset(effects, 0, sizeof(effects));
     GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL &&
-        __builtin_expect(arena_end != NULL, 1)) {
+    if (data->layers == NULL && (character->model_flags & 1) == 0 && arena != NULL && (arena_end != NULL)) {
         data->layers = layers;
         data->layer_count = 0;
         charconfig.flags |= 2;
     } else if (data->layer_count != 0) {
         charconfig.named_layers = 1;
     }
-    if (character->animations == NULL && arena != NULL && __builtin_expect(arena_end != NULL, 1)) {
+    if (character->animations == NULL && arena != NULL && (arena_end != NULL)) {
         arena->addr = ALIGN(arena->addr, 4);
         character->animations = static_cast<CHARACTERANIM_s *>(arena->void_ptr);
         charconfig.flags |= 0x20;
@@ -3160,7 +3159,7 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         if (size < 1)
             continue;
         i32 redirected = RedirectTextFile(static_cast<char *>(address), filename);
-        if (__builtin_expect(redirected != 0, 0)) {
+        if (redirected != 0) {
             NuStrCat(filename, ".txt");
             NuStrCpy(path, directory);
             NuStrCat(path, filename);

@@ -542,7 +542,7 @@ void Hint_ExpandButtons(char *input, char *output) {
             token[token_length + 1] = '\0';
             token_length = NuStrLen(token);
             if (token_length > 0) {
-                if (__builtin_expect(Text_ExpandButtonString(token, expanded) != 0, 0)) {
+                if (Text_ExpandButtonString(token, expanded) != 0) {
                     char *character = expanded;
                     while (*character != '\0') {
                         *output = *character;
@@ -722,7 +722,7 @@ void Hint_ResetHint(i32 hint_id, i32 reset_completed) {
     }
 
     i32 control_mode = MechInputTouchSystem::s_baseControlMode;
-    while (__builtin_expect(hint->control_mode_ids[control_mode] != hint_id, 1)) {
+    while (hint->control_mode_ids[control_mode] != hint_id) {
         hint++;
         if (hint->control_mode_ids[0] == -1) {
             return;
@@ -823,7 +823,7 @@ void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
     HINTUIBUTTON_s *button = hintUIButton;
     if (button->field_0x78 != NULL && button->field_0x78 == hint)
         return;
-    if (__builtin_expect(hint == NULL, 0)) {
+    if (hint == NULL) {
         hintsys.active_hint = NULL;
         if (button->field_0x78 != NULL) {
             const f32 blend_time = AlphaBlendTime;
@@ -973,13 +973,13 @@ void Hint_LoadAllGameState() {
     }
 
     for (i32 index = 0; (index >> 5) < system->save_bit_count; ++index) {
-        if (__builtin_expect(HINT_COMPLETE(index) == 0, 0)) {
+        if (HINT_COMPLETE(index) == 0) {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 0;
         } else {
             hint->completion_flags[MechInputTouchSystem::s_baseControlMode] = 1;
         }
         ++hint;
-        if (__builtin_expect(hint->control_mode_ids[0] == -1, 0)) {
+        if (hint->control_mode_ids[0] == -1) {
             return;
         }
     }
@@ -1000,11 +1000,11 @@ void Hint_Process(float elapsed) {
         BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
         (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 && FadeSys.fade == 0.0f &&
         (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
-    if (__builtin_expect(ChallengeMode != 0, 1))
+    if (ChallengeMode != 0)
         available = false;
     else if (Mission_Active(NULL) != NULL)
         available = false;
-    if (__builtin_expect(hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL, 1))
+    if (hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL)
         available = false;
 
     for (HINT_s *hint = hintsys.hints; hint->control_mode_ids[0] != -1; ++hint) {

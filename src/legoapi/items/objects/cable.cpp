@@ -158,7 +158,7 @@ CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 sound) {
 
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
     // The original checks the first cable's owner for the entire array.
-    if (__builtin_expect(cables[0].source != object, 1))
+    if (cables[0].source != object)
         return NULL;
 
     if (cables[0].active != 0)
@@ -181,7 +181,7 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
 }
 
 CABLE_s *GameObjIsCableTied(GameObject_s *object) {
-    if (__builtin_expect(cables[0].target != object, 1))
+    if (cables[0].target != object)
         return NULL;
 
     if (cables[0].active != 0)
@@ -268,7 +268,7 @@ void UpdateCables() {
                     cable->total_length = length + cable->total_length;
                 }
             }
-            if (__builtin_expect(!!(grounded), 0))
+            if (grounded)
                 DestroyCable(cable);
             continue;
         }
@@ -291,7 +291,7 @@ void UpdateCables() {
             continue;
         }
         if (target->id != id_ATAT) {
-            if (__builtin_expect(target->id == id_DRAGBOMB, 1)) {
+            if (target->id == id_DRAGBOMB) {
                 target->character_context = 0x34;
                 cable->target->context_animation_timer = 0.0f;
             }
@@ -344,7 +344,7 @@ void UpdateCables() {
                     }
                 } else {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
-                    if (__builtin_expect(cable->wrap_count == 15, 1)) {
+                    if (cable->wrap_count == 15) {
                         if (WORLD->current_level == HOTHBATTLED_LDATA)
                             DeactivatePlayer(cable->target, 60.0f, NULL);
                         else
@@ -375,11 +375,11 @@ void UpdateCables() {
             }
         }
         i32 path_count;
-        if (__builtin_expect(cable->wrap_count != 0, 1)) {
+        if (cable->wrap_count != 0) {
             path_count = 1;
             for (i32 i = cable->wrap_count - 1; i >= 0; --i) {
                 i32 index = cable->wrap_indices[i];
-                if (__builtin_expect(cable->target->apiobj.character_model->points_of_interest[index] != 0, 1)) {
+                if (cable->target->apiobj.character_model->points_of_interest[index] != 0) {
                     path[path_count++] = *NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[index]], 3);
                 }
             }
@@ -392,13 +392,13 @@ void UpdateCables() {
             ReleaseCable(cable, 0);
             continue;
         }
-        if (__builtin_expect((cable->source->apiobj.character_data->game_character->flags_090 & 0x400) == 0, 0)) {
+        if ((cable->source->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
             target = cable->target;
             ReleaseCable(cable, 0);
             continue;
         }
         f32 distance_sq = NuVecDistSqr(&path[0], &path[1], &delta);
-        if (__builtin_expect(GameRayCast(&path[1], &delta, 0.0f, TERRAINMASK_NONDROID | 0x1f) != 0, 0)) {
+        if (GameRayCast(&path[1], &delta, 0.0f, TERRAINMASK_NONDROID | 0x1f) != 0) {
             target = cable->target;
             ReleaseCable(cable, 1);
             continue;
@@ -408,24 +408,22 @@ void UpdateCables() {
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
             if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                __builtin_expect((object->field_0xe20 & 0x20) != 0, 1) ||
-                __builtin_expect(object->apiobj.player_controlled != 0, 1))
+                ((object->field_0xe20 & 0x20) != 0) || (object->apiobj.player_controlled != 0))
                 continue;
-            if (__builtin_expect(WORLD->area != NULL, 0) && __builtin_expect(WORLD->area == HOTHBATTLE_ADATA, 0) &&
-                object->id != id_ATAT && object->id != id_DRAGBOMB && object->id != id_ATST &&
-                object->id != id_ATST_LOWRES)
+            if ((WORLD->area != NULL) && (WORLD->area == HOTHBATTLE_ADATA) && object->id != id_ATAT &&
+                object->id != id_DRAGBOMB && object->id != id_ATST && object->id != id_ATST_LOWRES)
                 continue;
             if (object->cable != NULL &&
                 (object->cable->target == cable->target || object->cable->target == cable->source))
                 continue;
-            if (__builtin_expect(!(object == cable->source || object == cable->target), 1)) {
+            if (!(object == cable->source || object == cable->target)) {
 
                 f32 line_distance =
                     NuLineToPointDistSqrEx(&path[0], &path[1], &object->apiobj.collision_position, &closest);
                 f32 radius = object->apiobj.field_0x1dc;
                 f32 half_height = object->apiobj.field_0x1e0;
                 f32 combined = radius + half_height;
-                if (__builtin_expect(combined * combined > line_distance, 1) &&
+                if ((combined * combined > line_distance) &&
                     object->apiobj.collision_position.y + half_height > closest.y &&
                     closest.y > object->apiobj.collision_position.y - half_height) {
                     target_impulse.x = object->apiobj.collision_position.x - closest.x;
@@ -437,7 +435,7 @@ void UpdateCables() {
                 }
             }
         }
-        if (__builtin_expect(obstruction != 0, 0)) {
+        if (obstruction != 0) {
             target = cable->target;
             ReleaseCable(cable, 1);
             continue;
@@ -516,7 +514,7 @@ void UpdateCables() {
             cable->max_length = remaining;
             for (i32 i = 0; i < path_count - 1; ++i) {
                 f32 length = NuVecDist(&path[i + 1], &path[i], &delta);
-                if (__builtin_expect(!(remaining >= length), 0)) {
+                if (!(remaining >= length)) {
                     cable->segment_lengths[i] = remaining;
                     cable->total_length += remaining;
                     f32 scale = NuFdiv(remaining, length);
@@ -680,7 +678,7 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
         if ((CInfo[context].flags & 0x8000) != 0 || context == 0x17) {
             continue;
         }
-        if (__builtin_expect(!(context == 0x3b || context == 0x41 || context == 0x3d), 0)) {
+        if (!(context == 0x3b || context == 0x41 || context == 0x3d)) {
             if (candidate->id != id_DRAGBOMB && candidate->id != id_ATAT && candidate->id != id_ATST &&
                 candidate->id != id_ATST_LOWRES) {
                 continue;
@@ -699,7 +697,7 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
             } else if (candidate->id == id_ATAT) {
                 distance *= 0.9f;
             }
-            if (__builtin_expect(!(distance < radius_squared), 0)) {
+            if (!(distance < radius_squared)) {
                 continue;
             }
             if (distance < nearest_distance) {

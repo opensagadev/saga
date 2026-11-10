@@ -60,7 +60,7 @@ NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     NuSoundVoiceFactory **replacement =
         static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
             factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
-    if (__builtin_expect(replacement != factories, 1)) {
+    if (replacement != factories) {
         u32 previous_capacity = capacity;
         for (u32 i = 0; i < previous_capacity; ++i) {
             replacement[i] = factories[i];
@@ -182,7 +182,7 @@ u32 NuSoundSystem::GetFreeMemory(MemoryDiscipline disc) {
 }
 
 void *NuSoundSystem::_AllocMemory(MemoryDiscipline disc, u32 size, u32 align, const char *name) {
-    if (__builtin_expect(GetFreeMemory(disc) < size, 0)) {
+    if (GetFreeMemory(disc) < size) {
         return NULL;
     }
 
@@ -570,7 +570,7 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
         decoder = static_cast<NuSoundDecoderOGG *>(
             NuSoundSystem::_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundDecoderOGG), 4,
                                         "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1335"));
-        if (__builtin_expect(decoder != NULL, 0)) {
+        if (decoder != NULL) {
             new (decoder) NuSoundDecoderOGG(decoded_name, source);
         }
     }
@@ -704,7 +704,7 @@ NuSoundSample *NuSoundSystem::AddSample(const char *name, FileType file_type, Nu
     if (feed_type == NuSoundSource::FeedType::ZERO) {
         sample = (NuSoundSample *)_AllocMemory(MemoryDiscipline::SCRATCH, 0x80, 4,
                                                "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:646");
-        if (__builtin_expect(sample == NULL, 1)) {
+        if (sample == NULL) {
             return NULL;
         }
 

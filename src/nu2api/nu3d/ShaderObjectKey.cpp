@@ -101,9 +101,9 @@ namespace nu2api {
         // Auxiliary texture ids: selected only when the base flag / threshold says
         // the texture is actually bound.
         u8 specularId;
-        if (__builtin_expect(filter->variant == 0, 0)) {
+        if (filter->variant == 0) {
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
-            if (__builtin_expect(descFlags->bits.lightmap_a, 1)) {
+            if (descFlags->bits.lightmap_a) {
                 block[0x15] = descBytes[0xa9];
             } else if (descFlags->bits.lightmap_b) {
                 block[0x15] = descBytes[0xa9];
@@ -125,9 +125,9 @@ namespace nu2api {
 
         // Optional extra map id (0xae)
         u8 extraMap = 0;
-        if (__builtin_expect(filter->variant == 0, 1)) {
+        if (filter->variant == 0) {
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&filter->desc->flagsbits_1b8);
-            if (__builtin_expect(descFlags->bits.extra_map_a, 1)) {
+            if (descFlags->bits.extra_map_a) {
                 extraMap = descBytes[0xae];
             } else if (descFlags->bits.extra_map_b) {
                 extraMap = descBytes[0xae];
@@ -145,7 +145,7 @@ namespace nu2api {
         block[0x20] = 1;
 
         // Shadow / animation variant selectors
-        if (__builtin_expect(filter->variant == 0, 0)) {
+        if (filter->variant == 0) {
             const NUSHADERMTLDESC *d = filter->desc;
             const KeyFlags *descFlags = reinterpret_cast<const KeyFlags *>(&d->flagsbits_1b8);
             u8 v24;
@@ -184,12 +184,12 @@ namespace nu2api {
         const u8 vtxType = attr->alpha_mode;
 
         bool texcoordIsLong;
-        if (__builtin_expect(unitsLow == 5 || unitsLow == 3, 0)) {
+        if (unitsLow == 5 || unitsLow == 3) {
             texcoordIsLong = true;
         } else {
             texcoordIsLong = (vtxType == 10) | ((unitsLow & 3) == 2);
         }
-        if (__builtin_expect(attr->z_mode == 0, 1) || attr->z_mode == 2 || vtxType == 0 || vtxType == 10) {
+        if ((attr->z_mode == 0) || attr->z_mode == 2 || vtxType == 0 || vtxType == 10) {
             block[0x28] = texcoordIsLong;
         } else {
             block[0x28] = 0;

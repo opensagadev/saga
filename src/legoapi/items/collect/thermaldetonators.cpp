@@ -82,7 +82,7 @@ i32 PartDraw_ThermalDetonator(PART_s *part) {
 
     if (reflected != 0) {
         NuRndrStartReflectionRender(1);
-        if (__builtin_expect(part->source_special != NULL, 1)) {
+        if (part->source_special != NULL) {
             NuSpecialDrawAt(&part->special, &reflection);
         }
         if (level_index != -1) {
@@ -364,14 +364,14 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
             (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
             ((object->apiobj.character_data->model_flags & 0x01000000) != 0 || object->field_0x108e == 6 ||
              SuperWeirdo(object) != 0) &&
-            __builtin_expect((object->apiobj.field_0x27d != 0 || object->field_0xe31 == 1) != 0, 1)) {
+            ((object->apiobj.field_0x27d != 0 || object->field_0xe31 == 1) != 0)) {
             switch (object->character_context) {
                 case -1:
                 case 6:
                 case 7:
                     break;
                 default:
-                    if (__builtin_expect((CInfo[object->character_context].flags & 4) == 0, 1)) {
+                    if ((CInfo[object->character_context].flags & 4) == 0) {
                         return 0;
                     }
                     break;
@@ -390,9 +390,9 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 
     start_throw:
         object->character_context = 0x2e;
-        if (__builtin_expect(object->field_0xe31 == 1, 0)) {
+        if (object->field_0xe31 == 1) {
             object->context_animation = 0x6f;
-        } else if (__builtin_expect((object->field_0xe22 & 1) != 0, 1)) {
+        } else if ((object->field_0xe22 & 1) != 0) {
             object->context_animation = 0x6e;
         } else {
             object->context_animation = 0x65;

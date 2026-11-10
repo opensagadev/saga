@@ -114,7 +114,7 @@ void NuShaderObjectCreate(NUSHADEROBJECT *shader) {
 extern "C" void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader, i32 semantic, i32 first_element,
                                                       i32 count, const f32 *values) {
     GLSLParameter &parameter = shader->parameters[semantic];
-    if (__builtin_expect(parameter.location < 0, 1)) {
+    if (parameter.location < 0) {
         return;
     }
 
@@ -447,9 +447,9 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
             parameter.element_count *= array_size;
         } else if (type == GL_SAMPLER_2D) {
             i32 lightmap_unit = -1;
-            if (__builtin_expect(NuStrCmp(uniformName, "_lightmap0") == 0, 0)) {
+            if (NuStrCmp(uniformName, "_lightmap0") == 0) {
                 lightmap_unit = 0;
-            } else if (__builtin_expect(NuStrCmp(uniformName, "_lightmap1") == 0, 0)) {
+            } else if (NuStrCmp(uniformName, "_lightmap1") == 0) {
                 lightmap_unit = 1;
             } else if (NuStrCmp(uniformName, "_lightmap2") == 0) {
                 lightmap_unit = 2;
@@ -784,7 +784,7 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
                 // Original .L35 at 0x30a8d8.  GLES has no fixed-function
                 // alpha test, so generated shaders consume the current
                 // render-state comparison as (sign, adjusted reference).
-                if (__builtin_expect(g_alphaTestEnabled == 0, 0)) {
+                if (g_alphaTestEnabled == 0) {
                     goto alpha_disabled;
                 }
                 switch (g_alphaFunc) {
@@ -857,7 +857,7 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                         BIND_MATERIAL_2D(mtl->shader_desc.vtf_height_map_tid);
                         break;
                     case 18:
-                        if (__builtin_expect(NuWindCurrent(nuapi.wind) >= 0, 0)) {
+                        if (NuWindCurrent(nuapi.wind) >= 0) {
                             const u32 texture_unit = static_cast<u16>(parameter.location) & 0x7ff;
                             NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
                         }

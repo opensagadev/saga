@@ -120,7 +120,7 @@ bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_dro
         if (GameRayCast(&position.xyz, &displacement.xyz, 0.0f, 0) != 0) {
             VuVec normal = VuVec_Zero;
             NewRayCastGetImpactNormal(&normal.xyz);
-            if (__builtin_expect(normal.y > 0.8f, 0)) {
+            if (normal.y > 0.8f) {
                 if (GameShadow(&object, &position.xyz, 5.0f, -1) != 2000000.0f) {
                     const u32 layer = EShadowInfo();
                     if (layer <= 16 && (TerLayer[layer].flags & 1) == 0) {
@@ -164,7 +164,7 @@ bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float t
 bool TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &object, float time) {
     VuVec position(object.apiobj.position.x + object.apiobj.velocity.x * time, object.apiobj.position.y + 0.3f,
                    object.apiobj.position.z + object.apiobj.velocity.z * time, 1.0f);
-    if (__builtin_expect(GameShadow(&object, &position.xyz, 5.0f, -1) < object.apiobj.position.y - 0.3f, 1)) {
+    if (GameShadow(&object, &position.xyz, 5.0f, -1) < object.apiobj.position.y - 0.3f) {
         VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
         NuVecNorm(&direction.xyz, &direction.xyz);
         const f32 radius = object.apiobj.collision_radius * 0.8f;

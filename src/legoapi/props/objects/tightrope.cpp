@@ -216,7 +216,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
                 NuSpecialDrawAt(&WORLD->lev_objs[endpoint_model].special, &matrix);
             }
         }
-        if (__builtin_expect(rope->visible != 0, 1)) {
+        if (rope->visible != 0) {
             i32 endpoint_model = rope->field_0x31 == 0 ? 63 : 64;
             if (WORLD->lev_objs[endpoint_model].active != 0) {
                 NuMtxSetRotationX(&matrix, rope->field_0x2a);
@@ -241,7 +241,7 @@ static void TightRopes_Draw(void *world_info, void *, float) {
                                    : &object->apiobj.upper_position;
             distances[count] = NuVecDist(positions[count], &rope->start, NULL);
             ++count;
-            if (__builtin_expect(count != 64, 1)) {
+            if (count != 64) {
                 continue;
             }
             break;
@@ -366,15 +366,13 @@ TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *po
         offset.y = 0.0f;
         offset.z = origin.z - rope->start.z;
         NuVecRotateY(&offset, &offset, -rope->rotation);
-        if (__builtin_expect(
-                !(offset.z >= 0.0f && rope->horizontal_length >= offset.z && offset.x >= -width && width >= offset.x),
-                0)) {
+        if (!(offset.z >= 0.0f && rope->horizontal_length >= offset.z && offset.x >= -width && width >= offset.x)) {
             continue;
         }
         offset.x = 0.0f;
         offset.y = (rope->end.y - rope->start.y) * (offset.z / rope->horizontal_length) + rope->start.y;
         if (object->apiobj.field_0x1e0 > fabsf(offset.y - origin.y)) {
-            if (__builtin_expect(position != NULL, 0)) {
+            if (position != NULL) {
                 f32 margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
                                  ? object->apiobj.field_0x1e0
                                  : object->apiobj.field_0x1dc;
@@ -547,7 +545,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
     }
     if (object->context_animation != 0x8f) {
         object->external_force.y += FRAMETIME;
-        if (__builtin_expect(static_cast<u16>(object->context_animation - 5) <= 1, 0)) {
+        if (static_cast<u16>(object->context_animation - 5) <= 1) {
             object->context_animation_timer += FRAMETIME;
             void *rope = object->field_0x788;
             if (object->context_animation == 5) {
@@ -555,7 +553,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
                     object->airborne_action_duration + object->airborne_action_duration) {
                     StartEndOfJump(object);
                 }
-            } else if (__builtin_expect(object->context_animation_timer >= object->airborne_action_duration, 0)) {
+            } else if (object->context_animation_timer >= object->airborne_action_duration) {
                 object->context_animation = 5;
             }
             if (0.0f >= object->apiobj.velocity.y && TightRope_Attach(object, WORLD) == 0 &&
@@ -586,7 +584,7 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
         TightRope_Jump(object);
         return;
     }
-    if (__builtin_expect(object->context_animation != 0x8f, 0)) {
+    if (object->context_animation != 0x8f) {
         if (TightRope_MoveUpdate(object, 0) == 0 && object->context_animation != 0x8f &&
             object->external_force.y >= 0.5f) {
             StartJump(object, 0);

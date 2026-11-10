@@ -817,7 +817,7 @@ extern NuSoundWeakPtr<NuSoundVoice> mVoice;
 static i16 *ActionPairTab;
 static i16 *AmbientPairTab;
 
-__attribute__((optimize("O3"))) void GameAudio_Reset() {
+void GameAudio_Reset() {
     memset(&GameAudio_Default, 0, sizeof(GameAudio_Default));
     GameAudio = &GameAudio_Default;
     memset(GameAudio_Default.sfx_names, 0, sizeof(GameAudio_Default.sfx_names));
@@ -942,7 +942,7 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     if (sfx == -1 && name != NULL) {
         sfx = GetSfxId(name);
     }
-    if (__builtin_expect(sfx == -1, 0)) {
+    if (sfx == -1) {
         return;
     }
 
@@ -1083,7 +1083,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             if (type != 0) {
                 return;
             }
-            if (__builtin_expect(alternate != 0, 1)) {
+            if (alternate != 0) {
                 sfx = GameAudio->sfx_ids[8];
             } else {
                 sfx = GameAudio->sfx_ids[7];
@@ -1096,7 +1096,7 @@ void PlayLandSfx(GameObject_s *object, i32 type, i32) {
             }
         }
     }
-    if (__builtin_expect(sfx != -1, 1)) {
+    if (sfx != -1) {
         if (static_cast<i8>(object->apiobj.flags_low) < 0 || object->is_boss) {
             GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
         } else {
@@ -1119,7 +1119,7 @@ void PlayFootStepSfx(GameObject_s *object) {
         sfx = object->apiobj.character_data->game_character->sfx_footstep;
     } else {
         sfx = -1;
-        if (__builtin_expect(GameAudio->override_footstep_fn != NULL, 1)) {
+        if (GameAudio->override_footstep_fn != NULL) {
             sfx = GameAudio->override_footstep_fn(object, on_platform);
         }
         if (sfx == -1) {
@@ -1248,7 +1248,7 @@ void PlayDieSfx(GameObject_s *object) {
                 }
             }
         }
-        if (__builtin_expect(sfx == -1, 1)) {
+        if (sfx == -1) {
             goto extra;
         }
     }
@@ -1453,7 +1453,7 @@ void NewAreaMusicChanges(void) {
 i32 ActionFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; ActionPairTab[entry * 14] != -1; entry++) {
-            if (__builtin_expect(ActionPairTab[entry * 14] == idx, 0)) {
+            if (ActionPairTab[entry * 14] == idx) {
                 return ActionPairTab[entry * 14 + 1];
             }
         }
@@ -1464,7 +1464,7 @@ i32 ActionFromQuiet(i32 idx) {
 i32 AmbientFromQuiet(i32 idx) {
     if (idx != -1) {
         for (i32 entry = 0; AmbientPairTab[entry * 2] != -1; entry++) {
-            if (__builtin_expect(AmbientPairTab[entry * 2] == idx, 0)) {
+            if (AmbientPairTab[entry * 2] == idx) {
                 return AmbientPairTab[entry * 2 + 1];
             }
         }

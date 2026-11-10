@@ -229,7 +229,7 @@ void NuSoundVoice::Stop(bool with_effects) {
     if (with_effects) {
         if (this->BeginStopEffects()) {
             // Stop effects were started; the voice stops once they finished.
-            if (__builtin_expect(!this->CheckStopEffects(), 1)) {
+            if (!this->CheckStopEffects()) {
                 return;
             }
         }
@@ -519,7 +519,7 @@ void NuSoundVoice::UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStag
             effect->ProcessVoice(this, frametime);
         }
 
-        if (__builtin_expect(effect->state == 2 && !effect->keep_attached, 1)) {
+        if (effect->state == 2 && !effect->keep_attached) {
             this->RemoveEffect(effect);
         }
     }
@@ -536,12 +536,12 @@ void NuSoundVoice::UpdateHardwareVoice(f32) {
 // ---------------------------------------------------------------------------
 
 bool NuSoundVoice::AddEffect(NuSoundEffect *effect) {
-    if (__builtin_expect(effects.Contains(effect) != 0, 0)) {
+    if (effects.Contains(effect) != 0) {
         return false;
     }
 
     bool attached = effect->AttachVoice(this);
-    if (__builtin_expect(attached != 0, 1)) {
+    if (attached != 0) {
         NuSoundMemory::PushNuListNode(effects, effect);
     }
     return attached;

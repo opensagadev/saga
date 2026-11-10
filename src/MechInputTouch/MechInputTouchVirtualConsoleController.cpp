@@ -137,8 +137,8 @@ void VirtualControlDPad::Render() {
 void VirtualControlDPad::Process(float elapsed) {
     MechTouchUITexButton::Process(elapsed);
 
-    if (__builtin_expect(MechInputTouchVirtualConsoleController::s_noInputTimer >= 0.0f &&
-        (owner != NULL || SuperOptions.dpad_locked == 0 || GetMenuID() == 25), 0)) {
+    if (MechInputTouchVirtualConsoleController::s_noInputTimer >= 0.0f &&
+        (owner != NULL || SuperOptions.dpad_locked == 0 || GetMenuID() == 25)) {
         const f32 opacity = owner != NULL ? 0.75f : 0.4f;
         alpha = opacity;
         alpha_to = opacity;

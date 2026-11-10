@@ -22,9 +22,9 @@ void Whip_MoveCode(GameObject_s *object) {
     }
 
     if (object->character_context != LEGOCONTEXT_WHIP) {
-        if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0, 0) ||
-            object->apiobj.field_0x27d == 0 || __builtin_expect(ObjLandReady(object) == 0, 1) ||
-            LEGOACT_WHIP_START == -1 || object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL) {
+        if (((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0) || object->apiobj.field_0x27d == 0 ||
+            (ObjLandReady(object) == 0) || LEGOACT_WHIP_START == -1 ||
+            object->apiobj.character_model->model_data_b[LEGOACT_WHIP_START] == NULL) {
             return;
         }
 
@@ -65,7 +65,7 @@ void Whip_MoveCode(GameObject_s *object) {
     }
 
     if (object->field_0x7a3 == 0) {
-        if (__builtin_expect(AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL, 1)) {
+        if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL) {
             return;
         }
 
@@ -117,7 +117,7 @@ void Whip_MoveCode(GameObject_s *object) {
 
     if ((object->context_variant_flags & 1) != 0) {
         NUVEC *target_position = NULL;
-        if (__builtin_expect(object->field_0x788 != NULL, 1)) {
+        if (object->field_0x788 != NULL) {
             target_position = &static_cast<GIZMOBLOWUP_s *>(object->field_0x788)->position;
         } else if (object->force_target != NULL) {
             target_position = &object->force_target->apiobj.collision_position;
@@ -148,7 +148,7 @@ void Whip_MoveCode(GameObject_s *object) {
 
         if (activate) {
             if (object->field_0x7a3 == 2) {
-                if (__builtin_expect(GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1, 1, 1, NULL, 1) != 0, 1)) {
+                if (GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 1, 1, 1, NULL, 1) != 0) {
                     NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
                 }
                 NewRumble(object->pad_gamepad->pad, 0.5f, 0);

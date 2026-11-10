@@ -268,7 +268,7 @@ static __used__ void MenuEnterTitles(MENU *) {
 
 static __used__ void MenuUpdatePauseCut(MENU *menu) {
     MenuRefreshPauseCutTarget();
-    if (__builtin_expect(menu->confirm_pressed != 0 && menu->selected_item == 0, 0)) {
+    if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
         ResumeGame(1, 1);
         return;
     }
@@ -399,7 +399,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
     char *warning;
     char *title;
     f32 spacing;
-    if (__builtin_expect(save_level != NULL, 0)) {
+    if (save_level != NULL) {
         title = TTab[tEXITTOMAP];
         warning = TTab[tALLLEVELPROGRESSWILLBELOST];
         spacing = 2.0f;
@@ -444,7 +444,7 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
                         MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align, r, g, b, 1.7f, 1, NULL, 0, a);
         }
     }
-    if (__builtin_expect(save_level != NULL, 0)) {
+    if (save_level != NULL) {
         GameDrawMenuEntry(menu, TTab[tEXITWITHOUTSAVING]);
         GameDrawMenuEntry(menu, TTab[tSAVEANDEXIT]);
         GameDrawMenuEntry(menu, TTab[tCANCEL]);
@@ -543,7 +543,7 @@ void MenuDrawOptions(MENU_s *menu) {
         GameDrawMenuEntry(menu, text);
     }
 
-    if (__builtin_expect(memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) == 0, 0)) {
+    if (memcmp(&TempOptions, &Game.options_save, sizeof(TempOptions)) == 0) {
         NuStrCpy(text, TTab[tBACK]);
     } else {
         if (menu->selected_row != menu->draw_item && menu_flash != 0) {
@@ -568,7 +568,7 @@ void MenuDrawSelectControls(MENU_s *menu) {
 void MenuUpdateRestoreNewGame(MENU_s *menu) {
     startnewgame = 0;
 
-    if (__builtin_expect(startnewgame_initiated != 0 || saveload_autosave != -1, 0)) {
+    if (startnewgame_initiated != 0 || saveload_autosave != -1) {
         startnewgame_initiated = 0;
         startnewgame = 1;
     } else if (menu->confirm_pressed == 0) {
@@ -926,7 +926,7 @@ void MenuUpdateSelectControls(MENU_s *menu) {
 
 static i32 UpdateTitleSequence(MENU *menu) {
     f32 music_volume = 0.0f;
-    if (__builtin_expect(SuperOptions.music_enabled != 0, 1)) {
+    if (SuperOptions.music_enabled != 0) {
         music_volume = GameGetMusicVolume(&TempOptions);
     }
 
@@ -970,7 +970,7 @@ static i32 UpdateTitleSequence(MENU *menu) {
                 GamePlayMusic(WORLD->current_level, 0, &Game.options_save);
             }
         }
-    } else if (__builtin_expect(newgamefade == 2, 1)) {
+    } else if (newgamefade == 2) {
         newgamealpha -= FRAMETIME * 2.0f;
         if (newgamealpha <= 0.0f) {
             newgamealpha = 0.0f;
@@ -1005,7 +1005,7 @@ static __used__ void MenuUpdateTitles(MENU *menu) {
 
 void MenuUpdateOptions(MENU_s *menu) {
     GameSetSoundVolume(&TempOptions);
-    if (__builtin_expect(WORLD->current_level != TITLES_LDATA, 1))
+    if (WORLD->current_level != TITLES_LDATA)
         GameSetMusicVolume(&TempOptions);
     else
         legoSetMusicVolume(SuperOptions.music_enabled != 0 ? GameGetMusicVolume(&TempOptions) : 0.0f);
@@ -1050,7 +1050,7 @@ void MenuUpdateOptions(MENU_s *menu) {
             }
         } else if (menu->selected_item == row++) {
             menu->selected_item_column = TempOptions.master_volume;
-            if (__builtin_expect(menu->left_pressed != 0 && TempOptions.master_volume != 0, 0))
+            if (menu->left_pressed != 0 && TempOptions.master_volume != 0)
                 --TempOptions.master_volume;
             else if (menu->right_pressed != 0 && TempOptions.master_volume < 10)
                 ++TempOptions.master_volume;
@@ -1109,12 +1109,12 @@ void MenuUpdateNewGame(MENU *menu) {
         return;
     }
 
-    if (__builtin_expect((GamePad[0].unknown_04 & GAMEPAD_START) != 0, 1)) {
+    if ((GamePad[0].unknown_04 & GAMEPAD_START) != 0) {
         NuPadSetStatus(GamePad[0].pad->port, NUPAD_STATUS_ACTIVE);
     }
-    if (__builtin_expect(static_cast<u8>(GamePad[0].unknown_24) == 0, 0) || GamePad[0].pad->is_valid == 0) {
+    if ((static_cast<u8>(GamePad[0].unknown_24) == 0) || GamePad[0].pad->is_valid == 0) {
         PlayerProgress[0].active = 0;
-    } else if (__builtin_expect(g_nupadMapping[0].is_active != 0, 1)) {
+    } else if (g_nupadMapping[0].is_active != 0) {
         PlayerProgress[0].active = 1;
     }
 
@@ -1178,7 +1178,7 @@ void MenuUpdateNewGame(MENU *menu) {
                 break;
         }
 
-        if (__builtin_expect(startnewgame == 0, 1)) {
+        if (startnewgame == 0) {
             return;
         }
     }
@@ -1321,7 +1321,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             } else {
                 special_button = 0;
             }
-            if (__builtin_expect((special_button != 0 || buttons != 0) && buttons != 0, 1)) {
+            if ((special_button != 0 || buttons != 0) && buttons != 0) {
                 for (i32 index = 14; index > 0; --index)
                     buttons_store[index] = buttons_store[index - 1];
                 buttons_store[0] = buttons;
@@ -1335,9 +1335,9 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         pad = &GamePad[pause_i_pad];
     } else if (WORLD == NULL) {
         both_pads = true;
-    } else if (__builtin_expect(menu_id != -1 && WORLD->current_level == TITLES_LDATA, 1)) {
+    } else if (menu_id != -1 && WORLD->current_level == TITLES_LDATA) {
         both_pads = false;
-    } else if (__builtin_expect(menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0, 1)) {
+    } else if (menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0) {
         both_pads = true;
     } else if (Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
                Player[1]->apiobj.player_controlled) {
@@ -1357,7 +1357,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
             if ((Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && second_controlled) {
                 if (!first_active)
                     pad = Player[1]->pad_gamepad;
-            } else if (__builtin_expect(!first_active, 1)) {
+            } else if (!first_active) {
                 goto no_player;
             }
         } else {
@@ -1400,7 +1400,7 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
         if (result == 1 && Paused != 0)
             ResumeGame(1, 1);
     }
-    if (__builtin_expect(previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0, 1))
+    if (previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0)
         reset_area = 1;
 }
 
@@ -1429,7 +1429,7 @@ static __used__ void MenuUpdateShop(MENU *menu) {
     ShopNameAlpha = 0.0f;
     shop_quit = 1;
 
-    if (__builtin_expect(hub_forceshopsave == 0, 0)) {
+    if (hub_forceshopsave == 0) {
         TempGame.field30_0x7c2c = Game.field30_0x7c2c;
         if (memcmp(&TempGame, &Game, sizeof(Game)) == 0) {
             NuIOS_RecordFlurryEvent(const_cast<char *>("hubshop_leavewithoutbuying"));

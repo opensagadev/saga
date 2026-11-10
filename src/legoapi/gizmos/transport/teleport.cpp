@@ -347,7 +347,7 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
             nearest = i;
             nearest_distance = distance;
         }
-        if (__builtin_expect((teleport->flags & 1) != 0, 1))
+        if ((teleport->flags & 1) != 0)
             continue;
         point = &teleport->path->pts[teleport->path->length - 1];
         distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);
@@ -465,21 +465,21 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
 
         if (object->field_0x7a5 != 0xff && object->field_0x7a5 != 1 && object->field_0x7a5 != 2 &&
             object->field_0x7a5 != 3 && object->field_0x7a5 != 4) {
-            if (__builtin_expect(objInNetWaitContext(object, 15) == 0, 0))
+            if (objInNetWaitContext(object, 15) == 0)
                 return;
         }
 
-        if (!object->apiobj.player_controlled && __builtin_expect(object->use_action != 3, 1))
+        if (!object->apiobj.player_controlled && (object->use_action != 3))
             return;
         if (object->touch_task != NULL &&
             object->touch_task->GetHashId().value != MechTouchTaskUseTeleport::HashId.value)
             return;
 
         TELEPORT_s *teleport = Teleport_Find(object, 0.0f, NULL);
-        if (__builtin_expect(teleport == NULL, 0))
+        if (teleport == NULL)
             return;
 
-        if (__builtin_expect(objInNetWaitContext(object, 15) != 0, 1)) {
+        if (objInNetWaitContext(object, 15) != 0) {
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
                 object->field_0x7a5 = 0xff;
@@ -488,7 +488,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         }
 
         if (start_immediately == 0 && (objInNetWaitContext(object, 15) == 0 || object->big_jump_data == NULL)) {
-            if (__builtin_expect(!!(object->apiobj.player_controlled), 0))
+            if (object->apiobj.player_controlled)
                 object->field_0xe24 |= 0x20;
             return;
         }
@@ -655,8 +655,7 @@ i32 Teleport_UpdateHints(HINT_s *hint) {
         return 0;
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
-        if (__builtin_expect(object == NULL, 0) ||
-            (__builtin_expect((object->field_0xe24 & 0x20) == 0, 0) && Teleport_Find(object, 1.5625f, NULL) == NULL))
+        if ((object == NULL) || (((object->field_0xe24 & 0x20) == 0) && Teleport_Find(object, 1.5625f, NULL) == NULL))
             continue;
         if (hint->control_mode_ids[0] == 0x268)
             return AvailableToPlayer(0x40000, -1, 0, 1) != 0;

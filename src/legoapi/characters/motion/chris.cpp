@@ -392,7 +392,7 @@ static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     } else {
         space->unknown_3370 = &Actions_AnakinA;
     }
-    if (__builtin_expect(space->reset_buffer_count != 0, 1)) {
+    if (space->reset_buffer_count != 0) {
         memset(space->reset_buffer, 0, space->reset_buffer_count * 96);
         space->reset_buffer_used = 0;
     }
@@ -508,16 +508,15 @@ void ChrisAnakinCReset() {
     anakin_door_s *door = AnakinC;
     i32 count = 0;
     for (anakin_door_setup_s *setup = DoorSetupList; count < 12; ++setup) {
-        if (__builtin_expect(setup->name == NULL, 0))
+        if (setup->name == NULL)
             break;
-        if (__builtin_expect(NuSpecialFind(WORLD->current_gscn, &door->special, setup->name, 1), 0) &&
-            NuSpecialExistsFn(&door->special)) {
+        if ((NuSpecialFind(WORLD->current_gscn, &door->special, setup->name, 1)) && NuSpecialExistsFn(&door->special)) {
             if (NuSpecialFind(WORLD->current_gscn, &door->secondary_special, setup->secondary_name, 1))
                 door->has_secondary = static_cast<i16>(NuSpecialExistsFn(&door->secondary_special));
 
             NuMtxSetIdentity(&door->original_matrix);
             door->matrix = door->original_matrix = *NuSpecialGetMtx(&door->special);
-            if (__builtin_expect(door->has_secondary != 0, 0)) {
+            if (door->has_secondary != 0) {
                 NuMtxSetIdentity(&door->original_secondary_matrix);
                 door->secondary_matrix = door->original_secondary_matrix = *NuSpecialGetMtx(&door->secondary_special);
             }
@@ -760,7 +759,7 @@ static void DrawSpaceLevel(spacelevel_s *space) {
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[0].world_position), space->crosses[0].scale,
                       space->crosses[0].colour, 1);
     }
-    if (__builtin_expect(space->crosses[1].enabled != 0, 1)) {
+    if (space->crosses[1].enabled != 0) {
         NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->crosses[1].world_position),
                           reinterpret_cast<NUVEC *>(&space->crosses[1].local_position), &GameCam->render_mtx);
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[1].world_position), space->crosses[1].scale,
@@ -795,10 +794,10 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
 
     NUVEC_ALIGNED16 local;
     NUMTX_ALIGNED16 aim_matrix;
-    if (__builtin_expect(Player[0] != NULL && Player[0]->sock_position.distance > 435.0f, 0))
+    if (Player[0] != NULL && Player[0]->sock_position.distance > 435.0f)
         MissileDist = 2.0f;
     if (fighter->hit_count != 0) {
-        if (__builtin_expect(fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2, 1))
+        if (fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2)
             fighter->health = 0;
         else
             --fighter->health;
@@ -889,7 +888,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         }
         CalcSplinePoint(fighter_spline, reinterpret_cast<_vuv_s *>(&fighter->target_position),
                         fighter->spline_progress);
-        if (__builtin_expect(fighter_model_id == -307, 0)) {
+        if (fighter_model_id == -307) {
             fighter->target_position.x += fighter->matrix.m10 * MissileDist;
             fighter->target_position.y += fighter->matrix.m11 * MissileDist;
             fighter->target_position.z += fighter->matrix.m12 * MissileDist;
@@ -944,7 +943,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         }
     }
     fighter->matrix.m33 = 1.0f;
-    if (__builtin_expect(fighter->delete_when_done != 0, 1))
+    if (fighter->delete_when_done != 0)
         return 1;
     if (fighter->initial_delay != 0.0f) {
         fighter->initial_delay -= FRAMETIME;
@@ -974,8 +973,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         } else {
             starfighter_s *target = space->queued_fighters;
             fighter->target_id = -1;
-            while (__builtin_expect(target->active == 0 || target->object_id != target_id, 1)) {
-                if (__builtin_expect(++target == space->queued_fighters + 96, 0))
+            while (target->active == 0 || target->object_id != target_id) {
+                if (++target == space->queued_fighters + 96)
                     return 1;
             }
             fighter->target = target;
@@ -983,7 +982,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->target_id = target_id;
         }
     }
-    if (__builtin_expect(fighter->model_id == -307, 1))
+    if (fighter->model_id == -307)
         return 1;
     if (fighter->fired != 0 && fighter->aim_bias > 0.0f)
         fighter->aim_bias -= FRAMETIME + FRAMETIME;
@@ -1087,7 +1086,7 @@ fire: {
     if (fighter->missile_count != 0 && static_cast<u32>(fighter->spline->id - 84) > 1 && NuRandFloat() < 0.2f) {
         spacelevel_s *space = WORLD->space_level;
         for (i32 i = 0; g_lowEndLevelBehaviour == 0 && i != 96; ++i) {
-            if (__builtin_expect(space->queued_fighters[i].active == 0, 1)) {
+            if (space->queued_fighters[i].active == 0) {
                 starfighter_s *missile = &space->queued_fighters[i];
                 --fighter->missile_count;
                 *missile = *fighter;
@@ -1099,7 +1098,7 @@ fire: {
                 const f32 dx = missile->matrix.m30 - global_camera.mtx.m30;
                 const f32 dy = missile->matrix.m31 - global_camera.mtx.m31;
                 const f32 dz = missile->matrix.m32 - global_camera.mtx.m32;
-                if (__builtin_expect(dx * dx + dy * dy + dz * dz < 40000.0f, 1))
+                if (dx * dx + dy * dy + dz * dz < 40000.0f)
                     PlaySfx("Ep3_1_ProtoXWingMissile", reinterpret_cast<NUVEC *>(&missile->matrix.m30));
                 break;
             }
@@ -1115,7 +1114,7 @@ fire: {
             goto found;
     }
     for (slot = info->bolts; slot < bolt; ++slot) {
-        if (__builtin_expect(slot->duration == 0.0f, 1))
+        if (slot->duration == 0.0f)
             goto found;
     }
     fighter->fired = 1;
@@ -1421,7 +1420,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             space->current_action = &space->actions[space->unknown_3378];
             space->unknown_337c = space->current_action->command;
             ++space->unknown_3378;
-            if (__builtin_expect(space->unknown_337c == 3, 0)) {
+            if (space->unknown_337c == 3) {
                 space->unknown_3378 = 1;
                 space->unknown_337c = space->actions->command;
                 space->current_action = space->actions;
@@ -1434,7 +1433,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 MakeWingFormation(reinterpret_cast<_vuv_s *>(&formation_start),
                                   reinterpret_cast<_vuv_s *>(&formation_target), space->current_action->value, 1);
                 space->unknown_337c = 4;
-            } else if (__builtin_expect(space->unknown_337c == 2, 1)) {
+            } else if (space->unknown_337c == 2) {
                 passing_start = {-10.0f, -5.0f, -10.0f, 1.0f};
                 NuVecRotateZ(reinterpret_cast<NUVEC *>(&passing_start), reinterpret_cast<NUVEC *>(&passing_start),
                              qrand());
@@ -1452,7 +1451,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         }
         if (space->unknown_337c == 0) {
             space->action_timer -= FRAMETIME;
-            if (__builtin_expect(!(space->action_timer > 0.0f), 0))
+            if (!(space->action_timer > 0.0f))
                 space->unknown_337c = 4;
         }
     }
@@ -1506,17 +1505,17 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             *reinterpret_cast<NUVEC *>(&group->target) = position;
         }
     }
-    if (__builtin_expect(info->count != 0, 1)) {
+    if (info->count != 0) {
         i32 valid0 = 0, valid1 = 0;
         f32 player0x, player0y, player0z;
         f32 player1x, player1y, player1z;
-        if (Player[0] != NULL && __builtin_expect(Player[0]->apiobj.player_controlled, 1)) {
+        if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
             player0x = Player[0]->apiobj.field_0xb8.m30;
             player0y = Player[0]->apiobj.field_0xb8.m31;
             player0z = Player[0]->apiobj.field_0xb8.m32;
             valid0 = 1;
         }
-        if (Player[1] != NULL && __builtin_expect(Player[1]->apiobj.player_controlled, 1)) {
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
             player1x = Player[1]->apiobj.field_0xb8.m30;
             player1y = Player[1]->apiobj.field_0xb8.m31;
             player1z = Player[1]->apiobj.field_0xb8.m32;
@@ -1563,7 +1562,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (spline->point_count == 0 || !(spline->spawn_time > space->door_elapsed) ||
             !(spline->spawn_time <= space->door_countdown))
             continue;
-        if (__builtin_expect(g_lowEndLevelBehaviour == 0, 1)) {
+        if (g_lowEndLevelBehaviour == 0) {
             i32 j;
             for (j = 0; j != 96; ++j) {
                 if (space->queued_fighters[j].active == 0)
@@ -1626,7 +1625,7 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (spline->field_0x40c == 0.0f)
             spline->spawn_time = -1.0f;
         else {
-            if (__builtin_expect(spline->field_0x514 != 0, 1)) {
+            if (spline->field_0x514 != 0) {
                 if (--spline->repeat_count == 0) {
                     spline->spawn_time = -1.0f;
                     continue;
@@ -1648,13 +1647,13 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
     if (door_index >= 0) {
         DOOR_s *door = WORLD->doors;
         for (i32 i = 0; i < WORLD->door_count; ++i, ++door) {
-            if (__builtin_expect(NuStrICmp(door->name, DogFightDoors.doors[door_index].name) == 0, 0)) {
+            if (NuStrICmp(door->name, DogFightDoors.doors[door_index].name) == 0) {
                 Doors_SetLastDoor(door);
                 break;
             }
         }
     }
-    if (__builtin_expect(WORLD->area == DOGFIGHT_ADATA, 0))
+    if (WORLD->area == DOGFIGHT_ADATA)
         SpaceRumbleProcess();
 }
 
@@ -1861,9 +1860,8 @@ i32 ShipDropCoins(starfighter_s *fighter) {
     i32 index = 0;
     if (space->coin_history_count > 0) {
         for (; index < space->coin_history_count; ++index) {
-            if (__builtin_expect(space->coin_history[index].spline_id == fighter->spline->id &&
-                                     fighter->spawn_time == space->coin_history[index].spawn_time,
-                                 0))
+            if (space->coin_history[index].spline_id == fighter->spline->id &&
+                fighter->spawn_time == space->coin_history[index].spawn_time)
                 return 0;
         }
         if (index > 255)
@@ -1894,14 +1892,14 @@ static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *
         if (!(time <= (root - b) / (a + a)))
             return 0;
         const f32 enter = (-b - root) / (a + a);
-        if (__builtin_expect(!(enter <= 0.0f), 0))
+        if (!(enter <= 0.0f))
             return 0;
         time = time > enter ? time : enter;
         position->x += vx * time;
         position->y += vy * time;
         position->z += vz * time;
     } else {
-        if (__builtin_expect(c > 0.0f, 0))
+        if (c > 0.0f)
             return 0;
     }
     if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1) {

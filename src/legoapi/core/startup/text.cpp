@@ -244,11 +244,10 @@ extern "C" {
     }
 } // extern "C"
 
-__attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameObject_s *object) {
+void Tag_DrawIcon_Batman(GameObject_s *object) {
     i32 count;
-    if (__builtin_expect(VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
-                             !(object->pause_context_state > 0.0f),
-                         0)) {
+    if (VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
+        !(object->pause_context_state > 0.0f)) {
         return;
     }
 
@@ -283,7 +282,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
         f32 z_sum = 0.0f;
         count = 0;
 #define TAG_INCLUDE_POI(index)                                                                                         \
-    if (__builtin_expect(model->points_of_interest[index] != NULL, 1)) {                                               \
+    if (model->points_of_interest[index] != NULL) {                                                                    \
         NUMTX *m = &object->joint_matrices[index];                                                                     \
         count++;                                                                                                       \
         x_sum += m->m30;                                                                                               \
@@ -323,7 +322,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
     message.alpha = alpha;
     message.field_0x4e = 2;
     message.field_0x34 = 0.0f;
-    if (__builtin_expect(index == 1, 0)) {
+    if (index == 1) {
         message.field_0x34 = 0.002f;
     }
     message.text = ASCII_DOWN;
@@ -344,7 +343,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_Batman(GameO
     AddGameMsg(&message);
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) void Tag_DrawIcon_LSW(GameObject_s *object) {
+void Tag_DrawIcon_LSW(GameObject_s *object) {
     if (VehicleArea != 0 || FadeSys.fade != 0.0f || !object->apiobj.player_controlled ||
         (WORLD->current_level->flags & LEVEL_HIDE_ICONS) != 0) {
         return;

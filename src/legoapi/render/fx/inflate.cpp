@@ -70,7 +70,7 @@ static void FillBits(DEFLATECONTEXT *ctx) {
 
 #define READBITS(ctx, n)                                                                                               \
     ({                                                                                                                 \
-        if (__builtin_expect((ctx)->num_bits_available < (n), 0)) {                                                    \
+        if ((ctx)->num_bits_available < (n)) {                                                                         \
             FillBits((ctx));                                                                                           \
         }                                                                                                              \
                                                                                                                        \
@@ -264,7 +264,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
         }
         u32 bits = ctx->bit_buffer;
         u32 lookupIndex = ctx->temp_code_length.fast_lookup[bits & 0x1ff];
-        if (__builtin_expect(lookupIndex == 0xffff, 1)) {
+        if (lookupIndex == 0xffff) {
             i32 rev = ReverseBits(bits);
             i32 len = 10;
             while (rev >= ctx->temp_code_length.base_code[len]) {
@@ -281,7 +281,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
             symbol = symbolIndex;
         }
 
-        if (__builtin_expect(symbol < 16, 0)) {
+        if (symbol < 16) {
             allCodeLengths[i++] = symbol;
         } else if (symbol == 16) {
             symbol = READBITS(ctx, 2) + 3;
@@ -313,7 +313,7 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
 
 i32 DecodeUncompressedBlock(DEFLATECONTEXT *ctx) {
     i32 alignment = ctx->num_bits_available & 7;
-    if (__builtin_expect(alignment > 0, 0)) {
+    if (alignment > 0) {
         if (ctx->num_bits_available < alignment) {
             FillBits(ctx);
         }
@@ -384,7 +384,7 @@ i32 DecodeDeflated(DEFLATECONTEXT *ctx) {
         is_final_block = READBITS(ctx, 1);
         type = READBITS(ctx, 2);
 
-        if (__builtin_expect(type == BLOCK_UNCOMPRESSED, 0)) {
+        if (type == BLOCK_UNCOMPRESSED) {
             if (!DecodeUncompressedBlock(ctx)) {
                 return 0;
             }

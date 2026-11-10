@@ -26,6 +26,15 @@ filegroup(
 )
 
 py_test(
+    name = "check_compiler_hints",
+    size = "small",
+    srcs = ["check_compiler_hints.py"],
+    data = ["//src:all_source_files"],
+    env = _PYTHON_ENV,
+    main = "check_compiler_hints.py",
+)
+
+py_test(
     name = "check_duplicate_definitions",
     size = "small",
     srcs = ["check_duplicate_definitions.py"],
@@ -126,6 +135,7 @@ test_suite(
     name = "checks",
     tests = [
         ":check_bazel_optimization_map",
+        ":check_compiler_hints",
         ":check_duplicate_definitions",
         ":check_host_boundary",
         ":test_forward_declarations",

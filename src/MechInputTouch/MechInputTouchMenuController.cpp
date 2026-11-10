@@ -168,7 +168,7 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
             if (x > -half_width && x < half_width) {                                                                   \
                 const f32 y = down_y - centre_y;                                                                       \
                 const f32 half_height = fabsf(0.5f * height);                                                          \
-                if (y > -half_height && __builtin_expect(y < half_height, 0)) {                                        \
+                if (y > -half_height && (y < half_height)) {                                                           \
                     hit = index;                                                                                       \
                     break;                                                                                             \
                 }                                                                                                      \
@@ -253,7 +253,7 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
         item_delta.z = 0.0f;
         if (height == 0.0f) {
             item_delta.x /= GetAspectRatio();
-            if (__builtin_expect(!(NuVecMag(&item_delta) < width), 1)) {
+            if (!(NuVecMag(&item_delta) < width)) {
                 continue;
             }
         } else {
@@ -275,7 +275,7 @@ bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) 
     const volatile NuVec2 &touch = holder.touch_position;
     const f32 touch_y = touch.y;
     const f32 touch_x = touch.x;
-    if (__builtin_expect(!PackButtonActive, 1)) {
+    if (!PackButtonActive) {
         return false;
     }
     PackButtonActive = false;

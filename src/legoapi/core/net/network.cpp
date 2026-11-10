@@ -50,7 +50,7 @@ void TTNetwork::Display(ThingRenderData *) {
     if (field_2150 == 2) {
         stats = &theNuNetEmu.raw_stats;
     }
-    if (__builtin_expect(field_2150 == 3, 1)) {
+    if (field_2150 == 3) {
         stats = &reinterpret_cast<V2SessionManager *>(session)->stats;
     }
 
@@ -141,7 +141,7 @@ void TTNetwork::ReliableBroadcast(NetMessage message, unsigned char channel) {
 }
 
 void TTNetwork::Broadcast(NetMessage message, unsigned char channel) {
-    if (__builtin_expect(message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0, 0)) {
+    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
         return;
     }
 

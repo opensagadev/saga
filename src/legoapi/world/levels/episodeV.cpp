@@ -401,7 +401,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
     if (special_count == 0)
         return;
 
-    if (__builtin_expect(special_count > 0, 1)) {
+    if (special_count > 0) {
         for (i32 special_index = 0; special_index < special_count; ++special_index) {
             for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index) {
                 NuSpecialCompare(&world->gizmo_blowup_types[type_index].special, &specials[special_index]);
@@ -417,7 +417,7 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
                     asteroid_type = 0;
                 } else if (NuStrIStr(name, "asteroid_b") != NULL) {
                     asteroid_type = 1;
-                } else if (__builtin_expect(NuStrIStr(name, "asteroid_c") != NULL, 1)) {
+                } else if (NuStrIStr(name, "asteroid_c") != NULL) {
                     asteroid_type = 2;
                 } else {
                     asteroid_type = 0;
@@ -1289,7 +1289,7 @@ void DagobahA_Update(WORLDINFO_s *world) {
             node0->position.x = -16.31f;
             node0->position.y = 0.31f;
             node0->position.z = 15.13f;
-            if (__builtin_expect(!(group->forces[1] == first), 1)) {
+            if (!(group->forces[1] == first)) {
                 node1->position.x = -16.31f;
                 node1->position.y = 0.67f;
                 node1->position.z = 14.82f;
@@ -1305,7 +1305,7 @@ void DagobahA_Update(WORLDINFO_s *world) {
                 node2->position.z = 14.65f;
             }
         } else if (selected == third) {
-            if (__builtin_expect(group->forces[1] != first, 1)) {
+            if (group->forces[1] != first) {
                 node0->position.x = -16.20f;
                 node0->position.y = 0.31f;
                 node0->position.z = 15.13f;
@@ -1590,7 +1590,7 @@ void HothBattleE_Panel(WORLDINFO_s *) {
         case 1:
         case 2:
             for (i32 index = 0; index < melee.waves[0].initial_count; ++index) {
-                if (__builtin_expect(index == (u8)(melee.waves[0].initial_count / 2) + 1, 1)) {
+                if (index == (u8)(melee.waves[0].initial_count / 2) + 1) {
                     targets[count] = -1;
                     defeated[count] = 0;
                     ++count;
@@ -1667,7 +1667,7 @@ AILOCATOR_s *getSpawnLocator(float clip_radius, char *name) {
                                  1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
 }
 
-__attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32 type) {
+i32 SpawnMeleeCreatureType(i32 type) {
     u8 active_count = melee.waves[type].reserved_1a;
     f32 radius = apicharsys->char_data[melee.waves[type].character_id].collision_radius;
 
@@ -1710,11 +1710,10 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             --attempts;
             locator = getSpawnLocator(5.0f, "spawn");
             if (locator != NULL) {
-                if (__builtin_expect(__builtin_expect(OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
-                                                     NULL, 0.5f, NULL) == 0,
-                                     0) ||
+                if ((OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 0.5f, NULL) ==
+                     0) ||
                     OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.5f, NULL) ==
-                        0, 1)) {
+                        0) {
                     if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.5f,
                                         NULL) != 0 ||
                         OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.5f,
@@ -1739,7 +1738,7 @@ __attribute__((optimize("O2", "tree-vectorize"))) i32 SpawnMeleeCreatureType(i32
             object = AddDynamicCreature(melee.waves[type].character_id, &locator->position, locator->direction,
                                         melee.waves[type].name, &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
         }
-        if (__builtin_expect(object == NULL, 0))
+        if (object == NULL)
             return 0;
         melee.waves[type].creatures[slot] = object;
         object->ai.locator = locator;
@@ -1915,7 +1914,7 @@ void HothBattleE_UpdateWave() {
             melee.initialize_wave = 1;
             pending = 1;
         } else if (melee.transition_phase > 0) {
-            if (__builtin_expect(MiniCutCam == 0, 1)) {
+            if (MiniCutCam == 0) {
                 if (melee.transition_phase == 1) {
                     HothBattle_ClearBackgroundObjects();
                     melee.transition_phase = 2;
@@ -1927,7 +1926,7 @@ void HothBattleE_UpdateWave() {
                 melee.current_wave = melee.next_wave;
                 pending = 1;
             }
-        } else if (__builtin_expect(melee.transition_phase == 0 && MiniCutCam != 0, 0)) {
+        } else if (melee.transition_phase == 0 && MiniCutCam != 0) {
             melee.transition_phase = 1;
         }
     }
@@ -1937,8 +1936,7 @@ void HothBattleE_UpdateWave() {
         SpawnMeleeCreatureType(type);
     }
     HothBattle_ManageBackgroundCreatures();
-    if (__builtin_expect(
-            melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL, 0)) {
+    if (melee.current_wave == 3 && melee.waves[0].creatures[0] != NULL && melee.waves[0].creatures[1] != NULL) {
         AIANTINODE_s *node = AIAntinodeCreateSingleFrame(&melee.waves[0].creatures[0]->apiobj.position,
                                                          melee.waves[0].creatures[type]->apiobj.field_0x1dc * 3.0f);
         node->excluded_character_types = ~(1 << melee.waves[0].creatures[1]->apiobj.field_0x289);
@@ -1969,8 +1967,7 @@ void HothBattleE_UpdateWave() {
             pending = 1;
         }
     }
-    if (__builtin_expect((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.next_wave == melee.current_wave,
-                         1)) {
+    if ((pending | MiniCutCam) == 0 && NOAICREATURES == 0 && melee.next_wave == melee.current_wave) {
         ++melee.next_wave;
     }
 }

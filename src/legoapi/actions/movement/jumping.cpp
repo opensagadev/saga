@@ -307,7 +307,7 @@ i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
         return 0;
     Player_ClearContext(object, 0);
     GameObject_s *carried = object->field_0xcc0;
-    if (__builtin_expect(carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA, 1))
+    if (carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA)
         carried = NULL;
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->field_0xcc0 = carried;
@@ -399,7 +399,7 @@ void BigJumpCode(GameObject_s *object) {
     if (LEGOCONTEXT_BIGJUMP == -1 || object->character_context != LEGOCONTEXT_BIGJUMP)
         return;
     object->apiobj.respawn_timer = 0.0f;
-    if (__builtin_expect(object->build_button_taps != 0 && object->field_0x1084 != 0, 0)) {
+    if (object->build_button_taps != 0 && object->field_0x1084 != 0) {
         object->character_context = -1;
         return;
     }
@@ -432,7 +432,7 @@ void BigJumpCode(GameObject_s *object) {
             }
             if ((object->context_variant_flags & 1) != 0 && object->apiobj.field_0x27d == 0) {
                 f32 ground = GameShadow(NULL, &object->launch_origin, 5.0f, -1);
-                if (__builtin_expect(ground != 2000000.0f && object->launch_origin.y - ground >= 0.1f, 1)) {
+                if (ground != 2000000.0f && object->launch_origin.y - ground >= 0.1f) {
                     StartEndOfJump(object);
                     return;
                 }
@@ -473,7 +473,7 @@ void BigJumpCode(GameObject_s *object) {
                         arc = rise / 3.0f + 0.0f;
                 } else if (rise < -0.21f) {
                     horizontal = NU_SIN_LUT(static_cast<i32>(fraction * 16384.0f + 49152.0f + 16384.0f));
-                    if (__builtin_expect(rise < -0.42f, 1))
+                    if (rise < -0.42f)
                         arc = 0.0f - rise / 3.0f;
                 }
             }
@@ -512,9 +512,9 @@ i32 ObjLandReady(GameObject_s *object) {
     if (object == NULL) {
         return 0;
     }
-    if (__builtin_expect((CInfo[object->character_context].flags & 0x1004) != 0 &&
+    if ((CInfo[object->character_context].flags & 0x1004) != 0 &&
         (LEGOCONTEXT_LAND_COMBATROLL == -1 || LEGOCONTEXT_LAND_COMBATROLL != object->character_context ||
-         object->field_0x7a3 != 0), 0)) {
+         object->field_0x7a3 != 0)) {
         if (LEGOCONTEXT_WALLSHUFFLE != -1 && LEGOCONTEXT_WALLSHUFFLE == object->character_context) {
             return 0;
         }
@@ -531,7 +531,7 @@ i32 UseFallAnim(GameObject_s *object) {
 
 i32 StartFallLand(GameObject_s *object, i32 action) {
     PlayLandSfx(object, 0, 0);
-    if (__builtin_expect(LEGOCONTEXT_LAND_JUMP == -1, 0)) {
+    if (LEGOCONTEXT_LAND_JUMP == -1) {
         object->movement_runtime_flags &= ~4;
         return 0;
     }
@@ -675,7 +675,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if (frame > 0.0f) {
                 f32 *time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
                 if (time != NULL && *time >= frame) {
-                    if (__builtin_expect((object->apiobj.character_data->model_flags & 8) == 0, 0))
+                    if ((object->apiobj.character_data->model_flags & 8) == 0)
                         Punch_Hit(object, object->force_target, PUNCHCHARGAP, PUNCHCHARGAP);
                     else
                         ComboHitFrame(object, 1);
@@ -722,7 +722,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if (Jump_EndOfLandContextFn != NULL)
                 Jump_EndOfLandContextFn(object);
             if (object->character_context == LEGOCONTEXT_LAND_COMBATROLL) {
-                if (__builtin_expect(object->landing_followup == 2, 0)) {
+                if (object->landing_followup == 2) {
                     object->action_suppressed = 0;
                     const u16 angle = GamePad_InputAngle(object, object->pad_gamepad);
                     object->apiobj.field_0x276 = angle;
@@ -740,9 +740,8 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if (object->character_context == LEGOCONTEXT_LAND_LUNGE && (object->context_flags & 0x40) == 0 &&
                 (object->apiobj.character_data->model_flags & 8) != 0)
                 ComboHitFrame(object, 1);
-            if (__builtin_expect((object->character_context == LEGOCONTEXT_LAND_LUNGE ||
-                                  object->character_context == LEGOCONTEXT_LAND_SLAM) != 0,
-                                 1) &&
+            if (((object->character_context == LEGOCONTEXT_LAND_LUNGE ||
+                  object->character_context == LEGOCONTEXT_LAND_SLAM) != 0) &&
                 action_held != 0) {
                 StartHold(object);
                 return;
@@ -821,10 +820,10 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
         if (!landed) {
             GAMECHARACTERDATA *game_character =
                 static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            if (__builtin_expect((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
+            if ((touch_action || action_pressed != 0) && (vertical_speed > -1.25f || touch_action) &&
                 (game_character->field275_0x116 != 0 || (object->apiobj.character_data->model_flags & 8) != 0) &&
                 movement_state == 0 && variant_flags >= 0 && object->jump_sequence < 2 && LEGOACT_LUNGE != -1 &&
-                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL, 0)) {
+                object->apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL) {
                 object->field_0x780 = NULL;
                 object->blowup_target = NULL;
                 StartLunge(object, 0.0f, object->apiobj.field_0x1e0);
@@ -835,7 +834,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                 ((movement_state == 0 && (object->jump_sequence == 2 || (game_character->field_0x98 & 0x20) != 0)) ||
                  object->action_movement_state == 1 || movement_state == 2) &&
                 LEGOACT_SLAM != -1 && object->apiobj.character_model->model_data_b[LEGOACT_SLAM] != NULL) {
-                if (__builtin_expect(Slam_Start(object, SLAMJUMPSPEED) != 0, 1)) {
+                if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
                     PlaySabreSfx(NULL, object, NULL, 0);
                     if (object->action_movement_state == 1 || object->action_movement_state == 2) {
                         ResetAnimPacket(&object->apiobj.anim_packet, -1);
@@ -851,7 +850,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             if ((jump_pressed != 0 || (object->jump_input_flags & 0x10) != 0) && (animation_set & 8) != 0 &&
                 object->action_movement_state == PLAYER_JUMP_MOVEMENT_BASIC && object->jump_sequence <= 1 &&
                 (object->apiobj.velocity.y > -1.25f || (object->jump_input_flags & 0x10) != 0)) {
-                if (LEGOCONTEXT_DOOMED != -1 && __builtin_expect(object->character_context == LEGOCONTEXT_DOOMED, 1))
+                if (LEGOCONTEXT_DOOMED != -1 && (object->character_context == LEGOCONTEXT_DOOMED))
                     return;
                 game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 if ((game_character->flags_094[1] & 0x20) != 0) {
@@ -876,7 +875,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     return;
                 object->jump_sequence++;
                 object->context_variant_flags |= 0x40;
-                if (__builtin_expect((animation_set & 0x110) == 0, 0) &&
+                if (((animation_set & 0x110) == 0) &&
                     ((game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24))
                          ->flags_090 &
                      0x400000) == 0) {
@@ -923,7 +922,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) > 0x6aaa)
                     force_flip = 1;
-            } else if (__builtin_expect(object->action_movement_state == 2, 0)) {
+            } else if (object->action_movement_state == 2) {
                 if (!(object->pad_gamepad->input_magnitude <= 0.0f) && (object->field_0xe22 & 0x20) != 0 &&
                     abs(RotDiff(object->apiobj.movement_facing_angle, object->current_input_angle)) < 0x1555)
                     force_flip = 1;
@@ -955,10 +954,9 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                         PlayLandSfx(object, 0, 0);
                     }
                 } else {
-                    if (__builtin_expect(object->action_movement_state == 2 && LEGOCONTEXT_LAND_COMBOJUMP != -1 &&
-                                             LEGOACT_COMBOLAND != -1 &&
-                                             object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL,
-                                         0)) {
+                    if (object->action_movement_state == 2 && LEGOCONTEXT_LAND_COMBOJUMP != -1 &&
+                        LEGOACT_COMBOLAND != -1 &&
+                        object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL) {
                         if ((object->context_variant_flags & 0x20) == 0) {
                             object->apiobj.field_0x276 += 0x8000;
                             object->apiobj.facing_angle += 0x8000;
@@ -994,11 +992,9 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                             object->character_context = -1;
                         }
                         PlayLandSfx(object, 0, 0);
-                    } else if (__builtin_expect(object->action_movement_state == 8, 0)) {
-                        if (__builtin_expect(
-                                LEGOCONTEXT_LAND_COMBATROLL != -1 &&
-                                    object->apiobj.character_model->model_data_b[LEGOACT_COMBATROLL_LAND] != NULL,
-                                0)) {
+                    } else if (object->action_movement_state == 8) {
+                        if (LEGOCONTEXT_LAND_COMBATROLL != -1 &&
+                            object->apiobj.character_model->model_data_b[LEGOACT_COMBATROLL_LAND] != NULL) {
                             NewRumble(object->pad_gamepad->pad, 0.4f, 0);
                             object->character_context = LEGOCONTEXT_LAND_COMBATROLL;
                             object->field_0x7a3 = 0;
@@ -1036,7 +1032,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                             object->jump_reentry_timer = 0.0f;
                             if (object->pad_gamepad->input_magnitude != 0.0f) {
                                 object->character_context = -1;
-                            } else if (__builtin_expect(object->fall_animation_timer >= 0.2f, 0)) {
+                            } else if (object->fall_animation_timer >= 0.2f) {
                                 StartFallLand(object, -1);
                             } else {
                                 object->character_context = LEGOCONTEXT_LAND_JUMP2;
@@ -1108,7 +1104,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     object->context_animation_timer = AnimDuration(object->id, LEGOACT_LUNGELAND, 0.0f, 0.0f, 1);
                     object->context_flags &= ~0x40;
                     object->jump_reentry_timer = 0.0f;
-                    if (__builtin_expect(!restart_jump, 0))
+                    if (!restart_jump)
                         ResetAnimPacket(&object->apiobj.anim_packet, -1);
                     if ((object->apiobj.character_data->model_flags & 8) == 0 &&
                         AnimListFrame(object->apiobj.character_model, object->context_animation, 0) == 0.0f)
@@ -1156,7 +1152,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                     object->jump_sequence = 1;
                 else
                     ++object->jump_sequence;
-                if (__builtin_expect((animation_set & 1) != 0, 1) && object->jump_sequence > 1) {
+                if (((animation_set & 1) != 0) && object->jump_sequence > 1) {
                     if (UsingExtraActionsFn != NULL && UsingExtraActionsFn(object) && LEGOACT_EXTRA_JUMP2 != -1 &&
                         object->apiobj.character_model->model_data_b[LEGOACT_EXTRA_JUMP2] != NULL)
                         object->context_animation = LEGOACT_EXTRA_JUMP2;
@@ -1186,7 +1182,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
                         Hint_SetComplete(0x604);
                 }
             } else {
-                if (__builtin_expect(flip_kind == 1 && StartBackFlip(object), 1))
+                if (flip_kind == 1 && StartBackFlip(object))
                     return;
                 object->action_movement_state = 1;
                 object->context_animation = LEGOACT_FLIP;
@@ -1199,7 +1195,7 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
             object->jump_flags &= ~1;
             object->character_context = LEGOCONTEXT_JUMP;
             object->context_variant_flags = variant_flags & ~0x10;
-            if (object->action_movement_state == 1 && __builtin_expect(LEGOACT_FLIP != -1, 0) &&
+            if (object->action_movement_state == 1 && (LEGOACT_FLIP != -1) &&
                 object->apiobj.character_model->model_data_b[LEGOACT_FLIP] != NULL)
                 object->context_animation = LEGOACT_FLIP;
             object->field_0xe22 |= 0x10;

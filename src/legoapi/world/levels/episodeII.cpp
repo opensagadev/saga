@@ -220,7 +220,7 @@ JediBInitLocatorBody(AISYS_s **ai_sys, nuvec_s *position, i32 angle, AILOCATOR *
                      f32 radius) __asm__("_ZL16JediBInitLocatorP11WORLDINFO_sP7nuvec_siP11AILOCATOR_sf.isra.5.part.6");
 
 static inline i32 JediBInitLocator(WORLDINFO_s *world, nuvec_s *position, i32 angle, AILOCATOR *locator, f32 radius) {
-    if (__builtin_expect(netclient != 0, 0)) {
+    if (netclient != 0) {
         return 0;
     }
     return JediBInitLocatorBody(&world->ai_sys, position, angle, locator, radius);
@@ -437,7 +437,7 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 i32 a = paintsused[0];
                 i32 b = paintsused[1];
                 i32 mixed;
-                if (__builtin_expect(a == 0 && b == 1, 1) || (a == 1 && b == 0)) {
+                if ((a == 0 && b == 1) || (a == 1 && b == 0)) {
                     mixed = 3;
                 } else if ((b == 1 && a == 2) || (a == 1 && b == 2)) {
                     mixed = 4;
@@ -468,7 +468,7 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                     GAMEANIMSET_STATE_AT_END) {
                     if (paintmixed == painttarget) {
                         ++painttry;
-                        if (__builtin_expect(painttry == 3, 0)) {
+                        if (painttry == 3) {
                             PAINTPUZZLESTAGE = 4;
                         } else {
                             PAINTPUZZLESTAGE = 0;
@@ -678,7 +678,7 @@ void JediB_Update(WORLDINFO_s *world) {
         jedi_b.exclusion_mask = 0;
         // Not `timer >= 4.0f`: that form compares the other way round and is not
         // equivalent for NaN, and the original tests `4.0f > timer`.
-        if (__builtin_expect(jedi_b.timer < 4.0f, 0)) {
+        if (jedi_b.timer < 4.0f) {
             if (player != NULL) {
                 jedi_b.exclusion_mask = 1ULL << player->apiobj.field_0x289;
             }
@@ -708,7 +708,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 continue;
             }
             Player[slot]->ai_opponent_exclusion_mask = 0;
-            if (__builtin_expect(jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled, 1)) {
+            if (jedi_b.phase == 7 && boss != NULL && !Player[slot]->apiobj.player_controlled) {
                 Player[slot]->ai_opponent_exclusion_mask = 1ULL << boss->apiobj.field_0x289;
             }
         }
@@ -801,7 +801,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         break;
                 }
 
-                if (__builtin_expect(jedi_b.msg_phase == NULL, 0)) {
+                if (jedi_b.msg_phase == NULL) {
                     jedi_b.msg_phase = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
                 }
                 if (jedi_b.msg_phase_complete == NULL) {
@@ -876,10 +876,10 @@ void JediB_Update(WORLDINFO_s *world) {
                         break;
                     }
                     case 7:
-                        if (__builtin_expect(boss == NULL, 0)) {
+                        if (boss == NULL) {
                             boss = FindGameObject(id_JANGOFETT, 1, 1, 0, 0);
                             jedi_b.boss = boss;
-                            if (__builtin_expect(boss == NULL, 0)) {
+                            if (boss == NULL) {
                                 break;
                             }
                         }
@@ -923,7 +923,7 @@ void JediB_Update(WORLDINFO_s *world) {
                           (player->apiobj.objptr->id != id_JARJAR || player->apiobj.player_controlled) &&
                           (player->apiobj.character_data->game_character->uses_weapon_action != 4 ||
                            object->apiobj.character_data->game_character->uses_weapon_action != 4))) {
-                        if (__builtin_expect(object->ai.opponent == player, 1)) {
+                        if (object->ai.opponent == player) {
                             object->ai.opponent = NULL;
                         }
                         if (player2 != NULL) {
@@ -940,11 +940,10 @@ void JediB_Update(WORLDINFO_s *world) {
                         object->ai.opponent = player;
                     }
                 } else {
-                    if (__builtin_expect((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point,
-                                                          &PlayPlane[1].normal, NULL, 2.0f, NULL) == 0 &&
-                                          OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point,
-                                                          &PlayPlane[2].normal, NULL, 2.0f, NULL) == 0) != 0,
-                                         0) ||
+                    if (((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
+                                          2.0f, NULL) == 0 &&
+                          OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                                          NULL, 2.0f, NULL) == 0) != 0) ||
                         (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL,
                                          2.0f, NULL) == 0 &&
                          OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
@@ -1022,7 +1021,7 @@ void JediB_Update(WORLDINFO_s *world) {
                         }
                     } else {
                         object->field_0x1054 = baddie->field_0x58;
-                        if (__builtin_expect(baddie->two_row_hp == 0, 1)) {
+                        if (baddie->two_row_hp == 0) {
                             object->field_0xefd &= static_cast<u8>(~2);
                         } else {
                             object->random_layer_variant = 1;
@@ -1032,7 +1031,7 @@ void JediB_Update(WORLDINFO_s *world) {
                 }
             }
 
-            if (__builtin_expect(object == NULL, 1)) {
+            if (object == NULL) {
                 continue;
             }
             jedib_n_active++;
@@ -1101,7 +1100,7 @@ void JediB_DrawPanel(WORLDINFO_s *) {
                 }
                 break;
             case 7:
-                if (__builtin_expect(jedi_b.boss == NULL, 1)) {
+                if (jedi_b.boss == NULL) {
                     jedi_b.boss = (GameObject_s *)FindGameObject((i32)(i16)id_JANGOFETT, 1, 1, 0, 0);
                     if (jedi_b.boss == NULL) {
                         return;
@@ -1286,10 +1285,10 @@ void DookuC_Update(WORLDINFO_s *world) {
                 AIPATHNODE_s *node1;
                 AIPATHNODE_s *node2;
                 AIPATHNODE_s *node3;
-                if (__builtin_expect((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
+                if ((node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0])) != NULL &&
                     (node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1])) != NULL &&
                     (node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2])) != NULL &&
-                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL, 1)) {
+                    (node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3])) != NULL) {
                     if (LevGizForce[0] == group->forces[0]) {
                         node0->position = {3.76f, 0.01f, -1.59f};
                         if (!(LevGizForce[1] != group->forces[1])) {
@@ -1324,7 +1323,7 @@ void DookuC_Update(WORLDINFO_s *world) {
                             node3->position = {4.43f, 1.69f, -1.28f};
                         }
                     }
-                    if (__builtin_expect(world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL, 1)) {
+                    if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
                                             static_cast<AIPATHNODE_s *>(LevAIPathNode[0]));
                         AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
@@ -1524,9 +1523,9 @@ void KaminoC_Reset(WORLDINFO_s *world) {
 void KaminoC_Update(WORLDINFO_s *world) {
     KaminoProgressGizmo_s *progress = static_cast<KaminoProgressGizmo_s *>(LevGizmo[0]->object);
     if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) ||
-        (__builtin_expect(!(progress->flags & 1), 0) && (GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1),
-                                                         GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
-                                                             GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))))
+        ((!(progress->flags & 1)) && (GizmoActivate(world->gizmo_sys, LevGizmo[1], 1, 1),
+                                      GizmoGetOutput(world->gizmo_sys, gizTurrets[0], 0, 0) &&
+                                          GizmoGetOutput(world->gizmo_sys, gizTurrets[1], 0, 0))))
         GizmoSetVisibility(world->gizmo_sys, LevGizmo[1], 0, 1);
     kaminoc_netpacket->sound_mask = 0;
     SetGizAIMessage(gizaimessagesys, "NextDiscoTile", 0.0f, kaminodisco.next_tile_message);
@@ -1540,7 +1539,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
         NUVEC *position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.first_tile]);
         for (i32 i = 0; i < 8 && !first_occupied; ++i) {
             GameObject_s *object = Player[i];
-            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+            if (KaminoDiscoOccupied(object, position)) {
                 first_occupied = 1;
                 if (object == player)
                     occupied_by_player = kaminodisco.first_tile;
@@ -1548,26 +1547,26 @@ void KaminoC_Update(WORLDINFO_s *world) {
             }
         }
         if (old_state != kaminodisco.tile_state[kaminodisco.first_tile] &&
-            __builtin_expect(kaminodisco.tile_state[kaminodisco.first_tile] == 2, 1))
+            (kaminodisco.tile_state[kaminodisco.first_tile] == 2))
             kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.first_tile & 31);
         old_state = kaminodisco.tile_state[kaminodisco.second_tile];
         kaminodisco.tile_state[kaminodisco.second_tile] = 1;
         position = NuSpecialGetPos(&kaminodisco.pending[kaminodisco.second_tile]);
         for (i32 i = 0; i < 8 && !second_occupied; ++i) {
             GameObject_s *object = Player[i];
-            if (__builtin_expect(!!(KaminoDiscoOccupied(object, position)), 0)) {
+            if (KaminoDiscoOccupied(object, position)) {
                 second_occupied = 1;
-                if (__builtin_expect(!!(object == player), 1))
+                if (object == player)
                     occupied_by_player = kaminodisco.second_tile;
                 kaminodisco.tile_state[kaminodisco.second_tile] = 2;
             }
         }
         if (old_state != kaminodisco.tile_state[kaminodisco.second_tile] &&
-            __builtin_expect(kaminodisco.tile_state[kaminodisco.second_tile] == 2, 1))
+            (kaminodisco.tile_state[kaminodisco.second_tile] == 2))
             kaminoc_netpacket->sound_mask |= 1u << (kaminodisco.second_tile & 31);
         if (!(first_occupied && second_occupied)) {
             kaminodisco.timer += FRAMETIME;
-            if (__builtin_expect(kaminodisco.timer > 2.5f, 1)) {
+            if (kaminodisco.timer > 2.5f) {
                 kaminodisco.timer = 0.0f;
                 for (i32 i = 0; i < 2; ++i) {
                     i32 tile = KaminoDiscoChooseTile(-1, 3);
@@ -1583,7 +1582,7 @@ void KaminoC_Update(WORLDINFO_s *world) {
                     if (occupied_by_player == kaminodisco.first_tile)
                         SetGizAIMessage(gizaimessagesys, "NextDiscoTile", static_cast<f32>(kaminodisco.second_tile + 1),
                                         kaminodisco.next_tile_message);
-                    else if (__builtin_expect(occupied_by_player == kaminodisco.second_tile, 0))
+                    else if (occupied_by_player == kaminodisco.second_tile)
                         SetGizAIMessage(gizaimessagesys, "NextDiscoTile", static_cast<f32>(kaminodisco.first_tile + 1),
                                         kaminodisco.next_tile_message);
                 }
@@ -1613,18 +1612,18 @@ void KaminoC_Update(WORLDINFO_s *world) {
         for (i32 i = 0; i < kaminodisco.tile_count; ++i)
             kaminodisco.tile_state[i] = 4;
         kaminodisco.timer += FRAMETIME;
-        if (__builtin_expect(kaminodisco.timer > 20.0f, 1)) {
+        if (kaminodisco.timer > 20.0f) {
             KaminoC_Reset(world);
             return;
         }
     } else if (kaminodisco.phase == 0) {
-        if (__builtin_expect(KaminoDiscoPlayerInArea(world), 0)) {
+        if (KaminoDiscoPlayerInArea(world)) {
             kaminoc_netpacket->complete = 0;
             kaminodisco.phase = 1;
             kaminodisco.timer = 0.0f;
             kaminodisco.first_tile = KaminoDiscoChooseTile(-1, 0);
             kaminodisco.second_tile = KaminoDiscoChooseTile(kaminodisco.first_tile, 0);
-            if (__builtin_expect(kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1, 1)) {
+            if (kaminodisco.first_tile != -1 && kaminodisco.second_tile != -1) {
                 kaminodisco.tile_state[kaminodisco.first_tile] = 1;
                 kaminodisco.tile_state[kaminodisco.second_tile] = 1;
             }
@@ -1935,12 +1934,12 @@ void KaminoE_Update(WORLDINFO_s *world) {
                     aim = *NuSpecialGetDrawPos(&kamino_e.active_turret->primary_anim_obj->special);
                     aim.y += 0.5f;
                     have_target = true;
-                } else if (__builtin_expect(kamino_e.can_fire->value == 1.0f, 1)) {
+                } else if (kamino_e.can_fire->value == 1.0f) {
                     GameObject_s *nearest = NULL;
                     f32 best = 1000000000.0f;
                     for (i32 i = 0; i < 8; ++i) {
                         GameObject_s *object = Player[i];
-                        if (object == NULL || __builtin_expect((object->apiobj.field_0x1f8 & 0x1001) != 0x1001, 1) ||
+                        if (object == NULL || ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001) ||
                             (object->apiobj.character_data->model_flags & 0x80000))
                             continue;
                         f32 distance = NuVecDistSqr(&object->apiobj.collision_position,
@@ -2158,7 +2157,7 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
     f32 nearest_distance = gunshipb_seekrange * gunshipb_seekrange;
     NUVEC offset, nearest_offset, direction;
     for (i32 i = 0; i < 8; ++i) {
-        if (__builtin_expect(LevGizmo[i] == NULL, 0))
+        if (LevGizmo[i] == NULL)
             continue;
         GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[i]->object);
         if (blowup == NULL || (blowup->status_flags & 0x800001) != 0x800000)
@@ -2170,7 +2169,7 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
             nearest = blowup;
         }
     }
-    if (__builtin_expect(nearest == NULL, 0))
+    if (nearest == NULL)
         return;
     NuVecNorm(&direction, &nearest_offset);
     f32 momentum = (1.0f - NuFsqrt(nearest_distance) / gunshipb_seekrange) * gunshipb_seekmom;

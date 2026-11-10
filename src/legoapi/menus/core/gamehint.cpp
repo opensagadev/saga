@@ -61,12 +61,10 @@ void MechHintUIButton::Render() {
 }
 
 void MechHintUIButton::Process(float elapsed) {
-    if (__builtin_expect(active_hint != NULL, 1)) {
+    if (active_hint != NULL) {
         display_elapsed += elapsed;
-        if (__builtin_expect(
-                MechSystems::Get()->PlayerButton().selector != NULL ||
-                    (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration),
-                1)) {
+        if (MechSystems::Get()->PlayerButton().selector != NULL ||
+            (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration)) {
             if (active_hint != NULL) {
                 const f32 blend = AlphaBlendTime;
                 pending_hint = NULL;
@@ -95,15 +93,15 @@ void MechHintUIButton::Process(float elapsed) {
         scale = scale_to;
     }
     scale_elapsed = scale_duration;
-    if (__builtin_expect(!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay), 0)) {
+    if (!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay)) {
         slide_elapsed += elapsed;
-        if (__builtin_expect(slide_elapsed > slide_duration + slide_delay, 0))
+        if (slide_elapsed > slide_duration + slide_delay)
             slide_elapsed = slide_duration + slide_delay;
         if (slide_elapsed >= slide_delay)
             *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;
     }
     position.x = slide;
-    if (__builtin_expect(next_hint != NULL && __builtin_expect(slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay, 0), 1)) {
+    if (next_hint != NULL && (slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay)) {
         active_hint = next_hint;
         pending_hint = NULL;
         display_elapsed = 0.0f;
@@ -130,7 +128,7 @@ void MechHintUIButton::Process(float elapsed) {
     }
     if (was_pulsing) {
         pulse_remaining -= elapsed;
-        if (__builtin_expect(0.0f >= pulse_remaining, 0))
+        if (0.0f >= pulse_remaining)
             StartPulse();
     }
     MechTouchUITexButton::Process(elapsed);
@@ -244,8 +242,8 @@ static i32 updatehints_target_y[2];
 static f32 updatehints_current_y[2];
 
 static __used__ i32 Move_UpdateHint(HINT_s *hint) {
-    if (__builtin_expect(MechInputTouchSystem::s_baseControlMode == 0 || player == NULL || player->apiobj.field_0x27d == 0 ||
-        player->field_0x7a5 != 0xff || VehicleArea != 0 || !TouchHacks::TouchControlsActive, 0))
+    if (MechInputTouchSystem::s_baseControlMode == 0 || player == NULL || player->apiobj.field_0x27d == 0 ||
+        player->field_0x7a5 != 0xff || VehicleArea != 0 || !TouchHacks::TouchControlsActive)
         return 0;
     switch (hint->control_mode_ids[0]) {
         case 0x5f1:
@@ -261,7 +259,7 @@ static __used__ i32 PlayerButton_UpdateHint(HINT_s *hint) {
     if (WORLD == NULL || WORLD->area == HUB_ADATA || VehicleArea != 0)
         return 0;
     if (hint->control_mode_ids[0] == 0x5f4) {
-        if (__builtin_expect(FreePlay == 0, 0))
+        if (FreePlay == 0)
             return 1;
     } else if (hint->control_mode_ids[0] == 0x5f5) {
         if (FreePlay != 0)
@@ -282,11 +280,11 @@ static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint) {
         return 0;
     switch (hint->control_mode_ids[0]) {
         case 0x619:
-            if (__builtin_expect(show_unlock_shop_hint != 0, 1))
+            if (show_unlock_shop_hint != 0)
                 return 1;
             break;
         case 0x61a:
-            if (__builtin_expect(show_unlock_customiser_hint != 0, 0))
+            if (show_unlock_customiser_hint != 0)
                 return 1;
             break;
         case 0x61b:
@@ -426,7 +424,7 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
     f32 text_y = 0.0f;
     if ((WORLD->current_level->flags & LEVEL_STATUS) == 0) {
         text_y = -0.7f;
-        if (__builtin_expect(hint->control_mode_ids[0] == 0x164, 0))
+        if (hint->control_mode_ids[0] == 0x164)
             text_y = -0.1f;
     }
 
@@ -478,8 +476,7 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
 
     const i32 slide_angle = static_cast<i32>(alpha * 16384.0f);
     const f32 wave_x = (icon_x + 1.1f) * NU_SIN_LUT(slide_angle) - 1.1f;
-    if (__builtin_expect(hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay,
-                         0))
+    if (hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
         hintIconPos.value.x = wave_x;
 
     if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {
@@ -501,7 +498,7 @@ static void DrawHint_LSWBody(HINT_s *hint, i32 max_lines) {
 }
 
 void DrawHint_LSW(HINT_s *hint, i32 max_lines) {
-    if (hint == NULL || __builtin_expect(FadeSys.fade != 0.0f, 0))
+    if (hint == NULL || (FadeSys.fade != 0.0f))
         return;
     DrawHint_LSWBody(hint, max_lines);
 }
@@ -564,7 +561,7 @@ i32 HINT_COMPLETE(i32 hint_id) {
 }
 
 void MenuUpdateHints(MENU_s *menu) {
-    if (__builtin_expect(menu->input_activity != 0 && menu->confirm_pressed != 0, 1)) {
+    if (menu->input_activity != 0 && menu->confirm_pressed != 0) {
         if (menu->selected_item == 0)
             menu->up_pressed = 1;
         else
@@ -630,13 +627,13 @@ void MenuDrawHints(MENU_s *menu) {
 
     i32 row = 0;
     for (HINT_s *hint = Hints_LSW; hint->control_mode_ids[0] != -1; ++hint) {
-        if (__builtin_expect((hint->flags & 0x2c) != 0, 0))
+        if ((hint->flags & 0x2c) != 0)
             continue;
         const i32 mode = MechInputTouchSystem::s_baseControlMode;
         if ((hint->flags & 0x10) == 0) {
             if (hint->control_mode_ids[1] == -1 && mode != 0)
                 continue;
-        } else if (__builtin_expect(mode == 0, 1) || hint->control_mode_ids[1] == -1)
+        } else if ((mode == 0) || hint->control_mode_ids[1] == -1)
             continue;
         const i32 text_id = hint->control_mode_ids[mode];
         if (TTab[text_id] == NULL)

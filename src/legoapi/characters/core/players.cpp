@@ -331,7 +331,7 @@ void Players_InitPositions(WORLDINFO *world) {
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
                 }
-            } else if (__builtin_expect(hub_from_mission != -1, 1)) {
+            } else if (hub_from_mission != -1) {
                 void *door = Door_FindByName(world, const_cast<char *>("mission_door"));
                 if (door != NULL) {
                     NuStrCpy(Door_ExitName, (char *)door);
@@ -404,11 +404,10 @@ void Players_InitPositions(WORLDINFO *world) {
         hub_from_arcade = -1;
         if (hub_from_cutsceneplayer != 0) {
             void *av = CutScenePlayer_Available();
-            if (__builtin_expect(
-                    av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1, 1)) {
+            if (av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1) {
                 HubStartDoor = Door_FindByIndex(
                     world, -1, static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door, NULL);
-                if (__builtin_expect(HubStartDoor != NULL, 0)) {
+                if (HubStartDoor != NULL) {
                     NUVEC v2;
                     f32 *vps = *(f32 **)((char *)(*(void **)((char *)HubStartDoor + 0xa0)) + 0x8);
                     PlayerStart[0].pos = (NUVEC *)&vps[12];
@@ -729,13 +728,13 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         GAMEPAD_s *pad = object->pad_gamepad;
         right = pad->buttons_pressed & right_mask;
         left = pad->buttons_pressed & left_mask;
-        if (__builtin_expect((right != 0 && left != 0) || (left | right) == 0, 0)) {
+        if ((right != 0 && left != 0) || (left | right) == 0) {
             if (!object->apiobj.player_controlled) {
                 return;
             }
             right = pad->buttons_held & right_mask;
             left = pad->buttons_held & left_mask;
-            if (__builtin_expect((right != 0 && left != 0) != 0, 1) || (left | right) == 0) {
+            if (((right != 0 && left != 0) != 0) || (left | right) == 0) {
                 object->input_toggle_hold_time = TOGGLEHOLDTIME;
                 return;
             }
@@ -747,7 +746,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         hold_time = object->input_toggle_hold_time;
     }
-    if (__builtin_expect(Player_ToggleSubCharacterFn != NULL, 1)) {
+    if (Player_ToggleSubCharacterFn != NULL) {
         if (Player_ToggleSubCharacterFn(object, left, sound) != 0) {
             return;
         }
@@ -763,10 +762,10 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
     i32 id;
     do {
         if (left != 0) {
-            if (__builtin_expect(--index == -1, 0)) {
+            if (--index == -1) {
                 index = apicharsys->loaded_model_count - 1;
             }
-        } else if (__builtin_expect(++index == apicharsys->loaded_model_count, 0)) {
+        } else if (++index == apicharsys->loaded_model_count) {
             index = 0;
         }
         id = apicharsys->models[index].model_id;
@@ -784,8 +783,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             if ((CDataList[id].model_flags & 0x2000) == 0 &&
                 !(BonusArea != 0 && (CDataList[id].model_flags & 0x4000000) != 0) &&
                 (i32)GCDataList[id].flags_090 >= 0 &&
-                __builtin_expect(
-                    !(BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 && (GCDataList[id].flags_094[3] & 2) != 0), 0)) {
+                (!(BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 && (GCDataList[id].flags_094[3] & 2) != 0))) {
                 goto next_character;
             }
             if (BonusArea != 0) {
@@ -798,10 +796,8 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
                                                                    (GCDataList[id].flags_094[3] & 2) != 0)) {
                     goto next_character;
                 }
-                if (__builtin_expect(object->apiobj.field_0x27f <= 16 &&
-                                         (TerLayer[(i8)object->apiobj.field_0x27f].flags & 1) != 0 &&
-                                         GCDataList[id].field_0x28 <= 0.0f,
-                                     1)) {
+                if (object->apiobj.field_0x27f <= 16 && (TerLayer[(i8)object->apiobj.field_0x27f].flags & 1) != 0 &&
+                    GCDataList[id].field_0x28 <= 0.0f) {
                     goto next_character;
                 }
             }
@@ -813,23 +809,21 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
                 if ((object->apiobj.flags_low & 0x80) == 0 || Cheats_CheckFlags(0x100) == 0) {
                     goto next_character;
                 }
-            } else if (__builtin_expect(
-                           (GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0), 1)) {
+            } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
                 goto next_character;
             }
         }
-        if (__builtin_expect(object->apiobj.field_0x218 != 2000000.0f, 1) && object->apiobj.field_0x220 != 2000000.0f &&
+        if ((object->apiobj.field_0x218 != 2000000.0f) && object->apiobj.field_0x220 != 2000000.0f &&
             object->apiobj.character_data->move_fn != Move_DEFAULT &&
-            __builtin_expect(CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
-                                 object->apiobj.field_0x220 - object->apiobj.field_0x218,
-                             0)) {
+            (CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
+             object->apiobj.field_0x220 - object->apiobj.field_0x218)) {
             GameAudio_PlaySfx(0x32, &object->apiobj.collision_position, 0, 0);
             goto next_character;
         }
-        if (__builtin_expect(attempts >= apicharsys->loaded_model_count, 0)) {
+        if (attempts >= apicharsys->loaded_model_count) {
             return;
         }
-        if (__builtin_expect((object->apiobj.flags_low & 0x80) != 0, 1)) {
+        if ((object->apiobj.flags_low & 0x80) != 0) {
             Hint_SetComplete(LEGOHINT_FREEPLAYTOGGLE);
             if (VehicleArea == 0) {
                 GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
@@ -842,9 +836,9 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         object->input_toggle_hold_time = hold_time;
         if (sound != 0) {
-            if (__builtin_expect(left != 0, 0)) {
+            if (left != 0) {
                 GameAudio_PlaySfx(0x23, &object->apiobj.collision_position, 0, 0);
-            } else if (__builtin_expect(right != 0, 0)) {
+            } else if (right != 0) {
                 GameAudio_PlaySfx(0x24, &object->apiobj.collision_position, 0, 0);
             }
         }

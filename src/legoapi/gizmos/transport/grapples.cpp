@@ -338,10 +338,10 @@ static void Grapples_DrawList(WORLDINFO *world, GRAPPLE *grapples, i32 grapple_c
             }
 
             NuMtxSetRotationY(&matrix, target_rotation);
-            if (__builtin_expect(grapple->ground_z_rotation != 0, 1)) {
+            if (grapple->ground_z_rotation != 0) {
                 NuMtxRotateZ(&matrix, grapple->ground_z_rotation);
             }
-            if (__builtin_expect(grapple->ground_x_rotation != 0, 1)) {
+            if (grapple->ground_x_rotation != 0) {
                 NuMtxRotateX(&matrix, grapple->ground_x_rotation);
             }
             NuMtxScaleU(&matrix, 0.8f);
@@ -475,7 +475,7 @@ static void Grapples_Reset(void *world_ptr, void *, void *progress_ptr) {
     }
 
     GRAPPLE *grapple = world->grapples;
-    if (__builtin_expect(grapple != NULL, 1)) {
+    if (grapple != NULL) {
         for (i32 index = 0; index < world->grapple_count; ++index, ++grapple) {
             GRAPPLE *rope_grapple = &world->grapples[index];
             Grapple_ResetRope(rope_grapple);
@@ -678,7 +678,7 @@ void Grapple_DrawLine(GameObject_s *object) {
     const NUVEC *first_attachment;
     const NUVEC *second_attachment = NULL;
     const i32 joint_a = config->grapple_joint_a;
-    if (__builtin_expect(!(joint_a != -1 && object->apiobj.character_model->points_of_interest[joint_a] != NULL), 0)) {
+    if (!(joint_a != -1 && object->apiobj.character_model->points_of_interest[joint_a] != NULL)) {
         first_attachment = grapple->disabled ? &object->apiobj.collision_position : &object->apiobj.upper_position;
     } else {
         first_attachment = NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
@@ -697,8 +697,7 @@ void Grapple_DrawLine(GameObject_s *object) {
     }
     NuRndrLine3d(vertices, SolidMtl3D, NULL);
     grapple = static_cast<GRAPPLE *>(object->field_0x788);
-    if (__builtin_expect((grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED)) == GRAPPLE_FLAG_DISABLED,
-                         1)) {
+    if ((grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED)) == GRAPPLE_FLAG_DISABLED) {
         vertices[0].position = vertices[1].position;
         DrawRopeCurved(&vertices[0].position, grapple->rope_points, 6, 0, NULL);
     }
@@ -823,12 +822,12 @@ void Grapple_MoveCode(GameObject_s *object) {
             return;
         }
         if (object->field_0x7a3 == 1) {
-            if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0, 0)) {
+            if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0) {
                 GRAPPLE_JUMP();
                 return;
             }
-            if (__builtin_expect(object->pad_gamepad->input_magnitude == 0.0f || object->pad_gamepad->input_angle < 0x6001 ||
-                object->pad_gamepad->input_angle > 0x9fff, 0))
+            if (object->pad_gamepad->input_magnitude == 0.0f || object->pad_gamepad->input_angle < 0x6001 ||
+                object->pad_gamepad->input_angle > 0x9fff)
                 return;
             object->airborne_action_duration = 0.0f;
             object->field_0x7a3 = 0;
@@ -917,7 +916,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                 object->airborne_action_duration = 0.0f;
             else {
                 object->airborne_action_duration += FRAMETIME;
-                if (__builtin_expect(object->airborne_action_duration >= 0.5f, 0)) {
+                if (object->airborne_action_duration >= 0.5f) {
                     i16 animation = LEGOACT_GRAPPLE_HANG;
                     if (animation == -1 || object->apiobj.character_model->model_data_b[animation] == NULL)
                         animation = LEGOACT_LEDGE_IDLE;
@@ -935,10 +934,10 @@ void Grapple_MoveCode(GameObject_s *object) {
             }
         } else if (object->grapple_swing_degrees <= 15) {
             if (!down) {
-                if (__builtin_expect(object->pad_gamepad->input_magnitude == 0.0f &&
-                    (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) == 0 && object->field_0x768 < 0.1f, 0)) {
+                if (object->pad_gamepad->input_magnitude == 0.0f &&
+                    (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) == 0 && object->field_0x768 < 0.1f) {
                     object->field_0x768 += 0.75f * FRAMETIME;
-                    if (__builtin_expect(object->field_0x768 > 0.1f, 0))
+                    if (object->field_0x768 > 0.1f)
                         object->field_0x768 = 0.1f;
                 }
             } else {
@@ -1008,9 +1007,8 @@ void Grapple_MoveCode(GameObject_s *object) {
                 angle = NuAtan2D(object->apiobj.velocity.x, object->apiobj.velocity.z);
             if (GrappleSwingMode == 1)
                 GRAPPLE_QUANTIZE(angle);
-            if (__builtin_expect((GrappleSwingMode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) ||
-                                     (GrappleSwingMode != 0 && swing),
-                                 1)) {
+            if ((GrappleSwingMode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) ||
+                (GrappleSwingMode != 0 && swing)) {
                 const u8 increased_degrees = static_cast<u8>(object->grapple_swing_degrees + 10);
                 object->grapple_swing_degrees = increased_degrees <= 60 ? increased_degrees : 60;
                 return;
@@ -1051,7 +1049,7 @@ void Grapple_MoveCode(GameObject_s *object) {
         object->field_0x7a3 = 0;
         object->context_animation = LEGOACT_GRAPPLE_IDLE;
         object->field_0x768 = NuFabs(grapple->shadow_probe_position.y - object->apiobj.upper_position.y);
-        if (__builtin_expect((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0, 0)) {
+        if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
             object->context_variant_flags |= 1;
             object->apiobj.movement_facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
         } else {

@@ -410,7 +410,7 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
             break;
         }
     }
-    if (__builtin_expect(new_area == HUB_AREA_COUNT || new_area == hub_ai.area, 0)) {
+    if (new_area == HUB_AREA_COUNT || new_area == hub_ai.area) {
         return;
     }
 

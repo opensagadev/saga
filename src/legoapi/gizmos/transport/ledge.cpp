@@ -199,7 +199,7 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
     }
 }
 
-__attribute__((optimize("O2"))) static void Ledges_ClearProgress(void *, void *progress_data) {
+static void Ledges_ClearProgress(void *, void *progress_data) {
     LEDGEPROGRESS *progress = (LEDGEPROGRESS *)progress_data;
     if (progress == NULL) {
         return;
@@ -293,7 +293,7 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
                 point.y = 0.0f;
                 point.z = radius * NU_COS_LUT(local_angle) + piece->end.z;
                 f32 distance = NuVecDist(&local, &point, NULL);
-                if (__builtin_expect(!(distance < segment_distance), 0))
+                if (!(distance < segment_distance))
                     goto next_ledge;
                 NuVecRotateY(&local, &point, ledge->y_rotation);
                 NuVecAdd(&segment_position, &local, &ledge->position);
@@ -374,7 +374,7 @@ static i32 Ledges_Load(void *world_info, void *) {
     return 1;
 }
 
-__attribute__((optimize("O2"))) static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) {
+static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) {
     LEDGEPROGRESS *progress = static_cast<LEDGEPROGRESS *>(progress_data);
     if (progress == NULL)
         return;
@@ -388,7 +388,7 @@ __attribute__((optimize("O2"))) static void Ledges_StoreProgress(void *world_inf
     for (i32 i = 0; i < world_ledge_count && i != 128; ++i, ++ledge) {
         const i32 word = i >> 5;
         const u32 mask = 1u << (i & 31);
-        if (__builtin_expect(!(ledge->state_flags & 2), 1))
+        if (!(ledge->state_flags & 2))
             progress->state[4 + word] &= ~mask;
         if (!(ledge->state_flags & 1))
             progress->state[word] &= ~mask;
@@ -470,7 +470,7 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         return;
     }
-    if (__builtin_expect((object->apiobj.field_0x27d & 2) != 0, 0)) {
+    if ((object->apiobj.field_0x27d & 2) != 0) {
         object->character_context = -1;
         return;
     }
@@ -484,10 +484,10 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 speed;
     if (!(push > NuTrigTable[0x3555])) {
         if (push < -NuTrigTable[0x3555]) {
-            if (__builtin_expect(object->apiobj.character_model->model_data_b[0x9e] != NULL, 1)) {
+            if (object->apiobj.character_model->model_data_b[0x9e] != NULL) {
                 object->context_animation = 0x9e;
                 speed = -AnimSpeed(object->apiobj.character_model, 0x9e);
-                if (__builtin_expect(speed == 0.0f, 1))
+                if (speed == 0.0f)
                     return;
             } else
                 speed = -0.5f;

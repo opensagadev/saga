@@ -44,8 +44,7 @@ void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         i32 candidate_count = world->gizmo_blowup_count;
         for (i32 i = 0; i < candidate_count; ++i, ++candidate) {
             bool valid = false;
-            if (__builtin_expect(
-                    (candidate->status_flags & 0x0080c001) == 0x0080c000 && (candidate->draw_flags & 0x10) != 0, 1)) {
+            if ((candidate->status_flags & 0x0080c001) == 0x0080c000 && (candidate->draw_flags & 0x10) != 0) {
                 valid = true;
                 if ((candidate->draw_flags & 0x20) != 0 && ShadowMode == 0) {
                     valid = false;
@@ -54,10 +53,9 @@ void Transform_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (!valid) {
                 continue;
             }
-            if (__builtin_expect(candidate->mid_position.x < min_x || candidate->mid_position.x > max_x ||
-                                     candidate->mid_position.z < min_z || candidate->mid_position.z > max_z ||
-                                     candidate->mid_position.y < min_y || candidate->mid_position.y > max_y,
-                                 1)) {
+            if (candidate->mid_position.x < min_x || candidate->mid_position.x > max_x ||
+                candidate->mid_position.z < min_z || candidate->mid_position.z > max_z ||
+                candidate->mid_position.y < min_y || candidate->mid_position.y > max_y) {
                 continue;
             }
             NUVEC delta;

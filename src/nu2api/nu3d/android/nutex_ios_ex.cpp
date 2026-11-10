@@ -510,7 +510,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     i32 bits_per_pixel = 0;
     bool compressed = false;
 
-    if (__builtin_expect(channel_bits == 0, 0)) {
+    if (channel_bits == 0) {
         if (pixel_format >= 6) {
             return 0;
         }
@@ -702,9 +702,9 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
         outIsCompressed = false;
         outBpp = 0;
     } else {
-        if (__builtin_expect(!!(g_renderDevice.enabled_extensions[NUTEX_DXT1]), 0)) {
+        if (g_renderDevice.enabled_extensions[NUTEX_DXT1]) {
             outBpp = 0;
-        } else if (__builtin_expect(!!(g_renderDevice.enabled_extensions[NUTEX_ETC1]), 0)) {
+        } else if (g_renderDevice.enabled_extensions[NUTEX_ETC1]) {
             inFormat = NUTEX_ETC1;
             formatToCheck = NUTEX_ETC1;
             outBpp = 0;
@@ -824,7 +824,7 @@ void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalF
             break;
     }
 
-    if (check && __builtin_expect(!NuIOS_TextureFormatSupported(formatToCheck), 0)) {
+    if (check && (!NuIOS_TextureFormatSupported(formatToCheck))) {
         while (true) {
         }
     }
@@ -1018,13 +1018,13 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                         }
                         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                              0x589);
-                        if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {
+                        if (hLimit == 1 && mipWidth == 1) {
                             break;
                         }
                         continue;
                     }
                 }
-                if (__builtin_expect(hLimit == 1 && mipWidth == 1, 0)) {
+                if (hLimit == 1 && mipWidth == 1) {
                     break;
                 }
             }
@@ -1090,7 +1090,7 @@ GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out
 GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc) {
     const PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
     GLuint texture = 0;
-    if (__builtin_expect(!!(is_pvrtc), 1)) {
+    if (is_pvrtc) {
         texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
     } else {
         switch (platform) {
@@ -1140,7 +1140,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (__builtin_expect(remaining != 0, 1));
+    } while (remaining != 0);
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -1179,7 +1179,7 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    } while (__builtin_expect(remaining != 0, 1));
+    } while (remaining != 0);
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -1222,7 +1222,7 @@ GLuint NuIOS_CreateGLTexFromFile(const char *filename) {
     }
 
     GLuint texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(fixed_filename);
-    if (__builtin_expect(texture != 0, 1)) {
+    if (texture != 0) {
         return texture;
     }
     return NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);

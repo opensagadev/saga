@@ -133,7 +133,7 @@ void SuperCarry_DrawObject(GameObject_s *object) {
     NUMTX matrix;
     NUVEC offset;
     NUVEC *translation = NULL;
-    if (__builtin_expect(SuperCarry_AlignObject != 0, 0)) {
+    if (SuperCarry_AlignObject != 0) {
         NuVecRotateY(&offset, &object->carried_object_basis[0], object->apiobj.field_0x276);
         NuMtxSetRotationY(&matrix, object->carried_object_angle);
         translation = &offset;
@@ -143,7 +143,7 @@ void SuperCarry_DrawObject(GameObject_s *object) {
         *NUMTX_GET_ROW_VEC(&matrix, 1) = object->carried_object_basis[1];
         *NUMTX_GET_ROW_VEC(&matrix, 2) = object->carried_object_basis[2];
     }
-    if (__builtin_expect(SuperCarry_KeepObjectLevel != 0, 0)) {
+    if (SuperCarry_KeepObjectLevel != 0) {
         NuMtxRotateY(&matrix, object->apiobj.field_0x276);
         dco_locatorposonly = 1;
     }
@@ -282,9 +282,8 @@ void SuperCarry_Start(GameObject_s *object, GIZMOBLOWUP_s *blowup, i32 immediate
     object->action_movement_state = 0;
     object->field_0x788 = blowup;
     if (immediate == 0) {
-        if (__builtin_expect(LEGOACT_SUPERCARRY_PICKUP != -1 &&
-                                 object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PICKUP] != NULL,
-                             1)) {
+        if (LEGOACT_SUPERCARRY_PICKUP != -1 &&
+            object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PICKUP] != NULL) {
             object->context_animation = LEGOACT_SUPERCARRY_PICKUP;
             object->field_0x7a3 = 0;
             f32 duration = AnimDuration(object->id, LEGOACT_SUPERCARRY_PICKUP, 0.0f, 0.0f, 1);
@@ -381,7 +380,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 best = distance;
             }
         }
-        if (__builtin_expect(nearest == NULL, 0))
+        if (nearest == NULL)
             return;
         const i32 player = object->apiobj.field_0x27c;
         if (static_cast<u8>(player) <= 1) {
@@ -408,7 +407,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 *frame = NULL;
     if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
         frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-        if (__builtin_expect(frame == NULL, 1))
+        if (frame == NULL)
             return;
     }
     switch (object->field_0x7a3) {
@@ -425,13 +424,13 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 }
             }
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 0)) {
+            if (object->context_animation_timer <= 0.0f) {
                 object->field_0x7a3 = 2;
                 object->context_animation = LEGOACT_SUPERCARRY_IDLE;
-                if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
+                if ((object->context_flags & 0x40) == 0)
                     event = true;
             }
-            if (__builtin_expect(event != 0, 0)) {
+            if (event != 0) {
                 object->context_flags |= 0x40;
                 GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(object->field_0x788), 0, 7, -1, NULL, 1);
                 NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
@@ -440,7 +439,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         case 1: {
             i32 event = 0;
-            if (__builtin_expect((object->context_flags & 0x40) == 0, 1)) {
+            if ((object->context_flags & 0x40) == 0) {
                 if (frame == NULL) {
                     event = SuperCarry_PutDownDrop != 0;
                 } else {
@@ -487,29 +486,27 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (object->apiobj.field_0x27d != 0) {
                 bool throw_object = false, put_down = false;
                 if (SuperCarry_UseActionButton != 0) {
-                    if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0, 0))
+                    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) != 0)
                         throw_object = true;
                     else
                         put_down = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0;
-                } else if (__builtin_expect((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0, 1)) {
+                } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
                     if (object->pad_gamepad->input_magnitude > 0.0f)
                         throw_object = true;
                     else
                         put_down = true;
                 }
-                if (__builtin_expect(throw_object || put_down, 1)) {
-                    if (__builtin_expect((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
-                                             LEGOACT_SUPERCARRY_BASH != -1 &&
-                                             object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_BASH] !=
-                                                 NULL,
-                                         0)) {
+                if (throw_object || put_down) {
+                    if ((throw_object || SuperCarry_UseActionButton == 0) && SuperCarry_Bash != 0 &&
+                        LEGOACT_SUPERCARRY_BASH != -1 &&
+                        object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_BASH] != NULL) {
                         objopponent_ignoreaiopponent = 1;
                         object->force_target = ObjOpponent(object, 1.0f, PUNCHGAP, 1, 0, 1);
                         if (object->force_target == NULL) {
                             objopponent_ignoreaiopponent = 1;
                             object->force_target = ObjOpponent(object, 1.0f, PUNCHGAP, 1, 0, 2);
                         }
-                        if (__builtin_expect(object->force_target != NULL, 0)) {
+                        if (object->force_target != NULL) {
                             object->field_0x7a3 = 5;
                             object->context_animation = LEGOACT_SUPERCARRY_BASH;
                             object->context_flags &= static_cast<u8>(~0x40);
@@ -538,8 +535,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         return;
                     }
                     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
-                    if (put_down && __builtin_expect((blowup->secondary_flags & 4) != 0, 1) &&
-                        LEGOACT_SUPERCARRY_PUTDOWN != -1 &&
+                    if (put_down && ((blowup->secondary_flags & 4) != 0) && LEGOACT_SUPERCARRY_PUTDOWN != -1 &&
                         object->apiobj.character_model->model_data_b[LEGOACT_SUPERCARRY_PUTDOWN] != NULL &&
                         object->apiobj.field_0x218 != 2000000.0f &&
                         object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.1f) {
@@ -548,7 +544,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                         object->context_flags &= static_cast<u8>(~0x40);
                         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
                         object->context_animation_timer = duration;
-                        if (__builtin_expect(duration <= 0.0f, 1))
+                        if (duration <= 0.0f)
                             object->context_animation_timer = 0.5f;
                         object->carried_object_drop_position.x = object->apiobj.lower_position.x;
                         object->carried_object_drop_position.y = object->apiobj.field_0x218;
@@ -561,8 +557,8 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     }
                 }
             }
-            if (__builtin_expect(SuperCarry_Jump != 0 && LEGOACT_SUPERCARRY_JUMP != -1 &&
-                (object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0 && object->apiobj.field_0x27d != 0, 0)) {
+            if (SuperCarry_Jump != 0 && LEGOACT_SUPERCARRY_JUMP != -1 &&
+                (object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0 && object->apiobj.field_0x27d != 0) {
                 object->field_0x7a3 = 6;
                 object->context_animation = LEGOACT_SUPERCARRY_JUMP;
                 object->context_animation_timer = 0.0f;
@@ -593,7 +589,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             }
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
-                if (__builtin_expect((object->context_flags & 0x40) == 0, 1))
+                if ((object->context_flags & 0x40) == 0)
                     event = true;
                 else
                     object->character_context = -1;
@@ -644,7 +640,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->context_animation_timer += FRAMETIME;
             if (object->context_animation_timer >= object->airborne_action_duration)
                 object->context_variant_flags = static_cast<i8>(object->context_variant_flags | 0x80);
-            if (!(object->context_animation_timer >= 0.1f) || __builtin_expect(object->apiobj.field_0x27d == 0, 0))
+            if (!(object->context_animation_timer >= 0.1f) || (object->apiobj.field_0x27d == 0))
                 return;
             if (object->context_variant_flags < 0) {
                 object->field_0x7a3 = 7;
@@ -658,12 +654,12 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             }
             object->field_0x7a3 = 7;
             object->context_animation = LEGOACT_SUPERCARRY_LAND;
-            if (__builtin_expect(object->context_animation == -1, 1))
+            if (object->context_animation == -1)
                 goto idle_or_walk;
         landing:
             f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             object->context_animation_timer = duration;
-            if (__builtin_expect(duration <= 0.0f, 1))
+            if (duration <= 0.0f)
                 object->context_animation_timer = 0.5f;
             ResetAnimPacket(&object->apiobj.anim_packet, -1);
             object->apiobj.velocity.x = object->apiobj.velocity.z = 0.0f;
@@ -673,9 +669,9 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
         case 7:
             object->context_animation_timer -= FRAMETIME;
-            if (__builtin_expect(object->context_animation_timer <= 0.0f, 1))
+            if (object->context_animation_timer <= 0.0f)
                 goto idle_or_walk;
-            if (__builtin_expect(object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f, 1))
+            if (object->context_variant_flags >= 0 && object->pad_gamepad->input_magnitude > 0.0f)
                 goto idle_or_walk;
             return;
         default:
@@ -792,7 +788,7 @@ void RegisterTakeOverObject(GameObject_s *object) {
 }
 
 void StoreStatusTakeOverObjectSys() {
-    if (__builtin_expect(netclient != 0, 0)) {
+    if (netclient != 0) {
         return;
     }
     u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
@@ -805,12 +801,11 @@ void StoreStatusTakeOverObjectSys() {
         record->last_safe_position = object->apiobj.last_safe_position;
         record->heading = object->apiobj.field_0x276;
         u8 contact = 0xff;
-        if (__builtin_expect(object->field_0xcc0 != NULL && __builtin_expect(LEGOCONTEXT_BEENTAKENOVER != -1, 1) &&
-                                 object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
-                                 static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
-                                 Door_Last->takeover_character_mask != 0,
-                             1)) {
-            if (__builtin_expect(Door_Last->takeover_character_mask == ~static_cast<u64>(0), 0)) {
+        if (object->field_0xcc0 != NULL && (LEGOCONTEXT_BEENTAKENOVER != -1) &&
+            object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
+            static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
+            Door_Last->takeover_character_mask != 0) {
+            if (Door_Last->takeover_character_mask == ~static_cast<u64>(0)) {
                 contact = static_cast<u8>(object->apiobj.field_0x27c);
             } else {
                 u8 character_index = static_cast<u8>(Area_CharIDInCurrentList(object->id));

@@ -420,7 +420,7 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
         level = (i16)(i32)(log10((f64)gain) * 2000.0);
     }
 
-    if (__builtin_expect(level != this->last_volume_level, 1)) {
+    if (level != this->last_volume_level) {
         u32 error = SL_SLOT(this->volume_interface, VolumeSetVolumeLevelFn, 0)(this->volume_interface, level);
         NuSoundAndroid::ReportErrorCode(error, "Volume SetVolumeLevel");
         this->last_volume_level = level;
@@ -546,7 +546,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     sprintf(debug + strlen(debug), "%12d ", this->block_wraps);
     sprintf(debug + strlen(debug), "%12d ", block_samples * this->block_wraps);
     sprintf(debug + strlen(debug), "%12d ", estimated_position);
-    strcpy(debug + strlen(debug), __builtin_expect(player_position, 1) ? "PLAYER" : "ESTIMATED");
+    strcpy(debug + strlen(debug), player_position ? "PLAYER" : "ESTIMATED");
 }
 
 u64 NuVoiceAndroid::GetPlaybackPositionSamples() {

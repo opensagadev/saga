@@ -397,7 +397,7 @@ i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count) {
     if (list == NULL) {
         list = CollectList;
         count = CollectCount;
-        if (__builtin_expect(list == NULL, 1))
+        if (list == NULL)
             return id;
     }
 
@@ -427,7 +427,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
             const i16 id = CharIDFromName(fp->word_buf);
             LOG_DEBUG("Collection_Configure: Found collect id %s -> %d", fp->word_buf, id);
             collect->id = id;
-            if (id == -1 || __builtin_expect(InCollectList_Index(id, CollectList, CollectCount) != -1, 0))
+            if (id == -1 || (InCollectList_Index(id, CollectList, CollectCount) != -1))
                 continue;
             collect->type = 0;
             collect->field2_0x3 = 0xff;
@@ -445,7 +445,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
                         collect->type = 2;
                         collect->field2_0x3 = static_cast<u8>(area);
                     }
-                } else if (__builtin_expect(NuStrICmp(fp->word_buf, "all_episodes_complete") == 0, 1)) {
+                } else if (NuStrICmp(fp->word_buf, "all_episodes_complete") == 0) {
                     collect->type = 3;
                 } else if (NuStrICmp(fp->word_buf, "in_pack") == 0) {
                     if (NuFParGetWord(fp) != 0) {
@@ -476,8 +476,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
                     NuStrUpr(code, code);
                 }
             }
-            if (__builtin_expect(collect->type == 0 ? collect->can_buy != 0 : collect->type != 8, 1) &&
-                collect->type != 7) {
+            if ((collect->type == 0 ? collect->can_buy != 0 : collect->type != 8) && collect->type != 7) {
                 collect->field5_0x9 = 1;
                 ++COLLECTION_COMPLETIONCOUNT;
             }
@@ -490,7 +489,7 @@ void Collection_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) 
         }
     }
     NuFParDestroy(fp);
-    if (__builtin_expect(CollectCount < 1, 0))
+    if (CollectCount < 1)
         CollectList = NULL;
     else
         bufferStart->void_ptr = collect;
@@ -516,12 +515,12 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
     collection->count_y = 0;
 
     if (use_all_characters == 0) {
-        if (__builtin_expect(CollectCount > 0, 1)) {
+        if (CollectCount > 0) {
             COLLECTID *const end = CollectList + CollectCount;
             for (COLLECTID *current = CollectList; current != end; ++current) {
                 COLLECTID &source = *current;
                 const i32 id = source.id;
-                if (__builtin_expect(id < 0, 0)) {
+                if (id < 0) {
                     continue;
                 }
                 if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
@@ -586,9 +585,8 @@ COLLECTID *CollectIDUnlocked(i32 id) {
             case 0:
                 break;
             case 2:
-                if (__builtin_expect(static_cast<i8>(entry->field2_0x3) == -1 ||
-                                         Game_AreaSave[static_cast<i8>(entry->field2_0x3)].area_complete == 0,
-                                     1)) {
+                if (static_cast<i8>(entry->field2_0x3) == -1 ||
+                    Game_AreaSave[static_cast<i8>(entry->field2_0x3)].area_complete == 0) {
                     return NULL;
                 }
                 break;
@@ -614,7 +612,7 @@ COLLECTID *CollectIDUnlocked(i32 id) {
                 }
                 break;
             case 8:
-                if (__builtin_expect(!Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3)), 1)) {
+                if (!Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3))) {
                     return NULL;
                 }
                 break;
@@ -683,7 +681,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             for (i32 row = 0; row < rows; ++row)
                 for (i32 col = 0; col < columns; ++col) {
                     const i32 index = row * columns + col;
-                    if (__builtin_expect(found != 2, 1) && index < count &&
+                    if ((found != 2) && index < count &&
                         (collection->list[index].id == ids[0] || collection->list[index].id == ids[1])) {
                         selected_x[found] = col;
                         selected_y[found++] = row;
@@ -707,16 +705,16 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             list[index].grid_x = px;
             list[index].grid_y = py;
             i32 id = list[index].id;
-            if (__builtin_expect(alpha <= 0.0f, 0))
+            if (alpha <= 0.0f)
                 continue;
             i32 frame = LEGOOBJ_ICON_FRAME_NEUTRAL;
             f32 opacity = 1.0f;
             i32 model_index;
             if (models != NULL && InModelList(models, id, &model_index) != 0) {
-                if (__builtin_expect(hide_selected != 0, 0))
+                if (hide_selected != 0)
                     continue;
                 opacity = 0.25f;
-                if (__builtin_expect(model_index == 0, 1)) {
+                if (model_index == 0) {
                     frame = LEGOOBJ_ICON_FRAME_BLUE;
                     opacity = Collection_SelectedOpacity();
                 } else if (model_index == 1) {
@@ -737,7 +735,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             u32 neighbours = 0;
             Collection_AddNeighbourFlags(&neighbours, col, row, selected_x[0], selected_y[0]);
             Collection_AddNeighbourFlags(&neighbours, col, row, selected_x[1], selected_y[1]);
-            if (__builtin_expect((neighbours & 1) != 0, 0))
+            if ((neighbours & 1) != 0)
                 opacity *= 0.333f;
             else if ((neighbours & 2) != 0)
                 opacity *= 0.5f;
@@ -781,7 +779,7 @@ void CollectAllCharacters(i32 only_story) {
     if (CollectCount <= 0)
         return;
 
-    if (__builtin_expect(only_story == 0, 1)) {
+    if (only_story == 0) {
         for (i32 i = 0; i < CollectCount; ++i) {
             if (CollectList[i].type != 8)
                 AddToCollection(CollectList[i].id);

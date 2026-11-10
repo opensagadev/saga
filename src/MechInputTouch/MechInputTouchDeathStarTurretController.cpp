@@ -56,7 +56,7 @@ bool MechInputTouchDeathStarTurretController::OnRelease(GameObject_s &, TouchHol
 bool MechInputTouchDeathStarTurretController::OnSwipe(GameObject_s &, TouchHolder &holder, i32 direction) {
     const f32 *previous_y =
         reinterpret_cast<const f32 *>(reinterpret_cast<const u8 *>(&holder) + direction * 44 + 0x38);
-    if (__builtin_expect(holder.touch_position.y > *previous_y, 1)) {
+    if (holder.touch_position.y > *previous_y) {
         button_was_pressed[2] = 1;
         return true;
     }

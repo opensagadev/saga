@@ -108,15 +108,15 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                 } else {
                     const char *style_word = parser->word_buf;
                     i32 style_index;
-                    if (__builtin_expect(NuStrICmp(CreditType[0].name, style_word) == 0, 0))
+                    if (NuStrICmp(CreditType[0].name, style_word) == 0)
                         style_index = 0;
-                    else if (__builtin_expect(NuStrICmp(CreditType[1].name, style_word) == 0, 0))
+                    else if (NuStrICmp(CreditType[1].name, style_word) == 0)
                         style_index = 1;
-                    else if (__builtin_expect(NuStrICmp(CreditType[2].name, style_word) == 0, 0))
+                    else if (NuStrICmp(CreditType[2].name, style_word) == 0)
                         style_index = 2;
-                    else if (__builtin_expect(NuStrICmp(CreditType[3].name, style_word) == 0, 0))
+                    else if (NuStrICmp(CreditType[3].name, style_word) == 0)
                         style_index = 3;
-                    else if (__builtin_expect(NuStrICmp(CreditType[4].name, style_word) == 0, 0))
+                    else if (NuStrICmp(CreditType[4].name, style_word) == 0)
                         style_index = 4;
                     else
                         style_index = -1;
@@ -127,7 +127,7 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                             text = NULL;
                         } else {
                             text = parser->word_buf;
-                            if (__builtin_expect(text != NULL && NuStrICmp(text, "colour") == 0, 1)) {
+                            if (text != NULL && NuStrICmp(text, "colour") == 0) {
                                 for (i32 component = 0; component < 4; ++component) {
                                     if (NuFParGetWord(parser)) {
                                         f32 value = NuAToF(parser->word_buf);
@@ -244,7 +244,7 @@ void Credits_UpdateMenu(MENU_s *menu) {
                 progress = CreditsTime;
             }
         } else if (CreditsFlag != 2) {
-            if (__builtin_expect(CreditsTime >= 1.1f, 0)) {
+            if (CreditsTime >= 1.1f) {
                 NewLData = HUB_LDATA;
                 FADETYPE fade_type = {FADE_TYPE_STILL};
                 FadeSys.SetFade(fade_type, 0);

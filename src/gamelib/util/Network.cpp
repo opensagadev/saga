@@ -88,11 +88,11 @@ bool NetPredictor::AllowPush(EdClass const *object_class, void const *object, Re
         allowed = 1;
     } else if (now - *last_push > minimum_interval) {
         ReplicatorData prediction_data = data;
-        if (__builtin_expect(DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0, 0)) {
+        if (DoPrediction(object_class, const_cast<void *>(object), prediction_data, 1) != 0) {
             *failed_predictions = 0;
             replication_group |= 1;
             allowed = 1;
-        } else if (__builtin_expect(*failed_predictions <= 2, 1)) {
+        } else if (*failed_predictions <= 2) {
             ++*failed_predictions;
             replication_group &= ~1;
             allowed = 1;
@@ -210,7 +210,7 @@ i32 NetPredictor::SerialiseObject(EdStream &stream, NetPeer *peer, EdClass const
             if (size <= 0) {
                 size = type->size;
             }
-            if (__builtin_expect(object == NULL, 0)) {
+            if (object == NULL) {
                 stream.Eat(size, 1);
                 continue;
             }
@@ -688,7 +688,7 @@ void NetworkObjectManager::FlushObjects(i32 flush_level_editor) {
 }
 
 i32 NetworkObjectManager::GetNextGuid() {
-    if (__builtin_expect(guid_group < 0, 0)) {
+    if (guid_group < 0) {
         return 0;
     }
 
@@ -832,12 +832,12 @@ static inline void PrependObjectCallHeader(NetMessage &outgoing, i16 object_id, 
     if (outgoing.data != NULL) {
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &class_id, sizeof(class_id));
-        if (__builtin_expect(outgoing.swap_endianness != 0, 1)) {
+        if (outgoing.swap_endianness != 0) {
             EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
         }
         outgoing.read_offset -= 2;
         memcpy(outgoing.data->bytes + outgoing.read_offset, &object_id, sizeof(object_id));
-        if (__builtin_expect(outgoing.swap_endianness != 0, 1)) {
+        if (outgoing.swap_endianness != 0) {
             EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
         }
         outgoing.data->bytes[--outgoing.read_offset] = static_cast<u8>(call_id);
@@ -916,7 +916,7 @@ void NetworkObjectManager::PeerJoined(NetPeer const &peer) {
     if (theSession->status == 3 || theSession->status == 4) {
         if (!peer.local) {
             for (i32 i = 0; i < 2; i++) {
-                if (__builtin_expect(guid_peers[i] == NULL, 0)) {
+                if (guid_peers[i] == NULL) {
                     guid_peers[i] = &peer;
                     NetMessage message;
                     message.Write8(0);
@@ -1072,7 +1072,7 @@ void NetworkObjectManager::Receive(NetMessage message, unsigned char, NetPeer co
         stop = 0;
         switch (type) {
             case 0:
-                if (__builtin_expect(active != 0 && IsPeerReady(peer) != 0, 0)) {
+                if (active != 0 && IsPeerReady(peer) != 0) {
                     message.Read32(guid_group);
                 } else {
                     stop = 1;
@@ -1519,7 +1519,7 @@ i32 NetworkObjectManager::SendPushMessage(NetMessage *message, NetPeerPush const
         return 1;
     }
     if (peer != NULL) {
-        if (__builtin_expect((flags & 1) == 0 || (push->stage >= 1 && push->stage <= 2), 1)) {
+        if ((flags & 1) == 0 || (push->stage >= 1 && push->stage <= 2)) {
             theNetwork.ReliableSend(*message, 3, *peer, NULL, 0);
         } else {
             theNetwork.Send(*message, 3, *peer);
@@ -1609,7 +1609,7 @@ void NetworkObjectManager::Update() {
         i32 data_offset = 0;
         while (replicator != NULL) {
             i32 data_size = replicator->data_size;
-            if (__builtin_expect((replicator->replication_group & 4) != 0, 1)) {
+            if ((replicator->replication_group & 4) != 0) {
                 ReplicatorData data;
                 data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
                 data.cursor = data.start;
@@ -1634,9 +1634,9 @@ void NetworkObjectManager::Update() {
                 message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
             }
 
-            while (message_limit < theNuNetEmu.field_00 && __builtin_expect(object_index < object_count, 1)) {
+            while (message_limit < theNuNetEmu.field_00 && (object_index < object_count)) {
                 NetworkObject *object = local_objects[object_index++];
-                if (__builtin_expect(object == NULL || object->object == NULL, 0)) {
+                if (object == NULL || object->object == NULL) {
                     continue;
                 }
 

@@ -132,7 +132,7 @@ void AddSurfaceDebris(GameObject_s *object) {
     } else {
         return;
     }
-    if (__builtin_expect(world->debris_sys->entries[effect].effect == -1, 0) || __builtin_expect(run_speed <= 0.0f, 0))
+    if ((world->debris_sys->entries[effect].effect == -1) || (run_speed <= 0.0f))
         return;
     f32 height_scale = 1.0f;
     if (height > 0.0f) {

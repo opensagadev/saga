@@ -54,7 +54,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     float first_time;
     float second_time;
     const float gravity = character->apiobj.character_data->game_character->gravity;
-    if (__builtin_expect(!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time), 0)) {
+    if (!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time)) {
         state = 6;
         return;
     }
@@ -100,7 +100,7 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
         field_9d = false;
         if (LookForLandingSpotAroundPoint(field_74))
             state = 3;
-    } else if (__builtin_expect(field_9c != 0, 0)) {
+    } else if (field_9c != 0) {
         field_9c = false;
         if (!LookForLandingSpotAroundPoint(field_64)) {
             state = 5;
@@ -203,7 +203,7 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
         return false;
     if (state == 0) {
         elapsed_time += delta_time;
-        if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP, 0) && !started) {
+        if ((character->character_context == LEGOCONTEXT_JUMP) && !started) {
             field_24 =
                 VuVec(character->apiobj.position.x, character->apiobj.position.y, character->apiobj.position.z, 1.0f);
             field_34 =

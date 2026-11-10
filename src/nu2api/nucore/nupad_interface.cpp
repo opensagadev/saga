@@ -589,7 +589,7 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
         float ty = data->touch_events[i].unknown_08;
         float tx = data->touch_events[i].unknown_04;
         u32 touch_id = data->touch_events[i].unknown_14;
-        if (__builtin_expect(!released && !started && !active, 0))
+        if (!released && !started && !active)
             continue;
         float dy = ty - y;
         float ry = height * 0.5f;
@@ -605,7 +605,7 @@ void NuTouchInputButton::Update(NuInputTouchData const *data) {
                 }
             }
         } else {
-            if (__builtin_expect(touch_id == captured_touch_id, 0)) {
+            if (touch_id == captured_touch_id) {
                 pressed = true;
                 found = true;
             }

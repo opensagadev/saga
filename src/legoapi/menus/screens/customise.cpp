@@ -162,7 +162,7 @@ static u16 *Customiser_GetSelection(i32 side) {
             const u32 cape_mask = 1u << runtime->cape_layer;                                                           \
             layer_mask |= cape_mask;                                                                                   \
             CUSTOMPIECE *cape = &customiser->piece_sets[5][selection[5]];                                              \
-            if (__builtin_expect((cape->layer_flags & 0x40) != 0, 1))                                                  \
+            if ((cape->layer_flags & 0x40) != 0)                                                                       \
                 layer_mask &= ~cape_mask;                                                                              \
         }                                                                                                              \
         runtime->layer_mask_special = layer_mask;                                                                      \
@@ -236,7 +236,7 @@ void FinishWeirdoNames(i32 which) {
             Game.customizer[0].name[length] = ' ';
         }
         Game.customizer[0].name[15] = '\0';
-        if (__builtin_expect(which == 0, 1)) {
+        if (which == 0) {
             return;
         }
     }
@@ -541,7 +541,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
             layer_mask |= 1u << customiser->layer_indices[8];
         if (layer_mask == 0)
             layer_mask = 1;
-        if (__builtin_expect(runtime->cape_layer != -1, 1)) {
+        if (runtime->cape_layer != -1) {
             layer_mask |= 1u << runtime->cape_layer;
             if ((selected == -1 || GetMenuID() != 12 || customiser_quit != 0 || selected != 5) &&
                 (customiser->piece_sets[5][selection[5]].layer_flags & 0x40) != 0)
@@ -608,11 +608,11 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
     const f32 frame_time = FRAMETIME;
-    if (__builtin_expect(customiser != NULL, 1)) {
+    if (customiser != NULL) {
         i32 active_side, active_count;
         Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
         i32 preview_side = -1;
-        if (__builtin_expect(active_count == 1, 0))
+        if (active_count == 1)
             preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
         const i32 colour = menu_flash == 0 ? 255 : 191;
         const u16 rotation_step = static_cast<i32>(10922.0f * frame_time);
@@ -636,7 +636,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             f32 no_hat = 0.0f;
             if ((torso->availability_flags & 1) != 0) {
                 CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
-                if (__builtin_expect((torso->availability_flags & 4) == 0, 1))
+                if ((torso->availability_flags & 4) == 0)
                     no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
                 else
                     no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
@@ -652,7 +652,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 --customiser->animation_state[side];
             if (customiser->animation_active[side] == 0 &&
                 model->model_data_b[saber_colour == -1 ? 0x62 : 0x61] != NULL) {
-                if (__builtin_expect(customiser->animation_values[side] == 0.0f, 0)) {
+                if (customiser->animation_values[side] == 0.0f) {
                     customiser->animation_values[side] =
                         AnimDuration(model->model_id, saber_colour == -1 ? 0x62 : 0x61, 0.0f, 0.0f, 1);
                 } else {
@@ -665,13 +665,13 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
             customiser->animation_packets[side].previous_animation =
                 customiser->animation_packets[side].animation_index;
-            if (__builtin_expect(saber_colour == -1, 0)) {
-                if (__builtin_expect(customiser->animation_active[side] == 0, 0))
+            if (saber_colour == -1) {
+                if (customiser->animation_active[side] == 0)
                     customiser->animation_packets[side].requested_animation = 0x62;
                 else
                     customiser->animation_packets[side].requested_animation = 0x63;
             } else {
-                if (__builtin_expect(customiser->animation_active[side] == 0, 1))
+                if (customiser->animation_active[side] == 0)
                     customiser->animation_packets[side].requested_animation = 0x61;
                 else
                     customiser->animation_packets[side].requested_animation = 0xbe;
@@ -680,11 +680,10 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             const u16 angle = CustomiseYRot[side] + 0xc000;
             for (i32 category = 0; category < 9; ++category) {
                 const i32 selected = CustomiseMenuY[side];
-                if (__builtin_expect(selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
-                                         (active_count == 2 || side == preview_side) && control_side != -1 &&
-                                         __builtin_expect(customiser->locator_indices[category] != -1, 0) &&
-                                         model->points_of_interest[customiser->locator_indices[category]] != NULL,
-                                     0)) {
+                if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
+                    (active_count == 2 || side == preview_side) && control_side != -1 &&
+                    (customiser->locator_indices[category] != -1) &&
+                    model->points_of_interest[customiser->locator_indices[category]] != NULL) {
                     const i32 locator = customiser->locator_indices[category];
                     NUVEC position = *reinterpret_cast<NUVEC *>(&customiser->joint_matrices[side][locator].m30);
                     const f32 offset = customiser->locator_x_offsets[category];
@@ -696,7 +695,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     f32 scale = 1.0f;
                     if (TestForController() == 0) {
                         const f32 idle = GlobalTimer.time_elapsed - (LastTouchTime + 1.0f);
-                        if (__builtin_expect(idle > 4.0f, 1)) {
+                        if (idle > 4.0f) {
                             const i32 phase = static_cast<i32>(NuFmod(idle, 4.0f) * 0.25f * 65536.0f);
                             const f32 pulse = NU_SIN_LUT(phase) - 0.8f;
                             if (!(pulse < 0.0f))
@@ -769,7 +768,7 @@ i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
     if (first_animation != 99 && first_animation != 190) {
         return 0;
     }
-    if (__builtin_expect(APICharacterLoaded(customiser->character_ids[1]) == NULL, 1)) {
+    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
         return 0;
     }
     const i16 second_animation = customiser->animation_packets[1].requested_animation;
@@ -885,7 +884,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 }
                 const f32 icon_size = ICONSIZE;
                 f32 pulse = 1.0f;
-                if (__builtin_expect(!TestForController(), 1)) {
+                if (!TestForController()) {
                     const f32 idle = GlobalTimer.time_elapsed - (2.0f + LastTouchTime);
                     if (idle > 4.0f) {
                         const f32 time = NuFmod(idle, 4.0f);
@@ -909,7 +908,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 customiser->touch_widths[4] = size;
                 customiser->touch_heights[4] = size / GetAspectRatio();
                 pulse = 1.0f;
-                if (__builtin_expect(!TestForController(), 1)) {
+                if (!TestForController()) {
                     const f32 idle = GlobalTimer.time_elapsed - (3.0f + LastTouchTime);
                     if (idle > 4.0f) {
                         const f32 time = NuFmod(idle, 4.0f);
@@ -993,7 +992,7 @@ void CustomiserMenu_Update(MENU_s *) {
         CustomiseNameBoardTMul[1] = CustomiseMode[1] == 1 ? 1.0f : 0.0f;
         CustomiseNameBoardMul[1] = SeekLinearF(CustomiseNameBoardMul[1], CustomiseNameBoardTMul[1], 4.0f * FRAMETIME);
         CustomiseNameLetterBlipScale[1] = SeekLinearF(CustomiseNameLetterBlipScale[1], 1.0f, 5.0f * FRAMETIME);
-        if (__builtin_expect(MenuPacket.active_player[1] != 0, 1)) {
+        if (MenuPacket.active_player[1] != 0) {
             if ((GamePad[1].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
                 select[1] = 1;
             else if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
@@ -1047,7 +1046,7 @@ void CustomiserMenu_Update(MENU_s *) {
                     i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
                     i32 up_held = held & GAMEPAD_DUP, down_held = held & GAMEPAD_DDOWN;
                     i32 left_held = held & GAMEPAD_DLEFT, right_held = held & GAMEPAD_DRIGHT;
-                    if (__builtin_expect(up != 0 && down != 0, 1))
+                    if (up != 0 && down != 0)
                         up = down = 0;
                     if (left != 0 && right != 0)
                         left = right = 0;
@@ -1097,14 +1096,14 @@ void CustomiserMenu_Update(MENU_s *) {
                         char *name = Game.customizer[side].name;
                         const i32 old_x = CustomiseNameX[side], old_y = CustomiseNameY[side];
                         if (left != 0) {
-                            if (__builtin_expect(old_x > 0, 1)) {
+                            if (old_x > 0) {
                                 name[old_x] = CustomiseLetter[old_y];
                                 CustomiseNameX[side] = old_x - 1;
                                 CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                             }
                         } else if (right != 0) {
                             NuStrLen(name);
-                            if (__builtin_expect(CustomiseNameX[side] < 14, 0)) {
+                            if (CustomiseNameX[side] < 14) {
                                 name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
                                 ++CustomiseNameX[side];
                                 CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
@@ -1119,7 +1118,7 @@ void CustomiserMenu_Update(MENU_s *) {
                             CustomiseNameLetterBlipScale[side] = 1.5f;
                         }
                     } else {
-                        if (__builtin_expect(up_held != 0 && category > 0, 0))
+                        if (up_held != 0 && category > 0)
                             BlipU[player] = 1.0f;
                         else if (down_held != 0 && category < 8)
                             BlipD[player] = 1.0f;
@@ -1130,8 +1129,8 @@ void CustomiserMenu_Update(MENU_s *) {
                         i32 next_category = category;
                         u32 next_piece = old_piece;
                         bool category_changed = false, piece_changed = false;
-                        if (__builtin_expect(up != 0, 0)) {
-                            if (__builtin_expect(category > 0, 0)) {
+                        if (up != 0) {
+                            if (category > 0) {
                                 --next_category;
                                 category_changed = true;
                             }
@@ -1270,7 +1269,7 @@ void CustomiserMenu_Update(MENU_s *) {
             }
             quit = touch_exit;
         }
-        if (__builtin_expect(toggle, 0) && !quit) {
+        if (toggle && !quit) {
             MenuPacket.customise_other_player[active_index] = MenuPacket.customise_other_player[active_index] == 0;
             GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
             NewBuzzFrames(Player[active_index]->pad_gamepad->pad, 1, 0);

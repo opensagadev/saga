@@ -617,7 +617,7 @@ void GizmoSysClearLevelProgress(void *unknown, i32 type_id) {
 
 void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) {
     GizmoSysClearLevelProgress(world, progress_index);
-    if (__builtin_expect(gizmotypes == NULL || system == NULL, 1))
+    if (gizmotypes == NULL || system == NULL)
         return;
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = system->sets;
@@ -632,14 +632,14 @@ void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) 
 }
 
 void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index) {
-    if (__builtin_expect(gizmotypes != NULL && gizmo_sys != NULL, 1)) {
+    if (gizmotypes != NULL && gizmo_sys != NULL) {
         GIZMOTYPE *type = gizmotypes->types;
         GIZMOSET *set = gizmo_sys->sets;
 
         for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++set, ++type) {
             if (type->fns.reset_fn != NULL) {
                 if (progress_index >= 0) {
-                    if (__builtin_expect(type->buffer != NULL, 1)) {
+                    if (type->buffer != NULL) {
                         type->fns.reset_fn(world, set->unknown, type->buffer[progress_index].void_ptr);
                     } else {
                         type->fns.reset_fn(world, set->unknown, NULL);
@@ -774,11 +774,9 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
 
                     i32 data_length = EdFileReadInt();
                     i32 type_id = GizmoGetTypeIDByName(gizmo_sys, gizmo_name);
-                    if (__builtin_expect(
-                            data_length > 0 && type_id >= 0 && type_id < gizmotypes->count &&
-                                gizmotypes->types[type_id].fns.load_fn != NULL &&
-                                gizmotypes->types[type_id].fns.load_fn(world, gizmo_sys->sets[type_id].unknown) != 0,
-                            1)) {
+                    if (data_length > 0 && type_id >= 0 && type_id < gizmotypes->count &&
+                        gizmotypes->types[type_id].fns.load_fn != NULL &&
+                        gizmotypes->types[type_id].fns.load_fn(world, gizmo_sys->sets[type_id].unknown) != 0) {
                         name_length = EdFileReadInt();
                         continue;
                     }
@@ -793,7 +791,7 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
             }
 
             // File callbacks may replace or clear the registry before post-load dispatch.
-            if (__builtin_expect(gizmotypes != NULL, 1)) {
+            if (gizmotypes != NULL) {
                 GIZMOSET *set = gizmo_sys->sets;
                 GIZMOTYPE *type = gizmotypes->types;
                 for (i32 type_id = 0; type_id < gizmotypes->count; ++type_id, ++type, ++set) {
@@ -930,7 +928,7 @@ GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
-        if (__builtin_expect(type->fns.get_gizmo_name_fn == NULL, 0)) {
+        if (type->fns.get_gizmo_name_fn == NULL) {
             continue;
         }
 
@@ -1091,7 +1089,7 @@ i32 GizmoGetGuid(GIZMOSYS_s *, GIZMO_s *) {
 i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
     nuhspecial_s special;
     GIZMO gizmo;
-    if (__builtin_expect(gizmotypes == NULL, 0)) {
+    if (gizmotypes == NULL) {
         return 0;
     }
     if (NuFileExists(path)) {
@@ -1117,7 +1115,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
             }
             length = NuStrLen(type->prefix) + 1;
             EdFileWriteChar(static_cast<char>(length));
-            if (__builtin_expect(length != 0, 0)) {
+            if (length != 0) {
                 EdFileWrite(type->prefix, length);
             }
             EdFileWriteInt(set->count);
@@ -1155,7 +1153,7 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
         GIZMOTYPE *special_type = &gizmotypes->types[gizspecial_gizmotype_id];
         i32 length = NuStrLen(special_type->prefix) + 1;
         EdFileWriteChar(static_cast<char>(length));
-        if (__builtin_expect(length != 0, 0)) {
+        if (length != 0) {
             EdFileWrite(special_type->prefix, length);
         }
 

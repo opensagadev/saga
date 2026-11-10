@@ -157,7 +157,7 @@ static inline void TexQuadSubmit(NUVEC const &point, i32 colour, i32 u, i32 v) {
         vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
     else
         *reinterpret_cast<i32 *>(&vertex->colour) = colour;
-    if (__builtin_expect(g_NuPrim_NeedsHalfUVs, 0)) {
+    if (g_NuPrim_NeedsHalfUVs) {
         vertex->half_uv[0] = u ? 0x3c00 : 0;
         vertex->half_uv[1] = v ? 0x3c00 : 0;
     } else {
@@ -348,7 +348,7 @@ void MechTouchUI::Process(float dt) {
 
 void MechTouchUITagButton::Render() {
     MechObjectInterface *interface = target_object.Get();
-    if (__builtin_expect(interface == NULL || WORLD == NULL, 1)) {
+    if (interface == NULL || WORLD == NULL) {
         return;
     }
     GameObject_s *target = interface->GetCharacterObject();
@@ -515,7 +515,7 @@ void MechTouchUITexButton::Process(float) {
             frame_time = FRAMETIME;
         }
     }
-    if (!(alpha_duration < 0.0f) && __builtin_expect(!(alpha_elapsed >= alpha_duration + alpha_delay), 0)) {
+    if (!(alpha_duration < 0.0f) && (!(alpha_elapsed >= alpha_duration + alpha_delay))) {
         f32 elapsed = alpha_elapsed + frame_time;
         if (elapsed > alpha_duration + alpha_delay) {
             elapsed = alpha_duration + alpha_delay;
@@ -554,7 +554,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         i32 target_count = 0;
         for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (__builtin_expect(target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001, 1)) {
+            if (target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001) {
                 target_ids[target_count++] = target->id;
             }
         }
@@ -580,7 +580,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         if (target_ids[index] >= 0) {
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (__builtin_expect(target != NULL, 1)) {
+                if (target != NULL) {
                     if (target->id == target_ids[index]) {
                         if (!(!TouchHacks::CanTagTo(*player, *target))) {
                             if (TagCode(player, target, 0, 0, 1) == 1) {
@@ -593,7 +593,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
                 }
             }
         }
-        if (__builtin_expect(index == current_index, 0)) {
+        if (index == current_index) {
             return;
         }
         ++index;
@@ -665,8 +665,8 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
             if (VehicleArea != 0) {
                 const u32 model_flags = CDataList[id].model_flags;
-                if (__builtin_expect((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                    static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id), 0)) {
+                if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
+                    static_cast<i32>(GCDataList[id].flags_090) >= 0 && !IsCheatBonusChar(id)) {
                     continue;
                 }
 
@@ -680,7 +680,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                         continue;
                     }
                 }
-            } else if (__builtin_expect((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0, 1)) {
+            } else if ((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0) {
                 continue;
             }
 
@@ -981,7 +981,7 @@ void PerformPauseButtonStuff() {
         }
         return;
     }
-    if (__builtin_expect(GameMenuLevel == 0, 0)) {
+    if (GameMenuLevel == 0) {
         PauseGame(0);
         return;
     }
@@ -1049,7 +1049,7 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
     // Retained from the original routine even though the result is unused.
     NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
 
-    if (__builtin_expect(NuStrICmp(prompt, ">") == 0, 1)) {
+    if (NuStrICmp(prompt, ">") == 0) {
         text_x_offset = 0.005f;
         text_y_offset = 0.0f;
     } else if (NuStrICmp(prompt, "<<") == 0) {

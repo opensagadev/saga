@@ -48,7 +48,7 @@ void Detonators_Draw() {
             if (WORLD->lev_objs[0xef].active)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xef].special, &matrix);
         } else {
-            if (__builtin_expect(WORLD->lev_objs[0xee].active != 0, 0))
+            if (WORLD->lev_objs[0xee].active != 0)
                 detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[0xee].special, &matrix);
         }
     }
@@ -64,10 +64,8 @@ static inline void Detonator_Update(DETONATOR_s *detonator) {
         Detonator_Detonate(detonator);
     } else if (detonator->field_0x34 != NULL) {
         DetonatorHitData *hit_data = static_cast<DetonatorHitData *>(detonator->field_0x34);
-        if (!(detonator->timer >= 10.0f) &&
-            __builtin_expect(detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
-                                 !(detonator->object->field_0xde0 >= 0.3f),
-                             1)) {
+        if (!(detonator->timer >= 10.0f) && (detonator->object == NULL || detonator->object->apiobj.field_0x287 != 0 ||
+                                             !(detonator->object->field_0xde0 >= 0.3f))) {
             hit_data->field_0x0c = 0.08f;
         } else {
             hit_data->field_0x0c = 0.75f;
@@ -123,28 +121,28 @@ static inline i32 DetonatorPlacementSlot(GameObject_s *object) {
     DetonatorConsiderPlacementSlot(0, object, count, available);
     DetonatorConsiderPlacementSlot(1, object, count, available);
     DetonatorConsiderPlacementSlot(2, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(3, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(4, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(5, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(6, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(7, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(8, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     DetonatorConsiderPlacementSlot(9, object, count, available);
-    if (__builtin_expect(count == 3, 1))
+    if (count == 3)
         return -1;
     return available;
 }
@@ -160,11 +158,11 @@ void Detonator_MoveCode(GameObject_s *object) {
             return;
         }
         object->context_animation_timer -= FRAMETIME;
-        if (__builtin_expect(!(object->context_animation_timer <= 0.0f), 1)) {
+        if (!(object->context_animation_timer <= 0.0f)) {
             if (object->field_0x7a3 != 0) {
                 return;
             }
-            if (__builtin_expect(object->apiobj.character_model->model_data_b[object->context_animation] != NULL, 1)) {
+            if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
                 const f32 marker = AnimListFrame(object->apiobj.character_model, object->context_animation,
                                                  object->character_context == 0x49 ? 0 : 2);
                 if (frame == NULL || !(*frame > 0.0f) || !(*frame >= marker)) {
@@ -174,7 +172,7 @@ void Detonator_MoveCode(GameObject_s *object) {
                 return;
             }
             object->field_0x7a3 = 1;
-            if (__builtin_expect(object->character_context == 0x49, 1)) {
+            if (object->character_context == 0x49) {
                 DETONATOR_s *detonator = static_cast<DETONATOR_s *>(object->field_0x788);
                 if (detonator != NULL) {
                     detonator->active = 0;
@@ -189,14 +187,14 @@ void Detonator_MoveCode(GameObject_s *object) {
             }
         } else {
             object->character_context = -1;
-            if (__builtin_expect(object->field_0x7a3 != 0, 0)) {
+            if (object->field_0x7a3 != 0) {
                 return;
             }
             // Expiry falls through to placement, including an unfinished pickup.
             object->field_0x7a3 = 1;
         }
         const i32 slot = DetonatorPlacementSlot(object);
-        if (__builtin_expect(slot < 0, 1)) {
+        if (slot < 0) {
             GameAudio_PlaySfx(0x32, NULL, 0, 0);
             return;
         }
@@ -237,7 +235,7 @@ void Detonator_MoveCode(GameObject_s *object) {
         if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
             oldest_time = -1.0f;
             DETONATOR_s *oldest = NULL;
-            if (__builtin_expect(Detonator[0].active != 0, 1)) {
+            if (Detonator[0].active != 0) {
                 oldest = &Detonator[0];
                 oldest_time = Detonator[0].timer;
                 if (!(oldest_time > -1.0f)) {
@@ -280,7 +278,7 @@ void Detonator_MoveCode(GameObject_s *object) {
             object->context_destination.z = nearest->position.z - NU_COS_LUT(angle) * 0.1684f;
             object->carried_object_angle = RotDiff(angle, nearest->rotation_y);
         } else if (DetonatorPlacementSlot(object) != -1 && object->apiobj.field_0x218 != 2000000.0f &&
-                   __builtin_expect(object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f, 0)) {
+                   (object->apiobj.lower_position.y - object->apiobj.field_0x218 < 0.155f)) {
             object->context_destination.x = object->apiobj.lower_position.x;
             object->context_destination.y = object->apiobj.field_0x218;
             object->context_destination.z = object->apiobj.lower_position.z;

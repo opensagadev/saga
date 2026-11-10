@@ -255,7 +255,7 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     s_baseControlMode = layout != 1;
     bool active;
     if (GetMenuID() == 0x19 || (Paused == 0 && GetMenuID() == -1)) {
-        if (__builtin_expect(Controller_IsConnected() != 0, 0)) {
+        if (Controller_IsConnected() != 0) {
             s_baseControlMode = 0;
             layout = 7;
             active = false;
@@ -265,7 +265,7 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
             active = layout != 7 && layout != 1;
             goto done;
         }
-    } else if (__builtin_expect(Controller_IsConnected() != 0, 0)) {
+    } else if (Controller_IsConnected() != 0) {
         s_baseControlMode = 0;
         layout = 7;
         active = false;
@@ -274,16 +274,15 @@ i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
         layout = 3;
         active = true;
-    } else if (__builtin_expect(WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA, 0)) {
+    } else if (WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA) {
         layout = 4;
         active = true;
     } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && player != NULL &&
                player->id == id_GRABCONTROL) {
         layout = 5;
         active = true;
-    } else if (WORLD != NULL && __builtin_expect(WORLD->current_level == SPEEDERCHASEA_LDATA, 1) &&
-               players_cannot_exit_speeder != 0 && player != NULL &&
-               (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
+    } else if (WORLD != NULL && (WORLD->current_level == SPEEDERCHASEA_LDATA) && players_cannot_exit_speeder != 0 &&
+               player != NULL && (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
         layout = 6;
         active = true;
     } else {
@@ -434,7 +433,7 @@ void MechInputTouchSystem::FindTargetForce(WORLDINFO_s *world, GameObject_s &obj
             continue;
         }
 
-        if (__builtin_expect(object.force_glow_object != force && keep_current_target, 0)) {
+        if (object.force_glow_object != force && keep_current_target) {
             continue;
         }
 
@@ -470,8 +469,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if ((flags & 0x10) && TouchHacks::CanUseGizForce(object)) {
             bool found = false;
             PART_s *part = static_cast<PART_s *>(object.force_glow_object);
-            if (__builtin_expect(part != NULL && object.force_glow_kind == 3, 0)) {
-                if (__builtin_expect(!(flags & 0x2000), 0) || (part->flags & 0x8000)) {
+            if (part != NULL && object.force_glow_kind == 3) {
+                if ((!(flags & 0x2000)) || (part->flags & 0x8000)) {
                     f32 radius = part->radius;
                     if (part->flags & 0x8000)
                         radius *= 6.0f;
@@ -488,12 +487,12 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     FindTargetForce(world, object, start, direction, best_distance, best, found, true);
                 }
             }
-            if (__builtin_expect(found != 0, 1))
+            if (found != 0)
                 flags = 0;
             else if (!(flags & 0x2000))
                 FindTargetForce(world, object, start, direction, best_distance, best, found, false);
         }
-        if (__builtin_expect((flags & 4) != 0, 1) && __builtin_expect(world->gizmo_blowups != NULL, 1)) {
+        if (((flags & 4) != 0) && (world->gizmo_blowups != NULL)) {
             GIZMOBLOWUP_s *item = world->gizmo_blowups;
             f32 *mid_z = &item->mid_position.z;
             for (i32 index = 0; index < world->gizmo_blowup_count;
@@ -503,13 +502,13 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     special = &item->type->special;
                 if (item->field_0x125[0] == 0 && !((i8)item->state_flags >= 0) && item->type != NULL &&
                     NuSpecialExistsFn(special)) {
-                    bool sphere = __builtin_expect(item->field_0x124 != 0, 0) ||
+                    bool sphere = (item->field_0x124 != 0) ||
                                   (world->current_level == MOSEISLEYB_LDATA && index <= 31) ||
                                   (world->current_level == VADERB_LDATA && index <= 1) ||
                                   (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                     f32 distance;
                     bool hit;
-                    if (!!!__builtin_expect(sphere, 1)) {
+                    if (!sphere) {
                         // bounds preserve the original special's fourth lanes.
                         VuVec minimum, maximum;
                         minimum.x = special->display_special->bounds_min.x + mid_z[-2];
@@ -539,7 +538,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 }
             }
         }
-        if (__builtin_expect((flags & 0x20) && TouchHacks::CanUseBuildIt(object), 1)) {
+        if ((flags & 0x20) && TouchHacks::CanUseBuildIt(object)) {
             GIZBUILDITSYS_s *system = world->giz_buildit_sys;
             if (system != NULL && system->buildits != NULL) {
                 GIZBUILDIT_s *item = system->buildits;
@@ -561,8 +560,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if ((flags & 8) && TouchHacks::CanUseLever(object)) {
             LEVER_s *item = world->levers;
             for (i32 index = 0; index < world->nlevers; ++index, ++item) {
-                if (item != NULL && ((u8)item->flags & 0x93) == 0x90 &&
-                    __builtin_expect(item->pull_progress == 0.0f, 0)) {
+                if (item != NULL && ((u8)item->flags & 0x93) == 0x90 && (item->pull_progress == 0.0f)) {
                     VuVec center;
                     center.z = item->position.z;
                     center.x = item->position.x;
@@ -606,7 +604,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     best_distance = distance;
                     best = item->GetMechObjectInterface();
                 }
-                if (__builtin_expect(!(item->flags & 1), 0)) {
+                if (!(item->flags & 1)) {
                     point = &item->path->pts[item->path->length - 1];
                     center = VuVec(point->x, point->y + object.apiobj.scaled_height * 0.5f, point->z, 1.0f);
                     distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.4f);
@@ -638,7 +636,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             GIZTURRETSYS_s *system = world->giz_turret_sys;
             GIZTURRET_s *item = system->turrets;
             for (i32 index = 0; index < system->count; ++index, ++item) {
-                if (__builtin_expect(item == NULL || (item->flags & 0x22) != 2, 0))
+                if (item == NULL || (item->flags & 0x22) != 2)
                     continue;
                 VuVec center(item->field_0x3c.x, item->field_0x3c.y, item->field_0x3c.z, 1.0f);
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x140);
@@ -670,7 +668,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             bool large = (VehicleArea && best == NULL) ||
                          (candidate->is_boss && candidate->id != id_RANCOR) ||
                          WORLD->current_level == MAULA_LDATA;
-            if (__builtin_expect(WORLD->current_level == VADERC_LDATA, 1) && candidate->id == id_ANAKINJEDI &&
+            if ((WORLD->current_level == VADERC_LDATA) && candidate->id == id_ANAKINJEDI &&
                 !candidate->apiobj.player_controlled && vader_c.final_fight_message->value > 0.0f)
                 large = true;
             const NUVEC *collision_position = reinterpret_cast<const NUVEC *>(collision_z - offsetof(NUVEC, z));
@@ -690,7 +688,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             bool had_nonplayer = selected != NULL && selected_nonplayer;
             f32 weighted = had_nonplayer && !nonplayer ? distance * 0.5f : distance;
             if (weighted_distance > weighted) {
-                if ((flags & 0x1000) && __builtin_expect(!selected_nonplayer, 1) && selected != NULL && nonplayer) {
+                if ((flags & 0x1000) && (!selected_nonplayer) && selected != NULL && nonplayer) {
                     selected_nonplayer = false;
                 } else {
                     weighted_distance = weighted;
@@ -703,7 +701,7 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         if (selected != NULL && !(selected_nonplayer && best != NULL && (flags & 0x1000))) {
             if (flags & 0x800 != 0)
                 selected_distance *= 0.25f;
-            if (__builtin_expect(best_distance > selected_distance, 1)) {
+            if (best_distance > selected_distance) {
                 best = selected->GetMechObjectInterface();
                 best_distance = selected_distance;
             }

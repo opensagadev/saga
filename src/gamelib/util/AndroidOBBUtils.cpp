@@ -36,7 +36,7 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         sprintf(filename, "%s%s.%04d.0000.%s", directory, type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
                 type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion, "jpg");
         AAsset *asset = AAssetManager_open(g_assetManager, filename, AASSET_MODE_UNKNOWN);
-        if (__builtin_expect(asset != NULL, 0)) {
+        if (asset != NULL) {
             AAsset_close(asset);
             strcpy(ms_packageName[type], filename);
             ms_initializedPackage[type] = true;
@@ -48,7 +48,7 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         }
     }
     size = type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainSize : g_obbPatchSize;
-    if (__builtin_expect(size > 0, 1)) {
+    if (size > 0) {
         memcpy(directory, g_externalDataPath, prefix_length);
         directory[prefix_length] = '\0';
         strcat(directory, "obb/");
@@ -99,7 +99,7 @@ i32 AndroidOBBUtils::OpenFile(char const *name) {
     } else {
         return 0;
     }
-    if (__builtin_expect(ms_initializedPackage[type] != 0, 1)) {
+    if (ms_initializedPackage[type] != 0) {
         return NuFileOpen(ms_packageName[type], NUFILE_READ);
     }
     return 0;

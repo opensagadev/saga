@@ -26,7 +26,7 @@ void __attribute__((force_align_arg_pointer)) Faders_Draw(WORLDINFO_s *world) {
             if (distance < 0.5f) {
                 continue;
             }
-            if (__builtin_expect(!(distance < 2.0f), 1)) {
+            if (!(distance < 2.0f)) {
                 NuSpecialDrawAtAlpha(&fader->special, &matrix, 1.0f);
                 continue;
             }

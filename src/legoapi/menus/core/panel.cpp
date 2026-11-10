@@ -114,11 +114,11 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         case 600:
             if (FreePlay == 0)
                 return 0;
-            if (__builtin_expect(player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL, 0))
+            if (player != NULL && player->apiobj.player_controlled && player->field_0xcc0 != NULL)
                 return 0;
             return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
         case 602: {
-            if (__builtin_expect(Tag_DoneFirst != 0, 0)) {
+            if (Tag_DoneFirst != 0) {
                 Hint_SetComplete(hint);
                 return 0;
             }
@@ -128,7 +128,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             GameObject_s *first = player;
             if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
                 return 0;
-            if (__builtin_expect(second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL, 0))
+            if (second != NULL && second->apiobj.player_controlled && second->field_0xcc0 != NULL)
                 return 0;
             i32 count = 0;
             i32 active = 0;
@@ -146,7 +146,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
         }
         case 603: {
             if (!LSW_HintConditions.panel_used) {
-                if (__builtin_expect(Tag_DoneFirst > 1, 0))
+                if (Tag_DoneFirst > 1)
                     Tag_DoneFirst = 1;
                 return 0;
             }
@@ -157,7 +157,7 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             if (Tag_DoneFirst != 1 || (previous != NULL && Hint_isComplete(previous) == 0))
                 return 0;
-            if (__builtin_expect(VehicleArea != 0 || WORLD->current_level == HUB_LDATA, 0))
+            if (VehicleArea != 0 || WORLD->current_level == HUB_LDATA)
                 return 0;
             return (player != NULL && player->field_0xcc0 == NULL) || (player2 != NULL && player2->field_0xcc0 == NULL);
         }
@@ -181,10 +181,10 @@ i32 Tag_UpdateHint(HINT_s *hint) {
             }
             return 0;
         case 606:
-            if (__builtin_expect((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0xcc0 != NULL &&
+            if ((Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[0]->field_0xcc0 != NULL &&
                  Player[0]->id != id_LUKESKYWALKERDAGOBAH) ||
                 (Player[1] != NULL && Player[1]->apiobj.player_controlled && Player[1]->field_0xcc0 != NULL &&
-                 Player[1]->id != id_LUKESKYWALKERDAGOBAH), 1))
+                 Player[1]->id != id_LUKESKYWALKERDAGOBAH))
                 return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
             return 0;
         case 647:
@@ -258,9 +258,9 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
 // Retail only has the constant-propagated clone of
 // DrawHitPoints(GameObject_s *, float, float, float, float, i32, float, i32); every caller passes 0.0f and 0
 // for the two trailing (unused) arguments, so the clone drops them.
-static __attribute__((noinline, noclone, hot, section(".text"))) void DrawHitPoints(GameObject_s *object, float x, float y, float scale,
-                                                             float alpha, i32 alignment)
-    __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
+static __attribute__((noinline, noclone)) void
+DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha,
+              i32 alignment) __asm__("_ZL13DrawHitPointsP12GameObject_sffffifi.constprop.39");
 
 static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment) {
     // Retail has no NULL guards here; both callers pass a live object.
@@ -306,7 +306,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     float spacing = scale * 0.35f;
     const bool widescreen = GetMenuID() == 4 ? TempOptions.field11_0xb != 0
                                              : Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
-    if (__builtin_expect(!!(widescreen), 0)) {
+    if (widescreen) {
         spacing *= 0.85f;
     }
     if (alignment == 0) {
@@ -342,7 +342,7 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
         } else {
             draw_alpha = 0.5f;
         }
-        if (transitioning == 0 && current_hp > 0 && __builtin_expect(i == current_hp, 0)) {
+        if (transitioning == 0 && current_hp > 0 && (i == current_hp)) {
             const float pulse = i == 1 && current_hp == 1 ? 0.5f : 0.2f;
             const float pulse_scale = pulse - (NuFmod(GlobalTimer.time_elapsed, 0.5f) * 2.0f) * pulse + 1.0f;
             translation.z = 0.999f;
@@ -381,7 +381,7 @@ void UpdateStats() {
     if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0)
         return;
     f32 stats_target = 0.0f;
-    if (__builtin_expect(FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0, 1)) {
+    if (FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0) {
         const bool hub_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
         if (!hub_hidden && GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
             GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV)
@@ -400,14 +400,13 @@ void UpdateStats() {
     } else {
         if (ChallengeMode != 0)
             DrawMiniKitTime = 2.0f;
-        if (__builtin_expect(DrawMiniKitTime > 0.0f, 1))
+        if (DrawMiniKitTime > 0.0f)
             DrawMiniKitTime -= FRAMETIME;
         f32 target = 1.0f;
-        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
-            (__builtin_expect(Paused == 0, 1) && NetPaused == 0 && DrawMiniKitTime <= 0.0f) || screendump != 0 ||
-            GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD || GetMenuID() == PANEL_MENU_EPISODE_I ||
-            GetMenuID() == PANEL_MENU_EPISODE_II || GetMenuID() == PANEL_MENU_EPISODE_III ||
-            GetMenuID() == PANEL_MENU_EPISODE_IV)
+        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || ((Paused == 0) && NetPaused == 0 && DrawMiniKitTime <= 0.0f) ||
+            screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
+            GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+            GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
             target = 0.0f;
         if (ChallengeMode != 0) {
             f32 hint_alpha = CurrentHintAlpha();
@@ -428,12 +427,11 @@ void UpdateStats() {
                 DrawRedBrickTime -= FRAMETIME;
             target = 1.0f;
             if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
-                __builtin_expect((Paused == 0 &&
-                                  (NetPaused == 0 || (AreaGlobals.values.field_0x08 == 0 &&
-                                                      (WORLD->level_sub_id == -1 ||
-                                                       !Game.area_save[WORLD->level_sub_id].red_brick_collected))) &&
-                                  !(DrawRedBrickTime > 0.0f)) != 0,
-                                 0) ||
+                ((Paused == 0 &&
+                  (NetPaused == 0 ||
+                   (AreaGlobals.values.field_0x08 == 0 &&
+                    (WORLD->level_sub_id == -1 || !Game.area_save[WORLD->level_sub_id].red_brick_collected))) &&
+                  !(DrawRedBrickTime > 0.0f)) != 0) ||
                 screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
                 GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
                 GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
@@ -453,9 +451,8 @@ void UpdateStats() {
             const i32 freeplay = GAMEDEMO != 0 ? 0 : FreePlay;
             if (WORLD->area != NULL && (WORLD->area->flags & 0x4010) != 0) {
                 if (BOTHTRUEJEDIGOLDBRICKS == 0) {
-                    if (__builtin_expect(Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
-                                             Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0,
-                                         0))
+                    if (Game.area_save[WORLD->level_sub_id].true_hero_complete[0] != 0 ||
+                        Game.area_save[WORLD->level_sub_id].true_hero_complete[1] != 0)
                         goto buildup_finished;
                 } else if (Game.area_save[WORLD->level_sub_id].true_hero_complete[freeplay] != 0) {
                     goto buildup_finished;
@@ -485,13 +482,12 @@ void UpdateStats() {
     }
     if (SuperStory != 0 && (WORLD->current_level->flags & LEVEL_SHOW_COIN_TOTAL) != 0)
         DrawCoinTotalTime = 1.0f;
-    if (__builtin_expect(DrawCoinTotalTime > 0.0f, 0))
+    if (DrawCoinTotalTime > 0.0f)
         DrawCoinTotalTime -= FRAMETIME;
     f32 coin_target = 1.0f;
-    if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
-        (Paused == 0 && __builtin_expect(NetPaused == 0, 0) && !(DrawCoinTotalTime > 0.0f)) || screendump != 0 ||
-        MenuInMemoryCard() != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
-        GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+    if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && (NetPaused == 0) && !(DrawCoinTotalTime > 0.0f)) ||
+        screendump != 0 || MenuInMemoryCard() != 0 || GetMenuID() == PANEL_MENU_SAVE ||
+        GetMenuID() == PANEL_MENU_LOAD || GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
         GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
         coin_target = 0.0f;
     cointotaltime = SeekLinearF(cointotaltime, coin_target, FRAMETIME);
@@ -774,7 +770,7 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
 
             i32 red = 255;
             i32 green = 0;
-            if (__builtin_expect(counts[i] == meleeTarg_localCount[i], 0) && meleeTarg_flashTime[i] == 0.0f) {
+            if ((counts[i] == meleeTarg_localCount[i]) && meleeTarg_flashTime[i] == 0.0f) {
                 red = 255;
                 green = 0;
             } else {
@@ -782,13 +778,13 @@ void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhsp
                     meleeTarg_flashTime[i] = 0.01f;
                 meleeTarg_flashTime[i] += FRAMETIME;
 
-                if (__builtin_expect(meleeTarg_flashTime[i] < 0.375f, 0)) {
+                if (meleeTarg_flashTime[i] < 0.375f) {
                     const f32 phase = meleeTarg_flashTime[i] / 0.375f * 255.0f;
                     green = static_cast<i32>(phase);
                     red = static_cast<i32>(255.0f - phase);
                     meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.0f, 0.1f);
                 } else {
-                    if (__builtin_expect(meleeTarg_flashTime[i] < 0.625f, 1)) {
+                    if (meleeTarg_flashTime[i] < 0.625f) {
                         meleeTarg_localCount[i] = counts[i];
                         red = 0;
                         green = 255;
@@ -989,7 +985,7 @@ void DrawPanel() {
                         i32 visible = 0;
                         if (icon_time <= 0.0f)
                             visible = 1;
-                        else if (__builtin_expect(icon_time < 2.0f, 0))
+                        else if (icon_time < 2.0f)
                             visible = NuFmod(icon_time, 0.4f) < 0.2f;
                         DrawCharIcon(object->id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
                     } else {
@@ -1016,7 +1012,7 @@ void DrawPanel() {
                                         0, name_alpha);
                         }
                     }
-                    if (!paused && __builtin_expect(FadeSys.fade == 0.0f, 0) && object->apiobj.player_controlled &&
+                    if (!paused && (FadeSys.fade == 0.0f) && object->apiobj.player_controlled &&
                         MechSystems::Get()->PlayerButton().panel_state == NULL) {
                         if (ONEPLAYERPOWERUPS && object->field_0xdec > 0.0f) {
                             if (!FindGameMsgsWithID(7, 0, object->apiobj.field_0x27c, NULL) &&
@@ -1050,7 +1046,7 @@ void DrawPanel() {
                     if (object->apiobj.player_controlled) {
                         DrawHitPoints(object, -PANEL_HITPOINTSX, raised_hearts ? status_y : status_y + PANEL_HEARTY,
                                       0.195f, alpha, 2);
-                    } else if (__builtin_expect(!paused && !CUTSTOPGAME, 1)) {
+                    } else if (!paused && !CUTSTOPGAME) {
                         i32 dropin_alpha = static_cast<i32>(DROPINALPHA * 128.0f);
                         if (dropin_alpha > 0) {
                             f32 y = raised_hearts ? status_y : status_y + PANEL_HEARTY;
@@ -1196,7 +1192,7 @@ void DrawPanel() {
                 if (Arcade)
                     Arcade_DrawPanel(Paused || NetPaused);
                 else {
-                    if (__builtin_expect((WORLD->area->flags & 0x100) != 0, 0)) {
+                    if ((WORLD->area->flags & 0x100) != 0) {
                         DrawCoinTotal(2, hide_target);
                         if (DrawCoinTotalY != 2000000.0f) {
                             Text_MakeScore(BonusCoinTarget, auxiliary);
@@ -1242,7 +1238,7 @@ void DrawPanel() {
                         target_point = v000;
                         NUVEC *position = &target->apiobj.collision_position;
                         bool hide_target = false;
-                        if (__builtin_expect(target->id == id_QUIGONJINN, 1) &&
+                        if ((target->id == id_QUIGONJINN) &&
                             (player->field_0x661 == 10 || player->field_0x661 == 4 || player->field_0x661 == 11))
                             hide_target = true;
                         if (!hide_target) {

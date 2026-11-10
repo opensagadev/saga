@@ -177,16 +177,16 @@ static void GizBombGens_Reset(GIZBOMBGENSYS *system) {
 
     const bool players_share_bomb =
         BombGenerator_PlayerBomb[0] != NULL && BombGenerator_PlayerBomb[0] == BombGenerator_PlayerBomb[1];
-    if (__builtin_expect(netclient == 0, 1)) {
+    if (netclient == 0) {
         if (Player[0] != NULL) {
             if (BombGenerator_PlayerBomb[0] != NULL && Player[0]->cable != NULL && Player[0]->cable->target != NULL &&
-                __builtin_expect(Player[0]->cable->target->id == id_DRAGBOMB, 0)) {
+                (Player[0]->cable->target->id == id_DRAGBOMB)) {
                 KillGameObject(Player[0]->cable->target, 4, 0);
                 __builtin_memset(&Player[0]->cable, 0, sizeof(void *));
             }
 
             if (Player[0] != NULL && Player[0]->apiobj.player_controlled && BombGenerator_PlayerBomb[0] != NULL &&
-                __builtin_expect(Player[0]->cable == NULL, 0)) {
+                (Player[0]->cable == NULL)) {
                 NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
                 NuVecRotateY(&bomb_position, &bomb_position, Player[0]->apiobj.field_0x276);
                 NuVecAdd(&bomb_position, &bomb_position, &Player[0]->apiobj.collision_position);
@@ -203,13 +203,13 @@ static void GizBombGens_Reset(GIZBOMBGENSYS *system) {
 
         if (netclient == 0 && Player[1] != NULL) {
             if (BombGenerator_PlayerBomb[1] != NULL && Player[1]->cable != NULL && Player[1]->cable->target != NULL &&
-                __builtin_expect(Player[1]->cable->target->id == id_DRAGBOMB, 0)) {
+                (Player[1]->cable->target->id == id_DRAGBOMB)) {
                 KillGameObject(Player[1]->cable->target, 4, 0);
                 __builtin_memset(&Player[1]->cable, 0, sizeof(void *));
             }
 
             if (Player[1] != NULL && Player[1]->apiobj.player_controlled && BombGenerator_PlayerBomb[1] != NULL &&
-                __builtin_expect(Player[1]->cable == NULL, 1)) {
+                (Player[1]->cable == NULL)) {
                 GameObject_s *bomb;
                 if (players_share_bomb && Player[0]->cable != NULL && Player[0]->cable->target != NULL &&
                     Player[0]->cable->target->id == id_DRAGBOMB) {
@@ -237,8 +237,8 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZBOMBGENSYS *system = static_cast<GIZBOMBGENSYS *>(system_ptr);
 
-    if (__builtin_expect(system != NULL, 1)) {
-        if (__builtin_expect(system->reset, 0)) {
+    if (system != NULL) {
+        if (system->reset) {
             GizBombGens_Reset(system);
         }
 
@@ -268,7 +268,7 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                 if (bomb_generator->anim_set->state == GAMEANIMSET_STATE_AT_END) {
                     NUVEC bomb_position;
                     GameAnimSet_GetAveragePos(bomb_generator->anim_set, &bomb_position, 2, 1, 1);
-                    if (__builtin_expect(netclient == 0, 1)) {
+                    if (netclient == 0) {
                         bomb_generator->generated_bomb =
                             AddDynamicCreature(id_DRAGBOMB, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
                                                NULL, 1, NULL, NULL, 0, 0);
@@ -286,13 +286,13 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
     GameObject_s *player = Player[0];
     const i16 model_id = id_DRAGBOMB;
     if (player != NULL && player->cable != NULL && player->cable->target != NULL &&
-        __builtin_expect(player->cable->target->id == model_id, 0)) {
+        (player->cable->target->id == model_id)) {
         BombGenerator_PlayerBomb[0] = player->cable->target;
     }
     BombGenerator_PlayerBomb[1] = NULL;
     player = Player[1];
     if (player != NULL && player->cable != NULL && player->cable->target != NULL &&
-        __builtin_expect(player->cable->target->id == model_id, 0)) {
+        (player->cable->target->id == model_id)) {
         BombGenerator_PlayerBomb[1] = player->cable->target;
     }
 }

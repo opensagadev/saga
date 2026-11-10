@@ -193,7 +193,7 @@ void ResetStreaks() {
     STREAK_s *free_streaks = streaks_free;
 
     do {
-        while (__builtin_expect(header->streaks != NULL, 1)) {
+        while (header->streaks != NULL) {
             STREAK_s *streak = header->streaks;
             UnlinkStreak(&header->streaks, streak);
             streak->next = free_streaks;
@@ -201,7 +201,7 @@ void ResetStreaks() {
         }
 
         if (header->owner_slot != NULL) {
-            if (__builtin_expect(*header->owner_slot == header, 1)) {
+            if (*header->owner_slot == header) {
                 *header->owner_slot = NULL;
             }
             header->owner_slot = NULL;
@@ -225,7 +225,7 @@ void UpdateStreaks(float elapsed) {
     STREAKHDR_s *header = streakhdrs_used;
     while (header != NULL) {
         STREAKHDR_s *next_header = header->next;
-        if (__builtin_expect(header->has_new_streak == 0 && header->owner_slot != NULL && *header->owner_slot == header, 0)) {
+        if (header->has_new_streak == 0 && header->owner_slot != NULL && *header->owner_slot == header) {
             *header->owner_slot = NULL;
             header->owner_slot = NULL;
         }
@@ -235,7 +235,7 @@ void UpdateStreaks(float elapsed) {
         while (streak != NULL) {
             STREAK_s *next_streak = streak->next;
             streak->remaining_time -= elapsed;
-            if (__builtin_expect(streak->remaining_time <= 0.0f && next_streak == NULL, 0)) {
+            if (streak->remaining_time <= 0.0f && next_streak == NULL) {
                 UnlinkStreak(&header->streaks, streak);
                 streak->next = streaks_free;
                 streaks_free = streak;
@@ -243,9 +243,9 @@ void UpdateStreaks(float elapsed) {
             streak = next_streak;
         }
 
-        if (__builtin_expect(header->streaks == NULL, 0)) {
+        if (header->streaks == NULL) {
             if (header->owner_slot != NULL) {
-                if (__builtin_expect(*header->owner_slot == header, 0)) {
+                if (*header->owner_slot == header) {
                     *header->owner_slot = NULL;
                 }
                 header->owner_slot = NULL;

@@ -144,7 +144,7 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
             VERTEX_ATTRIBUTE(11, 0x1401, 4, 0, 4);
             break;
     }
-    if (__builtin_expect(skinned != 0, 1)) {
+    if (skinned != 0) {
         VERTEX_ATTRIBUTE(8, 0x1401, 4, 1, 4);
         VERTEX_ATTRIBUTE(9, 0x1401, 4, 1, 4);
     }

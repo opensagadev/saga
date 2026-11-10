@@ -686,7 +686,7 @@ void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_cou
     // record for menu_id_count - 1.
     for (i32 i = 0; i < menu_ids_used; i++) {
         MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
-        if (__builtin_expect(!(menu_info[i].id >= menu_ids_used - 1), 1)) {
+        if (!(menu_info[i].id >= menu_ids_used - 1)) {
             continue;
         }
         break;
@@ -875,7 +875,7 @@ extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
         if (MenuInfo[menu->menu].memory_y != -1) {
             menu->selected_row = MenuInfo[menu->menu].memory_y;
         }
-        if (__builtin_expect(menu->selected_row < menu->first_row, 0)) {
+        if (menu->selected_row < menu->first_row) {
             menu->selected_row = menu->first_row;
         } else if (menu->selected_row > menu->last_row) {
             menu->selected_row = menu->last_row;
@@ -957,9 +957,9 @@ void MenuEnterSave(MENU_s *menu) {
         NewMenu(1020, -1, -1);
     } else if (saveload_cardformatted == 0) {
         NewMenu(1006, 1, -1);
-    } else if (__builtin_expect(saveload_savepresent == 0, 1) && saveload_freespace < SAVESIZE) {
+    } else if ((saveload_savepresent == 0) && saveload_freespace < SAVESIZE) {
         NewMenu(1003, -1, -1);
-    } else if (__builtin_expect(Menu_InHeaderSave != 0, 1)) {
+    } else if (Menu_InHeaderSave != 0) {
         memcard_slot = -1;
         NewMenu(1008, 1, -1);
     }
@@ -1021,7 +1021,7 @@ void MenuUpdateCardWarning(MENU_s *menu) {
             BackupMenu();
             return;
         }
-    } else if (__builtin_expect(MenuCardWarningState == 3, 1)) {
+    } else if (MenuCardWarningState == 3) {
         BackupMenu();
         return;
     } else {
@@ -1075,7 +1075,7 @@ void MenuUpdateDeleting(MENU_s *) {
             memcard_deleteresult_delay = 1.5f;
             return;
         }
-        if (__builtin_expect(memcard_deleteresult_delay <= 0.0f, 1))
+        if (memcard_deleteresult_delay <= 0.0f)
             BackupMenu();
         return;
     }
@@ -1096,7 +1096,7 @@ void MenuUpdateFormatting(MENU_s *) {
         }
         return;
     }
-    if (__builtin_expect(memcard_formatting != 0, 1) || memcard_formatmessage_delay > 0.0f) {
+    if ((memcard_formatting != 0) || memcard_formatmessage_delay > 0.0f) {
         memcard_formatresult_delay = 1.5f;
         return;
     }
@@ -1157,7 +1157,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             if (previous_id == 1000) {
                 BackupMenuNoFn();
                 NewMenu(1016, 1, -1);
-            } else if (__builtin_expect(previous_id == 1012, 0)) {
+            } else if (previous_id == 1012) {
                 BackupMenuNoFn();
                 NewMenu(1017, 1, -1);
             } else {
@@ -1167,7 +1167,7 @@ void MenuUpdateFormatCancel(MENU_s *menu) {
             BackupMenuNoFn();
             NewMenu(1006, 1, -1);
         }
-    } else if (__builtin_expect(menu->cancel_pressed != 0, 1)) {
+    } else if (menu->cancel_pressed != 0) {
         MenuSFX = MENUSFX_MENUSELECT;
         BackupMenuNoFn();
         NewMenu(1006, 1, -1);
@@ -1204,11 +1204,11 @@ void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
         memcard_loadresult_delay = 1.0f;
-        if (__builtin_expect(saveload_cardtype == -1 || memcard_cardchanged != 0, 1)) {
+        if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
             memcard_loadneeded = 0;
             memcard_loadfailed = 1;
         }
-    } else if (__builtin_expect(memcard_loadstarted != 0 || memcard_loadmessage_delay > 0.0f, 0)) {
+    } else if (memcard_loadstarted != 0 || memcard_loadmessage_delay > 0.0f) {
         memcard_loadresult_delay = 1.0f;
     } else if (memcard_loadresult_delay <= 0.0f) {
         if (memcard_loadfailed == 0 && memcard_loadcorrupt == 0) {
@@ -1237,7 +1237,7 @@ void MenuUpdateAutoSaveWarning(MENU_s *menu) {
 }
 
 void MenuUpdateSaving(MENU_s *) {
-    if (__builtin_expect(memcard_saveneeded != 0, 1)) {
+    if (memcard_saveneeded != 0) {
         memcard_savemessage_delay = 1.0f;
         memcard_saveresult_delay = 1.0f;
         if (saveload_cardtype == -1 || memcard_cardchanged != 0) {
@@ -1318,7 +1318,7 @@ void MenuUpdateFileCorrupt(MENU_s *menu) {
 }
 
 void MenuUpdateFormatConfirm(MENU_s *menu) {
-    if (__builtin_expect(menu->confirm_pressed != 0, 1)) {
+    if (menu->confirm_pressed != 0) {
         MenuSFX = MENUSFX_MENUSELECT;
     } else if (menu->cancel_pressed != 0 && MenuInfo[GameMenu[GameMenuLevel - 1].menu].id != 1019) {
         MenuSFX = MENUSFX_MENUSELECT;
@@ -1583,7 +1583,7 @@ void MenuUpdateSave(MENU_s *menu) {
             if (saveload_slotused[slot] != 0) {
                 memcard_slot = slot;
                 NewMenu(1008, 1, -1);
-            } else if (__builtin_expect(saveload_freespace >= SAVESIZE_ADDITIONAL, 1)) {
+            } else if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
                 memcard_slot = slot;
                 MenuStartSave();
                 NewMenu(1009, 0, -1);
@@ -1692,7 +1692,7 @@ extern "C" {
     void MenuDrawBackground(void) {
         static i32 menufadelevel;
         if (MenuInCriticalMemoryCard() != 0) {
-            if (__builtin_expect(menufadelevel <= 127, 1)) {
+            if (menufadelevel <= 127) {
                 menufadelevel += 8;
                 if (menufadelevel <= 0)
                     return;
@@ -1719,14 +1719,14 @@ extern "C" {
         char *overbright = &g_NuPrim_NeedsOverbrightening;
         u32 colour = static_cast<u32>(menufadelevel) << 24;
         MenuFadeVertex *vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
-        if (__builtin_expect(*overbright == 0, 1))
+        if (*overbright == 0)
             colour &= 0xff000000u;
         vertex->colour = colour;
         NuPrim2DAddXYZ(0.0f, 0.0f, 0.0f);
 
         colour = static_cast<u32>(menufadelevel) << 24;
         vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
-        if (__builtin_expect(*overbright == 0, 1))
+        if (*overbright == 0)
             colour &= 0xff000000u;
         vertex->colour = colour;
         NuPrim2DAddXYZ(1.0f, 1.0f, 0.0f);
@@ -1851,7 +1851,7 @@ extern "C" {
         if ((primary_pressed & directions) != 0)
             pressed = primary_pressed;
 
-        if (__builtin_expect(MenuAlpha < 0.5f, 0)) {
+        if (MenuAlpha < 0.5f) {
             held = 0;
             pressed = 0;
         }
@@ -1861,7 +1861,7 @@ extern "C" {
         i32 right_pressed = pressed & 0x2000;
         i32 left_pressed = pressed & 0x8000;
         i32 up_held = held & 0x1000;
-        if (__builtin_expect(fastup_lock != 0, 0)) {
+        if (fastup_lock != 0) {
             if (up_held == 0)
                 fastup_lock = 0;
             else
@@ -1905,14 +1905,14 @@ extern "C" {
                 up_pressed = down_pressed = 0;
         }
         if (right_pressed != 0) {
-            if (__builtin_expect(left_pressed != 0, 0))
+            if (left_pressed != 0)
                 left_pressed = right_pressed = 0;
         }
         if (up_held != 0 && down_held != 0)
             up_held = down_held = 0;
         if (left_held != 0 && right_held != 0)
             left_held = right_held = 0;
-        if (__builtin_expect(action_04_pressed != 0 && action_08_pressed != 0, 1))
+        if (action_04_pressed != 0 && action_08_pressed != 0)
             action_04_pressed = action_08_pressed = 0;
 
         menu->input_activity = 0;
@@ -1979,7 +1979,7 @@ extern "C" {
                     menu->selected_row = last_row;
                     row_clamped = true;
                 } else if (down_pressed != 0 && (wrap || menu->selected_row < last_row)) {
-                    if (__builtin_expect(wrap, 1)) {
+                    if (wrap) {
                         ++menu->selected_row;
                         if (menu->selected_row > last_row)
                             menu->selected_row = first_row;
@@ -2016,9 +2016,9 @@ extern "C" {
                     menu->selected_column = first_column;
                 else if (menu->selected_column > last_column)
                     menu->selected_column = last_column;
-                if (__builtin_expect(right_pressed != 0 && menu->selected_column < last_column, 1))
+                if (right_pressed != 0 && menu->selected_column < last_column)
                     ++menu->selected_column;
-                else if (__builtin_expect(left_pressed != 0 && menu->selected_column > first_column, 1))
+                else if (left_pressed != 0 && menu->selected_column > first_column)
                     --menu->selected_column;
                 if (menu->selected_column != old_column)
                     MenuSFX = MENUSFX_MENUMOVE;
@@ -2152,7 +2152,7 @@ i32 ChecksumSaveData(void *buffer, i32 size) {
 }
 
 extern "C" {
-    __attribute__((optimize("O2", "tree-vectorize"))) void UpdateSaveSlots(void) {
+    void UpdateSaveSlots(void) {
         const f32 elapsed = NuTimeGetFrameTime();
         if (memcard_autosavecanceldelay > 0.0f)
             memcard_autosavecanceldelay -= elapsed;
@@ -2207,7 +2207,7 @@ extern "C" {
                 saveloadASLoad(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4);
                 memcard_loadneeded = 0;
                 memcard_loadcorrupt = 0;
-                if (__builtin_expect(saveload_status == 1, 1)) {
+                if (saveload_status == 1) {
                     memcard_loadstarted = 0;
                     memcard_loadfailed = 1;
                 } else {
@@ -2235,14 +2235,14 @@ extern "C" {
                         saveload_autosave = -1;
                     }
                 }
-                if (__builtin_expect(memcard_loadcorrupt == 0 && memcard_savedata != NULL, 1)) {
+                if (memcard_loadcorrupt == 0 && memcard_savedata != NULL) {
                     memmove(memcard_savedata, memcard_savedatabuffer, memcard_savedatasize);
                     if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
                         memcard_extra_savedatasize >= 0)
                         memmove(memcard_extra_savedata, memcard_extra_savedatabuffer, memcard_extra_savedatasize);
                     MenuLoadOccurred = 1;
                 }
-            } else if (__builtin_expect(saveload_error == 0x80, 1)) {
+            } else if (saveload_error == 0x80) {
                 memcard_loadcorrupt = 1;
                 saveload_autosave = -1;
             } else {
@@ -2288,7 +2288,7 @@ extern "C" {
                 }
             }
         } else {
-            if (__builtin_expect(saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0, 0)) {
+            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
                 memcard_savemessage_delay = 1.5f;
                 if (memcard_savedatasize <= 0 || memcard_savedatabuffer == NULL || memcard_savedata == NULL) {
                     memcard_saveneeded = 0;
@@ -2411,7 +2411,7 @@ i32 getsaveload_status() {
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     u16 character;
 
-    while (__builtin_expect(*src != 0, 1)) {
+    while (*src != 0) {
         src = NuUnicodeCharFromUTF8(&character, src);
         if (character == '~') {
             if (*src == 0)
@@ -2546,7 +2546,7 @@ extern "C" {
         i32 dest_pos = 0;
         const unsigned char *text = reinterpret_cast<unsigned char *>(source);
         do {
-            if (__builtin_expect(text[source_pos] == '\0', 0))
+            if (text[source_pos] == '\0')
                 break;
             if (text[source_pos] == '[' && text[source_pos + 1] == '[') {
                 source_pos += 2;
@@ -2608,7 +2608,7 @@ extern "C" {
             dest[dest_pos++] = text[source_pos++];
             while (static_cast<u8>(text[source_pos] + 0x80) < 0x40)
                 dest[dest_pos++] = text[source_pos++];
-        } while (__builtin_expect(dest_pos < 0x1e0, 1));
+        } while (dest_pos < 0x1e0);
         dest[dest_pos] = 0;
     }
 
@@ -2620,7 +2620,7 @@ f32 TextPrintSubstring(unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f3
     VUFNT *font;
     f32 relative_scale;
     f32 pulse;
-    if (__builtin_expect(QFont2DButtons == nullptr || button_font == 0, 1)) {
+    if (QFont2DButtons == nullptr || button_font == 0) {
         font = base_font;
         pulse = 1.0f;
         relative_scale = 1.0f;
@@ -2665,7 +2665,7 @@ extern "C" {
             NuQFntPushPrintMode(2);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        if (__builtin_expect(followon_line == 0, 1))
+        if (followon_line == 0)
             NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         draw_x_scale *= x_scale;
         draw_y_scale *= y_scale;
@@ -2680,7 +2680,7 @@ extern "C" {
         f32 draw_y = y + NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D) - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
-            if (__builtin_expect(ButtonScaleMode == 1, 0))
+            if (ButtonScaleMode == 1)
                 button_scale = draw_x_scale;
             else if (ButtonScaleMode == 2)
                 button_scale = draw_y_scale;
@@ -2714,7 +2714,7 @@ extern "C" {
                                draw_y_scale * QFONTSCALEY);
                 normal_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, normal_encoded);
             }
-            if (__builtin_expect(normal_width == 0.0f, 1)) {
+            if (normal_width == 0.0f) {
                 button_scale = draw_x_scale;
                 if (ButtonScaleMode == 2) {
                     width = draw_y_scale * width / draw_x_scale;
@@ -2726,7 +2726,7 @@ extern "C" {
         }
         if ((alignment & 4) != 0)
             draw_y -= height * 0.5f;
-        else if (__builtin_expect((alignment & 1) != 0, 0))
+        else if ((alignment & 1) != 0)
             draw_y += height * 0.5f;
         if ((alignment & 2) == 0)
             x -= (alignment & 8) != 0 ? width : width * 0.5f;
@@ -2921,7 +2921,7 @@ void APIMenuDrawMemCardSlots(MENU *menu, f32 y) {
             green = MENUFLASH1G;
             blue = MENUFLASH1B;
         }
-    } else if (__builtin_expect(menu_pulse > 0.0f, 1)) {
+    } else if (menu_pulse > 0.0f) {
         red = MenuSlotColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
         green = MenuSlotColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
         blue = MenuSlotColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
@@ -2984,7 +2984,7 @@ begin_scan:
                 goto continue_scan;
             if (next == ';')
                 goto continue_scan;
-            if (__builtin_expect(next == ':', 0))
+            if (next == ':')
                 goto continue_scan;
             return index;
         } else if (ch == '.') {
@@ -2996,7 +2996,7 @@ begin_scan:
     continue_scan:;
     } while (--count != 0);
 
-    if (__builtin_expect(text[index] == '~', 0)) {
+    if (text[index] == '~') {
         if (index > 0 && text[index - 1] == '~')
             index -= 1;
     } else if (index > 0 && text[index - 1] == '~' && index != 1) {
@@ -3024,7 +3024,7 @@ i32 FindNearestBreak(unsigned char *text, i32 index) {
         while (static_cast<u8>(text[backward] - 0x80) <= 0x3f)
             --backward;
 
-        if (__builtin_expect(IsTextBreak(text, forward), 1))
+        if (IsTextBreak(text, forward))
             return forward;
         if (IsTextBreak(text, backward))
             return backward;
@@ -3226,7 +3226,7 @@ extern "C" {
                     lines[line][length] = '\0';
                     Text3DStringEncode(reinterpret_cast<char *>(lines[line]), encoded);
                     const f32 line_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
-                    if (__builtin_expect(width < line_width, 1)) {
+                    if (width < line_width) {
                         widest_line = line;
                         width = line_width;
                     }
@@ -3278,7 +3278,7 @@ extern "C" {
                             end = bytes - 1;
                         } else {
                             i32 next = begin;
-                            if (__builtin_expect(available_width > 0.0f, 1)) {
+                            if (available_width > 0.0f) {
                                 do {
                                     end = next;
                                     next = end + 1;
@@ -3300,8 +3300,8 @@ extern "C" {
                                     memcpy(candidate, decoded + begin, length);
                                     candidate[length] = '\0';
                                     Text3DStringEncode(reinterpret_cast<char *>(candidate), encoded);
-                                } while (__builtin_expect(NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
-                                         available_width, 0));
+                                } while (NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded) <
+                                         available_width);
                             }
                         }
                         i32 length = end - begin + 1;
@@ -4049,7 +4049,7 @@ extern "C" {
 
 void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination) {
     u16 character;
-    while (__builtin_expect(*source != '\0', 1)) {
+    while (*source != '\0') {
         source = NuUnicodeCharFromUTF8(&character, source);
         if (character == '~') {
             if (*source == '\0') {
